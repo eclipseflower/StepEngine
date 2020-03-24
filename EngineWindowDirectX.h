@@ -1,6 +1,7 @@
 #ifndef __ENGINE_WINDOW_DIRECTX_H__
 #define __ENGINE_WINDOW_DIRECTX_H__
 
+#include "EngineUtilDirectX.h"
 #include "EngineWindow.h"
 
 namespace Engine
@@ -12,6 +13,10 @@ namespace Engine
 		public:
 			EngineWindowDirectX();
 			~EngineWindowDirectX();
+
+		private:
+			HINSTANCE mHAppInst;
+			HWND mHMainWnd;
 		};
 	}
 }

@@ -9,7 +9,7 @@
 
 #include "EngineWindowDirectX.h"
 
-using namespace Engine::Window;
+using Engine::Window::EngineWindowDirectX;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance, PSTR cmdLine, int showCmd)
 {
