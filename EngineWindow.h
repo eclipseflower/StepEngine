@@ -1,7 +1,8 @@
 #ifndef __ENGINE_WINDOW_H__
 #define __ENGINE_WINDOW_H__
 
-#include <string>
+#include "EngineUtil.h"
+
 using std::string;
 
 namespace Engine
@@ -13,6 +14,7 @@ namespace Engine
 		public:
 			EngineWindow();
 			~EngineWindow();
+			virtual bool Init();
 
 		protected:
 			string mCaption;

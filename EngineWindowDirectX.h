@@ -14,9 +14,15 @@ namespace Engine
 			EngineWindowDirectX();
 			~EngineWindowDirectX();
 
+			bool Init() override;
+
 		private:
-			HINSTANCE mHAppInst;
-			HWND mHMainWnd;
+			HINSTANCE mhAppInst;
+			HWND mhMainWnd;
+
+			const char mWndClassName[] = "EngineWindowDirectX";
+
+			static LRESULT CALLBACK WindowProcess(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 		};
 	}
 }

@@ -5,8 +5,6 @@
 #include <crtdbg.h>
 #endif
 
-#include <windows.h>
-
 #include "EngineWindowDirectX.h"
 
 using Engine::Window::EngineWindowDirectX;
@@ -19,6 +17,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance, PSTR cmdLine, in
 #endif
 
 	EngineWindowDirectX window;
+	if (!window.Init())
+	{
+		return -1;
+	}
 }
 
 #endif // ENGINE_PLATFORM_DIRECTX
