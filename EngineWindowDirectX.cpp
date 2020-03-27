@@ -25,5 +25,17 @@ bool Engine::Window::EngineWindowDirectX::Init()
 
 LRESULT Engine::Window::EngineWindowDirectX::WindowProcess(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	return LRESULT();
+	switch (msg)
+	{
+	case WM_ACTIVATE:
+		if (LOWORD(wParam) == WA_INACTIVE)
+		{
+			mPaused = true;
+		}
+		else
+		{
+
+		}
+		return 0;
+	}
 }

@@ -23,6 +23,7 @@ namespace Engine
 			bool mMinimized;
 			bool mMaximized;
 			bool mResizing;
+			bool mPaused;
 		};
 	}
 }
