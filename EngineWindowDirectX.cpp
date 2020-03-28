@@ -2,6 +2,7 @@
 
 Engine::Window::EngineWindowDirectX::EngineWindowDirectX()
 {
+	gWindowDirectX = this;
 }
 
 Engine::Window::EngineWindowDirectX::~EngineWindowDirectX()
@@ -23,7 +24,7 @@ bool Engine::Window::EngineWindowDirectX::Init()
 	wc.lpszClassName = mWndClassName;
 }
 
-LRESULT Engine::Window::EngineWindowDirectX::WindowProcess(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+LRESULT Engine::Window::EngineWindowDirectX::InnerWindowProcess(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg)
 	{
@@ -34,8 +35,16 @@ LRESULT Engine::Window::EngineWindowDirectX::WindowProcess(HWND hwnd, UINT msg, 
 		}
 		else
 		{
-
+			mPaused = false;
 		}
 		return 0;
+	}
+}
+
+LRESULT Engine::Window::WindowProcess(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	if (gWindowDirectX != nullptr)
+	{
+		return gWindowDirectX->InnerWindowProcess(hwnd, msg, wParam, lParam);
 	}
 }

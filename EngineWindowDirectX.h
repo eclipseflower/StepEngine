@@ -3,6 +3,7 @@
 
 #include "EngineUtilDirectX.h"
 #include "EngineWindow.h"
+#include "EngineGlobalDirectX.h"
 
 namespace Engine
 {
@@ -22,8 +23,10 @@ namespace Engine
 
 			const char mWndClassName[] = "EngineWindowDirectX";
 
-			static LRESULT CALLBACK WindowProcess(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
+			LRESULT CALLBACK InnerWindowProcess(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 		};
+
+		LRESULT CALLBACK WindowProcess(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 	}
 }
 
