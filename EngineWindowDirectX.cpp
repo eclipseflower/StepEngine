@@ -38,6 +38,44 @@ LRESULT Engine::Window::EngineWindowDirectX::InnerWindowProcess(HWND hwnd, UINT 
 			mPaused = false;
 		}
 		return 0;
+
+	case WM_SIZE:
+		mWidth = LOWORD(lParam);
+		mHeight = HIWORD(lParam);
+
+		if (wParam == SIZE_MINIMIZED)
+		{
+			mPaused = true;
+			mMinimized = true;
+			mMaximized = false;
+		}
+		else if (wParam == SIZE_MAXIMIZED)
+		{
+			mPaused = false;
+			mMinimized = false;
+			mMaximized = true;
+		}
+		else if (wParam == SIZE_RESTORED)
+		{
+			if (mMinimized)
+			{
+				mPaused = false;
+				mMinimized = false;
+			}
+			else if (mMaximized)
+			{
+				mPaused = false;
+				mMaximized = false;
+			}
+			else if (mResizing)
+			{
+
+			}
+			else
+			{
+
+			}
+		}
 	}
 }
 
