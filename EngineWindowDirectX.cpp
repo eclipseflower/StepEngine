@@ -22,6 +22,12 @@ bool Engine::Window::EngineWindowDirectX::Init()
 	wc.hbrBackground = (HBRUSH)GetStockObject(NULL_BRUSH);
 	wc.lpszMenuName = nullptr;
 	wc.lpszClassName = mWndClassName;
+
+	if (!RegisterClass(&wc))
+	{
+		Debug::LogErrorMessageBox("RegisterClass Failed");
+		return false;
+	}
 }
 
 LRESULT Engine::Window::EngineWindowDirectX::InnerWindowProcess(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -76,13 +82,44 @@ LRESULT Engine::Window::EngineWindowDirectX::InnerWindowProcess(HWND hwnd, UINT 
 
 			}
 		}
+		return 0;
+
+	case WM_ENTERSIZEMOVE:
+		mPaused = true;
+		mResizing = true;
+		return 0;
+
+	case WM_EXITSIZEMOVE:
+		mPaused = false;
+		mResizing = false;
+		return 0;
+
+	case WM_DESTROY:
+		PostQuitMessage(0);
+		return 0;
+
+	case WM_LBUTTONDOWN:
+	case WM_MBUTTONDOWN:
+	case WM_RBUTTONDOWN:
+		return 0;
+
+	case WM_LBUTTONUP:
+	case WM_MBUTTONUP:
+	case WM_RBUTTONUP:
+		return 0;
+
+	case WM_MOUSEMOVE:
+		return 0;
 	}
+
+	return DefWindowProc(hwnd, msg, wParam, lParam);
 }
 
-LRESULT Engine::Window::WindowProcess(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK Engine::Window::WindowProcess(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	if (gWindowDirectX != nullptr)
 	{
 		return gWindowDirectX->InnerWindowProcess(hwnd, msg, wParam, lParam);
 	}
+	return 0;
 }

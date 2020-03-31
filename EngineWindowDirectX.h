@@ -1,9 +1,11 @@
 #ifndef __ENGINE_WINDOW_DIRECTX_H__
 #define __ENGINE_WINDOW_DIRECTX_H__
 
-#include "EngineUtilDirectX.h"
 #include "EngineWindow.h"
+#include "EngineLog.h"
 #include "EngineGlobalDirectX.h"
+
+using Engine::Debug;
 
 namespace Engine
 {
