@@ -28,6 +28,25 @@ bool Engine::Window::EngineWindowDirectX::Init()
 		Debug::LogErrorMessageBox("RegisterClass Failed");
 		return false;
 	}
+
+	RECT rect = { 0, 0, mWidth, mHeight };
+	AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, false);
+	int width = rect.right - rect.left;
+	int height = rect.bottom - rect.top;
+
+	mhMainWnd = CreateWindow(mWndClassName, mCaption, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, width, height,
+		nullptr, nullptr, mhAppInst, 0);
+
+	if (!mhMainWnd)
+	{
+		Debug::LogErrorMessageBox("CreateWindow Failed");
+		return false;
+	}
+
+	ShowWindow(mhMainWnd, SW_SHOW);
+	UpdateWindow(mhMainWnd);
+
+	return true;
 }
 
 LRESULT Engine::Window::EngineWindowDirectX::InnerWindowProcess(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)

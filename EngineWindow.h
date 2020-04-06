@@ -3,8 +3,6 @@
 
 #include "EngineUtil.h"
 
-using std::string;
-
 namespace Engine
 {
 	namespace Window
@@ -17,7 +15,7 @@ namespace Engine
 			virtual bool Init();
 
 		protected:
-			string mCaption;
+			char *mCaption;
 			int mWidth;
 			int mHeight;
 			bool mMinimized;
