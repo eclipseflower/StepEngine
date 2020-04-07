@@ -14,7 +14,7 @@ namespace Engine
 		class EngineWindowDirectX : public EngineWindow
 		{
 		public:
-			EngineWindowDirectX();
+			EngineWindowDirectX(HINSTANCE hInstance);
 			~EngineWindowDirectX();
 
 			bool Init() override;

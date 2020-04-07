@@ -15,13 +15,13 @@ namespace Engine
 			virtual bool Init();
 
 		protected:
-			char *mCaption;
-			int mWidth;
-			int mHeight;
-			bool mMinimized;
-			bool mMaximized;
-			bool mResizing;
-			bool mPaused;
+			const char mCaption[] = "StepEngine";
+			int mWidth = 800;
+			int mHeight = 600;
+			bool mMinimized = false;
+			bool mMaximized = false;
+			bool mResizing = false;
+			bool mPaused = false;
 		};
 	}
 }

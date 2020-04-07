@@ -1,7 +1,8 @@
 #include "EngineWindowDirectX.h"
 
-Engine::Window::EngineWindowDirectX::EngineWindowDirectX()
+Engine::Window::EngineWindowDirectX::EngineWindowDirectX(HINSTANCE hInstance)
 {
+	mhAppInst = hInstance;
 	gWindowDirectX = this;
 }
 
