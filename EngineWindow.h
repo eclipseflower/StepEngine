@@ -2,6 +2,9 @@
 #define __ENGINE_WINDOW_H__
 
 #include "EngineUtil.h"
+#include "EngineDelegate.h"
+
+using Engine::Delegate;
 
 namespace Engine
 {
@@ -10,6 +13,8 @@ namespace Engine
 		class EngineWindow
 		{
 		public:
+			Delegate::CMultiDelegate<void, bool> onPause;
+
 			EngineWindow();
 			~EngineWindow();
 			virtual bool Init();

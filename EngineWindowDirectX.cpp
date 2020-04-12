@@ -58,10 +58,12 @@ LRESULT Engine::Window::EngineWindowDirectX::InnerWindowProcess(HWND hwnd, UINT 
 		if (LOWORD(wParam) == WA_INACTIVE)
 		{
 			mPaused = true;
+			onPause(mPaused);
 		}
 		else
 		{
 			mPaused = false;
+			onPause(mPaused);
 		}
 		return 0;
 
