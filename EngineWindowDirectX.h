@@ -4,7 +4,7 @@
 #include "EngineWindow.h"
 #include "EngineLog.h"
 
-using namespace Engine::Debug;
+using Engine::Debug::EngineLog;
 
 namespace Engine
 {

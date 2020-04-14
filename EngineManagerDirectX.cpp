@@ -1,5 +1,10 @@
 #include "EngineManagerDirectX.h"
 
+namespace Engine
+{
+	EngineManagerDirectX * gManagerDirectX = nullptr;
+}
+
 Engine::EngineManagerDirectX::EngineManagerDirectX()
 {
 	gManagerDirectX = this;
@@ -24,4 +29,6 @@ bool Engine::EngineManagerDirectX::InitEngineWindow(HINSTANCE hInstance)
 		mWindowInst = nullptr;
 		return false;
 	}
+
+	return true;
 }

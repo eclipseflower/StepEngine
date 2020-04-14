@@ -27,7 +27,7 @@ bool Engine::Window::EngineWindowDirectX::Init()
 
 	if (!RegisterClass(&wc))
 	{
-		Debug::LogErrorMessageBox("RegisterClass Failed");
+		EngineLog::LogErrorMessageBox("RegisterClass Failed");
 		return false;
 	}
 
@@ -41,7 +41,7 @@ bool Engine::Window::EngineWindowDirectX::Init()
 
 	if (!mhMainWnd)
 	{
-		Debug::LogErrorMessageBox("CreateWindow Failed");
+		EngineLog::LogErrorMessageBox("CreateWindow Failed");
 		return false;
 	}
 

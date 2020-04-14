@@ -19,7 +19,7 @@ namespace Engine
 		EngineTimer mTimerInst;
 	};
 
-	EngineManagerDirectX * gManagerDirectX = nullptr;
+	extern EngineManagerDirectX * gManagerDirectX;
 }
 
 #endif // __ENGINE_MANAGER_H__

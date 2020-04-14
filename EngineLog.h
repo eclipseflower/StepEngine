@@ -9,13 +9,17 @@ namespace Engine
 {
 	namespace Debug
 	{
-		const char *DEBUG_INFO = "INFO";
-		const char *DEBUG_WARNING = "WARNING";
-		const char *DEBUG_ERROR = "ERROR";
+		class EngineLog
+		{
+		public:
+			static const char *DEBUG_INFO;
+			static const char *DEBUG_WARNING;
+			static const char *DEBUG_ERROR;
 
-		void LogMessageBox(const char *msg);
-		void LogWarningMessageBox(const char *msg);
-		void LogErrorMessageBox(const char *msg);
+			static void LogMessageBox(const char *msg);
+			static void LogWarningMessageBox(const char *msg);
+			static void LogErrorMessageBox(const char *msg);
+		};
 	}
 }
 
