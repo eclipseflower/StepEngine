@@ -5,9 +5,9 @@
 #include <crtdbg.h>
 #endif
 
-#include "EngineWindowDirectX.h"
+#include "EngineManagerDirectX.h"
 
-using Engine::Window::EngineWindowDirectX;
+using Engine::EngineManagerDirectX;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance, PSTR cmdLine, int showCmd)
 {
@@ -16,8 +16,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance, PSTR cmdLine, in
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
-	EngineWindowDirectX window(hInstance);
-	if (!window.Init())
+	EngineManagerDirectX manager;
+	if (!manager.InitEngineWindow(hInstance))
 	{
 		return -1;
 	}

@@ -43,6 +43,9 @@ void Engine::EngineTimer::Reset()
 void Engine::EngineTimer::Start()
 {
 	__int64 startTime;
+#ifdef ENGINE_PLATFORM_DIRECTX
+	QueryPerformanceCounter((LARGE_INTEGER*)&startTime);
+#endif
 
 	if (mStopped)
 	{

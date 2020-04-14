@@ -3,9 +3,8 @@
 
 #include "EngineWindow.h"
 #include "EngineLog.h"
-#include "EngineGlobalDirectX.h"
 
-using Engine::Debug;
+using namespace Engine::Debug;
 
 namespace Engine
 {
@@ -18,14 +17,13 @@ namespace Engine
 			~EngineWindowDirectX();
 
 			bool Init() override;
+			LRESULT CALLBACK EngineWindowProcess(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 		private:
 			HINSTANCE mhAppInst;
 			HWND mhMainWnd;
 
-			const char mWndClassName[] = "EngineWindowDirectX";
-
-			LRESULT CALLBACK InnerWindowProcess(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
+			const char *mWndClassName = "EngineWindowDirectX";
 		};
 
 		LRESULT CALLBACK WindowProcess(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);

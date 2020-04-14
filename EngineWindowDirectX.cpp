@@ -1,9 +1,10 @@
 #include "EngineWindowDirectX.h"
+#include "EngineManagerDirectX.h"
 
 Engine::Window::EngineWindowDirectX::EngineWindowDirectX(HINSTANCE hInstance)
 {
 	mhAppInst = hInstance;
-	gWindowDirectX = this;
+	gManagerDirectX->mWindowInst = this;
 }
 
 Engine::Window::EngineWindowDirectX::~EngineWindowDirectX()
@@ -50,7 +51,7 @@ bool Engine::Window::EngineWindowDirectX::Init()
 	return true;
 }
 
-LRESULT Engine::Window::EngineWindowDirectX::InnerWindowProcess(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+LRESULT Engine::Window::EngineWindowDirectX::EngineWindowProcess(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg)
 	{
@@ -58,12 +59,12 @@ LRESULT Engine::Window::EngineWindowDirectX::InnerWindowProcess(HWND hwnd, UINT 
 		if (LOWORD(wParam) == WA_INACTIVE)
 		{
 			mPaused = true;
-			onPause(mPaused);
+			gManagerDirectX->mTimerInst.Stop();
 		}
 		else
 		{
 			mPaused = false;
-			onPause(mPaused);
+			gManagerDirectX->mTimerInst.Start();
 		}
 		return 0;
 
@@ -109,11 +110,13 @@ LRESULT Engine::Window::EngineWindowDirectX::InnerWindowProcess(HWND hwnd, UINT 
 	case WM_ENTERSIZEMOVE:
 		mPaused = true;
 		mResizing = true;
+		gManagerDirectX->mTimerInst.Stop();
 		return 0;
 
 	case WM_EXITSIZEMOVE:
 		mPaused = false;
 		mResizing = false;
+		gManagerDirectX->mTimerInst.Start();
 		return 0;
 
 	case WM_DESTROY:
@@ -139,9 +142,9 @@ LRESULT Engine::Window::EngineWindowDirectX::InnerWindowProcess(HWND hwnd, UINT 
 
 LRESULT CALLBACK Engine::Window::WindowProcess(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	if (gWindowDirectX != nullptr)
+	if (gManagerDirectX->mWindowInst != nullptr)
 	{
-		return gWindowDirectX->InnerWindowProcess(hwnd, msg, wParam, lParam);
+		return gManagerDirectX->mWindowInst->EngineWindowProcess(hwnd, msg, wParam, lParam);
 	}
 	return 0;
 }
