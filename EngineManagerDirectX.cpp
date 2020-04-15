@@ -9,6 +9,7 @@ Engine::EngineManagerDirectX::EngineManagerDirectX()
 {
 	gManagerDirectX = this;
 	mWindowInst = nullptr;
+	mCoreInst = nullptr;
 }
 
 Engine::EngineManagerDirectX::~EngineManagerDirectX()
@@ -17,6 +18,12 @@ Engine::EngineManagerDirectX::~EngineManagerDirectX()
 	{
 		delete mWindowInst;
 		mWindowInst = nullptr;
+	}
+
+	if (mCoreInst)
+	{
+		delete mCoreInst;
+		mCoreInst = nullptr;
 	}
 }
 
@@ -31,4 +38,28 @@ bool Engine::EngineManagerDirectX::InitEngineWindow(HINSTANCE hInstance)
 	}
 
 	return true;
+}
+
+bool Engine::EngineManagerDirectX::InitEngineCore(bool enableMsaa)
+{
+	mCoreInst = new EngineCoreDirectX(enableMsaa);
+	if (!mCoreInst->Init())
+	{
+		delete mCoreInst;
+		mCoreInst = nullptr;
+		return false;
+	}
+	return true;
+}
+
+void Engine::EngineManagerDirectX::OnPause(bool paused)
+{
+	if (paused)
+	{
+		mTimerInst.Stop();
+	}
+	else
+	{
+		mTimerInst.Start();
+	}
 }

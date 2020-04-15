@@ -2,9 +2,11 @@
 #define __ENGINE_MANAGER_H__
 
 #include "EngineWindowDirectX.h"
+#include "EngineCoreDirectX.h"
 #include "EngineTimer.h"
 
 using Engine::Window::EngineWindowDirectX;
+using Engine::Core::EngineCoreDirectX;
 
 namespace Engine
 {
@@ -14,8 +16,11 @@ namespace Engine
 		EngineManagerDirectX();
 		~EngineManagerDirectX();
 		bool InitEngineWindow(HINSTANCE hInstance);
+		bool InitEngineCore(bool enableMsaa);
+		void OnPause(bool paused);
 
 		EngineWindowDirectX *mWindowInst;
+		EngineCoreDirectX *mCoreInst;
 		EngineTimer mTimerInst;
 	};
 

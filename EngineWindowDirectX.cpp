@@ -59,12 +59,12 @@ LRESULT Engine::Window::EngineWindowDirectX::EngineWindowProcess(HWND hwnd, UINT
 		if (LOWORD(wParam) == WA_INACTIVE)
 		{
 			mPaused = true;
-			gManagerDirectX->mTimerInst.Stop();
+			gManagerDirectX->OnPause(mPaused);
 		}
 		else
 		{
 			mPaused = false;
-			gManagerDirectX->mTimerInst.Start();
+			gManagerDirectX->OnPause(mPaused);
 		}
 		return 0;
 
@@ -110,13 +110,13 @@ LRESULT Engine::Window::EngineWindowDirectX::EngineWindowProcess(HWND hwnd, UINT
 	case WM_ENTERSIZEMOVE:
 		mPaused = true;
 		mResizing = true;
-		gManagerDirectX->mTimerInst.Stop();
+		gManagerDirectX->OnPause(mPaused);
 		return 0;
 
 	case WM_EXITSIZEMOVE:
 		mPaused = false;
 		mResizing = false;
-		gManagerDirectX->mTimerInst.Start();
+		gManagerDirectX->OnPause(mPaused);
 		return 0;
 
 	case WM_DESTROY:
