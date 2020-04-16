@@ -2,6 +2,9 @@
 #define __ENGINE_CORE_DIRECTX_H__
 
 #include "EngineUtil.h"
+#include "EngineLog.h"
+
+using Engine::Debug::EngineLog;
 
 namespace Engine
 {
@@ -10,12 +13,13 @@ namespace Engine
 		class EngineCoreDirectX
 		{
 		public:
-			EngineCoreDirectX(bool enableMsaa);
+			EngineCoreDirectX(bool enableMsaa, UINT msaaCount);
 			~EngineCoreDirectX();
 			bool Init();
 
 		private:
 			bool mEnableMsaa;
+			UINT mMsaaCount;
 			UINT mMsaaQuality;
 			ID3D11Device *mD3dDevice;
 			ID3D11DeviceContext *mD3dImmediateContext;

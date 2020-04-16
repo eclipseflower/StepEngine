@@ -16,7 +16,7 @@ namespace Engine
 		EngineManagerDirectX();
 		~EngineManagerDirectX();
 		bool InitEngineWindow(HINSTANCE hInstance);
-		bool InitEngineCore(bool enableMsaa);
+		bool InitEngineCore(bool enableMsaa, UINT quality);
 		void OnPause(bool paused);
 
 		EngineWindowDirectX *mWindowInst;

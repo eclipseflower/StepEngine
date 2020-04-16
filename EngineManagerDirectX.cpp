@@ -40,9 +40,9 @@ bool Engine::EngineManagerDirectX::InitEngineWindow(HINSTANCE hInstance)
 	return true;
 }
 
-bool Engine::EngineManagerDirectX::InitEngineCore(bool enableMsaa)
+bool Engine::EngineManagerDirectX::InitEngineCore(bool enableMsaa, UINT msaaCount)
 {
-	mCoreInst = new EngineCoreDirectX(enableMsaa);
+	mCoreInst = new EngineCoreDirectX(enableMsaa, msaaCount);
 	if (!mCoreInst->Init())
 	{
 		delete mCoreInst;
