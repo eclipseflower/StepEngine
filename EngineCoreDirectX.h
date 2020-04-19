@@ -16,6 +16,7 @@ namespace Engine
 			EngineCoreDirectX(bool enableMsaa, UINT msaaCount);
 			~EngineCoreDirectX();
 			bool Init();
+			bool ResizeBuffer();
 
 		private:
 			bool mEnableMsaa;

@@ -12,6 +12,7 @@ namespace Engine
 
 		float TotalTime()const;  // in seconds
 		float DeltaTime()const; // in seconds
+		float FPS()const;
 
 		void Reset(); // Call before message loop.
 		void Start(); // Call when unpaused.

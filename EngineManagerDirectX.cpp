@@ -52,6 +52,27 @@ bool Engine::EngineManagerDirectX::InitEngineCore(bool enableMsaa, UINT msaaCoun
 	return true;
 }
 
+int Engine::EngineManagerDirectX::RunEngine()
+{
+	if (mWindowInst)
+	{
+		return mWindowInst->WindowLoop();
+	}
+	return 0;
+}
+
+void Engine::EngineManagerDirectX::EngnineLoop(bool paused)
+{
+	mTimerInst.Tick();
+	if (!paused)
+	{
+		float fps = mTimerInst.FPS();
+		if (mWindowInst)
+		{
+		}
+	}
+}
+
 void Engine::EngineManagerDirectX::OnPause(bool paused)
 {
 	if (paused)
@@ -62,4 +83,35 @@ void Engine::EngineManagerDirectX::OnPause(bool paused)
 	{
 		mTimerInst.Start();
 	}
+}
+
+void Engine::EngineManagerDirectX::OnResize()
+{
+}
+
+UINT Engine::EngineManagerDirectX::GetWindowWidth()
+{
+	if (mWindowInst)
+	{
+		return mWindowInst->GetWidth();
+	}
+	return 0;
+}
+
+UINT Engine::EngineManagerDirectX::GetWindowHeight()
+{
+	if (mWindowInst)
+	{
+		return mWindowInst->GetHeight();
+	}
+	return 0;
+}
+
+HWND Engine::EngineManagerDirectX::GetHwnd()
+{
+	if (mWindowInst)
+	{
+		return mWindowInst->GetHandle();
+	}
+	return nullptr;
 }

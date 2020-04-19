@@ -27,6 +27,25 @@ float Engine::EngineTimer::DeltaTime() const
 	return (float)mDeltaTime;
 }
 
+float Engine::EngineTimer::FPS() const
+{
+	static int frameCnt = 0;
+	static float timeElapsed = 0.0f;
+	static float fps = 0.0f;
+	frameCnt++;
+
+	// Compute averages over one second period.
+	if ((TotalTime() - timeElapsed) >= 1.0f)
+	{
+		fps = (float)frameCnt; // fps = frameCnt / 1
+
+		// Reset for next average.
+		frameCnt = 0;
+		timeElapsed += 1.0f;
+	}
+	return fps;
+}
+
 void Engine::EngineTimer::Reset()
 {
 	__int64 currTime;

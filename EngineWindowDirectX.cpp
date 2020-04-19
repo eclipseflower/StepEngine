@@ -83,6 +83,7 @@ LRESULT Engine::Window::EngineWindowDirectX::EngineWindowProcess(HWND hwnd, UINT
 			mPaused = false;
 			mMinimized = false;
 			mMaximized = true;
+			gManagerDirectX->OnResize();
 		}
 		else if (wParam == SIZE_RESTORED)
 		{
@@ -90,11 +91,13 @@ LRESULT Engine::Window::EngineWindowDirectX::EngineWindowProcess(HWND hwnd, UINT
 			{
 				mPaused = false;
 				mMinimized = false;
+				gManagerDirectX->OnResize();
 			}
 			else if (mMaximized)
 			{
 				mPaused = false;
 				mMaximized = false;
+				gManagerDirectX->OnResize();
 			}
 			else if (mResizing)
 			{
@@ -102,7 +105,7 @@ LRESULT Engine::Window::EngineWindowDirectX::EngineWindowProcess(HWND hwnd, UINT
 			}
 			else
 			{
-
+				gManagerDirectX->OnResize();
 			}
 		}
 		return 0;
@@ -117,6 +120,7 @@ LRESULT Engine::Window::EngineWindowDirectX::EngineWindowProcess(HWND hwnd, UINT
 		mPaused = false;
 		mResizing = false;
 		gManagerDirectX->OnPause(mPaused);
+		gManagerDirectX->OnResize();
 		return 0;
 
 	case WM_DESTROY:
@@ -138,6 +142,32 @@ LRESULT Engine::Window::EngineWindowDirectX::EngineWindowProcess(HWND hwnd, UINT
 	}
 
 	return DefWindowProc(hwnd, msg, wParam, lParam);
+}
+
+HWND Engine::Window::EngineWindowDirectX::GetHandle()
+{
+	return mhMainWnd;
+}
+
+int Engine::Window::EngineWindowDirectX::WindowLoop()
+{
+	MSG msg = { 0 };
+	while (msg.message != WM_QUIT)
+	{
+		// If there are Window messages then process them.
+		if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
+		{
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+		// Otherwise, do animation/game stuff.
+		else
+		{
+			gManagerDirectX->EngnineLoop(mPaused);
+		}
+	}
+
+	return (int)msg.wParam;
 }
 
 LRESULT CALLBACK Engine::Window::WindowProcess(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)

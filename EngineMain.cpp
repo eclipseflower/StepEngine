@@ -21,24 +21,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance, PSTR cmdLine, in
 	{
 		return -1;
 	}
-
-	MSG msg = { 0 };
-	while (msg.message != WM_QUIT)
+	if (!manager.InitEngineCore(true, 4))
 	{
-		// If there are Window messages then process them.
-		if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
-		{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
-		// Otherwise, do animation/game stuff.
-		else
-		{
-
-		}
+		return -1;
 	}
 
-	return (int)msg.wParam;
+	return manager.RunEngine();
 }
 
 #endif // ENGINE_PLATFORM_DIRECTX

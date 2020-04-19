@@ -18,6 +18,8 @@ namespace Engine
 
 			bool Init() override;
 			LRESULT CALLBACK EngineWindowProcess(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
+			HWND GetHandle();
+			int WindowLoop();
 
 		private:
 			HINSTANCE mhAppInst;

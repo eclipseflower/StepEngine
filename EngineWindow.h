@@ -13,11 +13,14 @@ namespace Engine
 			EngineWindow();
 			~EngineWindow();
 			virtual bool Init();
+			UINT GetWidth();
+			UINT GetHeight();
+			const char *GetCaption();
 
 		protected:
 			const char *mCaption = "StepEngine";
-			int mWidth = 800;
-			int mHeight = 600;
+			UINT mWidth = 800;
+			UINT mHeight = 600;
 			bool mMinimized = false;
 			bool mMaximized = false;
 			bool mResizing = false;
