@@ -16,13 +16,37 @@ Engine::Core::EngineCoreDirectX::EngineCoreDirectX(bool enableMsaa, UINT msaaCou
 
 Engine::Core::EngineCoreDirectX::~EngineCoreDirectX()
 {
+	if (mD3dDevice)
+	{
+		mD3dDevice->Release();
+	}
+	if (mD3dImmediateContext)
+	{
+		mD3dImmediateContext->Release();
+	}
+	if (mSwapChain)
+	{
+		mSwapChain->Release();
+	}
+	if (mDepthStencilBuffer)
+	{
+		mDepthStencilBuffer->Release();
+	}
+	if (mRenderTargetView)
+	{
+		mRenderTargetView->Release();
+	}
+	if (mDepthStencilView)
+	{
+		mDepthStencilView->Release();
+	}
 }
 
 bool Engine::Core::EngineCoreDirectX::Init()
 {
 	UINT createDeviceFlags = 0;
 #if defined(DEBUG) || defined(_DEBUG)  
-	createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
+	//createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
 
 	D3D_FEATURE_LEVEL featureLevel;

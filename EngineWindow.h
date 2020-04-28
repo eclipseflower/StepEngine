@@ -2,6 +2,7 @@
 #define __ENGINE_WINDOW_H__
 
 #include "EngineUtil.h"
+using std::string;
 
 namespace Engine
 {
@@ -13,12 +14,14 @@ namespace Engine
 			EngineWindow();
 			~EngineWindow();
 			virtual bool Init();
+			virtual void SetCaption(string caption);
+
 			UINT GetWidth();
 			UINT GetHeight();
-			const char *GetCaption();
+			string GetCaption() const;
 
 		protected:
-			const char *mCaption = "StepEngine";
+			string mCaption = "StepEngine";
 			UINT mWidth = 800;
 			UINT mHeight = 600;
 			bool mMinimized = false;

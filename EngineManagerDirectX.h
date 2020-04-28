@@ -7,6 +7,7 @@
 
 using Engine::Window::EngineWindowDirectX;
 using Engine::Core::EngineCoreDirectX;
+using std::ostringstream;
 
 namespace Engine
 {

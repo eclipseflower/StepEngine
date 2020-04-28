@@ -2,6 +2,7 @@
 #define __ENGINE_UTIL_H__
 
 #include <string>
+#include <sstream>
 
 #ifdef ENGINE_PLATFORM_DIRECTX
 

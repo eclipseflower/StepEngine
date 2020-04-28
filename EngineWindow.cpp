@@ -23,7 +23,12 @@ UINT Engine::Window::EngineWindow::GetHeight()
 	return mHeight;
 }
 
-const char * Engine::Window::EngineWindow::GetCaption()
+string Engine::Window::EngineWindow::GetCaption() const
 {
 	return mCaption;
+}
+
+void Engine::Window::EngineWindow::SetCaption(string caption)
+{
+	mCaption = caption;
 }

@@ -23,7 +23,7 @@ bool Engine::Window::EngineWindowDirectX::Init()
 	wc.hCursor = LoadCursor(0, IDC_ARROW);
 	wc.hbrBackground = (HBRUSH)GetStockObject(NULL_BRUSH);
 	wc.lpszMenuName = nullptr;
-	wc.lpszClassName = mWndClassName;
+	wc.lpszClassName = mWndClassName.c_str();
 
 	if (!RegisterClass(&wc))
 	{
@@ -36,8 +36,8 @@ bool Engine::Window::EngineWindowDirectX::Init()
 	int width = rect.right - rect.left;
 	int height = rect.bottom - rect.top;
 
-	mhMainWnd = CreateWindow(mWndClassName, mCaption, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, width, height,
-		nullptr, nullptr, mhAppInst, 0);
+	mhMainWnd = CreateWindow(mWndClassName.c_str(), mCaption.c_str(), WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT,
+		width, height, nullptr, nullptr, mhAppInst, 0);
 
 	if (!mhMainWnd)
 	{
@@ -49,6 +49,12 @@ bool Engine::Window::EngineWindowDirectX::Init()
 	UpdateWindow(mhMainWnd);
 
 	return true;
+}
+
+void Engine::Window::EngineWindowDirectX::SetCaption(string caption)
+{
+	EngineWindow::SetCaption(caption);
+	SetWindowText(mhMainWnd, mCaption.c_str());
 }
 
 LRESULT Engine::Window::EngineWindowDirectX::EngineWindowProcess(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)

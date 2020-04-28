@@ -17,6 +17,7 @@ namespace Engine
 			~EngineWindowDirectX();
 
 			bool Init() override;
+			void SetCaption(string caption) override;
 			LRESULT CALLBACK EngineWindowProcess(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 			HWND GetHandle();
 			int WindowLoop();
@@ -25,7 +26,7 @@ namespace Engine
 			HINSTANCE mhAppInst;
 			HWND mhMainWnd;
 
-			const char *mWndClassName = "EngineWindowDirectX";
+			const string mWndClassName = "EngineWindowDirectX";
 		};
 
 		LRESULT CALLBACK WindowProcess(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);

@@ -54,6 +54,7 @@ bool Engine::EngineManagerDirectX::InitEngineCore(bool enableMsaa, UINT msaaCoun
 
 int Engine::EngineManagerDirectX::RunEngine()
 {
+	mTimerInst.Reset();
 	if (mWindowInst)
 	{
 		return mWindowInst->WindowLoop();
@@ -69,6 +70,16 @@ void Engine::EngineManagerDirectX::EngnineLoop(bool paused)
 		float fps = mTimerInst.FPS();
 		if (mWindowInst)
 		{
+			static float interval = 0.0f;
+			interval += mTimerInst.DeltaTime();
+			if (interval >= 1.0)
+			{
+				interval = 0.0f;
+				ostringstream outs;
+				outs.precision(6);
+				outs << " FPS: " << fps;
+				mWindowInst->SetCaption(outs.str());
+			}
 		}
 	}
 }

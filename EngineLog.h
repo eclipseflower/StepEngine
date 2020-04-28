@@ -12,9 +12,9 @@ namespace Engine
 		class EngineLog
 		{
 		public:
-			static const char *DEBUG_INFO;
-			static const char *DEBUG_WARNING;
-			static const char *DEBUG_ERROR;
+			static const string DEBUG_INFO;
+			static const string DEBUG_WARNING;
+			static const string DEBUG_ERROR;
 
 			static void LogMessageBox(const char *msg);
 			static void LogWarningMessageBox(const char *msg);
