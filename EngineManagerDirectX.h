@@ -4,9 +4,11 @@
 #include "EngineWindowDirectX.h"
 #include "EngineCoreDirectX.h"
 #include "EngineTimer.h"
+#include "EngineObjectDirectX.h"
 
 using Engine::Window::EngineWindowDirectX;
 using Engine::Core::EngineCoreDirectX;
+using Engine::Object::EngineObjectDirectX;
 using std::ostringstream;
 
 namespace Engine
@@ -25,6 +27,8 @@ namespace Engine
 		UINT GetWindowWidth();
 		UINT GetWindowHeight();
 		HWND GetHwnd();
+
+		void CreateBoxObject(EngineObjectDirectX **object);
 
 		EngineWindowDirectX *mWindowInst;
 		EngineCoreDirectX *mCoreInst;

@@ -26,6 +26,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance, PSTR cmdLine, in
 		return -1;
 	}
 
+	EngineObjectDirectX *boxObject;
+	manager.CreateBoxObject(&boxObject);
+
 	return manager.RunEngine();
 }
 

@@ -3,6 +3,7 @@
 
 #include <string>
 #include <sstream>
+#include <vector>
 
 #ifdef ENGINE_PLATFORM_DIRECTX
 
