@@ -257,3 +257,28 @@ bool Engine::Core::EngineCoreDirectX::ResizeBuffer()
 	mD3dImmediateContext->RSSetViewports(1, &mScreenViewport);
 	return true;
 }
+
+bool Engine::Core::EngineCoreDirectX::CreateVertexBuffer(void *vertices, UINT byteWidth, D3D11_USAGE usage, UINT cpuAccessFlags, ID3D11Buffer **buffer)
+{
+	D3D11_BUFFER_DESC desc;
+	desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	desc.ByteWidth = byteWidth;
+	desc.CPUAccessFlags = cpuAccessFlags;
+	desc.MiscFlags = 0;
+	desc.StructureByteStride = 0;
+	desc.Usage = usage;
+
+	D3D11_SUBRESOURCE_DATA data;
+	data.pSysMem = vertices;
+	data.SysMemPitch = 0;
+	data.SysMemSlicePitch = 0;
+
+	HRESULT hr = mD3dDevice->CreateBuffer(&desc, &data, buffer);
+	if (FAILED(hr))
+	{
+		EngineLog::LogErrorMessageBox("CreateBuffer Failed");
+		return false;
+	}
+
+	return true;
+}

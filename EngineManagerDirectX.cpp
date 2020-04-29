@@ -127,17 +127,16 @@ HWND Engine::EngineManagerDirectX::GetHwnd()
 	return nullptr;
 }
 
+bool Engine::EngineManagerDirectX::CreateVertexBuffer(void *vertices, UINT byteWidth, D3D11_USAGE usage, UINT cpuAccessFlags, ID3D11Buffer **buffer)
+{
+	if (mCoreInst)
+	{
+		return mCoreInst->CreateVertexBuffer(vertices, byteWidth, usage, cpuAccessFlags, buffer);
+	}
+	return false;
+}
+
 void Engine::EngineManagerDirectX::CreateBoxObject(EngineObjectDirectX **object)
 {
-	*object = new EngineObjectDirectX;
-	(*object)->mVertexCount = 8;
-	(*object)->mVertices.push_back({ XMFLOAT3(-1.0f, -1.0f, -1.0f), (const float*)&White });
-	(*object)->mVertices.push_back({ XMFLOAT3(-1.0f, -1.0f, -1.0f), (const float*)&White }),
-	(*object)->mVertices.push_back({ XMFLOAT3(-1.0f, +1.0f, -1.0f), (const float*)&White });
-	(*object)->mVertices.push_back({ XMFLOAT3(+1.0f, +1.0f, -1.0f), (const float*)&White });
-	(*object)->mVertices.push_back({ XMFLOAT3(+1.0f, -1.0f, -1.0f), (const float*)&White });
-	(*object)->mVertices.push_back({ XMFLOAT3(-1.0f, -1.0f, +1.0f), (const float*)&White });
-	(*object)->mVertices.push_back({ XMFLOAT3(-1.0f, +1.0f, +1.0f), (const float*)&White });
-	(*object)->mVertices.push_back({ XMFLOAT3(+1.0f, +1.0f, +1.0f), (const float*)&White });
-	(*object)->mVertices.push_back({ XMFLOAT3(+1.0f, -1.0f, +1.0f), (const float*)&White });
+	mSceneMgrInst.CreateBoxObject(object);
 }

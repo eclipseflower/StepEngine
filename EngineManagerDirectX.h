@@ -4,11 +4,11 @@
 #include "EngineWindowDirectX.h"
 #include "EngineCoreDirectX.h"
 #include "EngineTimer.h"
-#include "EngineObjectDirectX.h"
+#include "EngineSceneManagerDirectX.h"
 
 using Engine::Window::EngineWindowDirectX;
 using Engine::Core::EngineCoreDirectX;
-using Engine::Object::EngineObjectDirectX;
+using Engine::Core::EngineSceneManagerDirectX;
 using std::ostringstream;
 
 namespace Engine
@@ -28,11 +28,13 @@ namespace Engine
 		UINT GetWindowHeight();
 		HWND GetHwnd();
 
+		bool CreateVertexBuffer(void * vertices, UINT byteWidth, D3D11_USAGE usage, UINT cpuAccessFlags, ID3D11Buffer ** buffer);
 		void CreateBoxObject(EngineObjectDirectX **object);
 
 		EngineWindowDirectX *mWindowInst;
 		EngineCoreDirectX *mCoreInst;
 		EngineTimer mTimerInst;
+		EngineSceneManagerDirectX mSceneMgrInst;
 	};
 
 	extern EngineManagerDirectX * gManagerDirectX;

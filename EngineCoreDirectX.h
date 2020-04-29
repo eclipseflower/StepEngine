@@ -17,6 +17,7 @@ namespace Engine
 			~EngineCoreDirectX();
 			bool Init();
 			bool ResizeBuffer();
+			bool CreateVertexBuffer(void * vertices, UINT byteWidth, D3D11_USAGE usage, UINT cpuAccessFlags, ID3D11Buffer ** buffer);
 
 		private:
 			bool mEnableMsaa;

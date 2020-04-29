@@ -14,6 +14,8 @@ namespace Engine
 		public:
 			int mVertexCount;
 			vector<EngineVertexDirectX> mVertices;
+			vector<UINT> mIndices;
+			ID3D11Buffer *mVertexBuffer;
 
 			EngineObjectDirectX();
 			~EngineObjectDirectX();
