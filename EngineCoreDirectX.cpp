@@ -282,3 +282,28 @@ bool Engine::Core::EngineCoreDirectX::CreateVertexBuffer(void *vertices, UINT by
 
 	return true;
 }
+
+bool Engine::Core::EngineCoreDirectX::CreateIndexBuffer(void *indices, UINT byteWidth, D3D11_USAGE usage, ID3D11Buffer **buffer)
+{
+	D3D11_BUFFER_DESC desc;
+	desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	desc.ByteWidth = byteWidth;
+	desc.CPUAccessFlags = 0;
+	desc.MiscFlags = 0;
+	desc.StructureByteStride = 0;
+	desc.Usage = usage;
+	
+	D3D11_SUBRESOURCE_DATA data;
+	data.pSysMem = indices;
+	data.SysMemPitch = 0;
+	data.SysMemSlicePitch = 0;
+
+	HRESULT hr = mD3dDevice->CreateBuffer(&desc, &data, buffer);
+	if (FAILED(hr))
+	{
+		EngineLog::LogErrorMessageBox("CreateBuffer Failed");
+		return false;
+	}
+
+	return true;
+}

@@ -29,6 +29,7 @@ namespace Engine
 		HWND GetHwnd();
 
 		bool CreateVertexBuffer(void * vertices, UINT byteWidth, D3D11_USAGE usage, UINT cpuAccessFlags, ID3D11Buffer ** buffer);
+		bool CreateIndexBuffer(void * indices, UINT byteWidth, D3D11_USAGE usage, ID3D11Buffer ** buffer);
 		void CreateBoxObject(EngineObjectDirectX **object);
 
 		EngineWindowDirectX *mWindowInst;

@@ -136,6 +136,15 @@ bool Engine::EngineManagerDirectX::CreateVertexBuffer(void *vertices, UINT byteW
 	return false;
 }
 
+bool Engine::EngineManagerDirectX::CreateIndexBuffer(void *indices, UINT byteWidth, D3D11_USAGE usage, ID3D11Buffer **buffer)
+{
+	if (mCoreInst)
+	{
+		return mCoreInst->CreateIndexBuffer(indices, byteWidth, usage, buffer);
+	}
+	return false;
+}
+
 void Engine::EngineManagerDirectX::CreateBoxObject(EngineObjectDirectX **object)
 {
 	mSceneMgrInst.CreateBoxObject(object);

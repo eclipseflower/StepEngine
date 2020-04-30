@@ -13,7 +13,7 @@ namespace Engine
 		public:
 			EngineSceneManagerDirectX();
 			~EngineSceneManagerDirectX();
-			void CreateBoxObject(EngineObjectDirectX **object);
+			bool CreateBoxObject(EngineObjectDirectX **object);
 		};
 	}
 }

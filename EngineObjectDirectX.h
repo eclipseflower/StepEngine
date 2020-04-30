@@ -13,9 +13,13 @@ namespace Engine
 		{
 		public:
 			int mVertexCount;
+			int mIndexCount;
 			vector<EngineVertexDirectX> mVertices;
 			vector<UINT> mIndices;
 			ID3D11Buffer *mVertexBuffer;
+			ID3D11Buffer *mIndexBuffer;
+
+			XMFLOAT4X4 mWorldMatrix;
 
 			EngineObjectDirectX();
 			~EngineObjectDirectX();
