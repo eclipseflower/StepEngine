@@ -5,10 +5,12 @@
 #include "EngineCoreDirectX.h"
 #include "EngineTimer.h"
 #include "EngineSceneManagerDirectX.h"
+#include "EngineShaderDirectX.h"
 
 using Engine::Window::EngineWindowDirectX;
 using Engine::Core::EngineCoreDirectX;
 using Engine::Core::EngineSceneManagerDirectX;
+using Engine::Shader::EngineShaderDirectX;
 using std::ostringstream;
 
 namespace Engine
@@ -30,7 +32,8 @@ namespace Engine
 
 		bool CreateVertexBuffer(void * vertices, UINT byteWidth, D3D11_USAGE usage, UINT cpuAccessFlags, ID3D11Buffer ** buffer);
 		bool CreateIndexBuffer(void * indices, UINT byteWidth, D3D11_USAGE usage, ID3D11Buffer ** buffer);
-		void CreateBoxObject(EngineObjectDirectX **object);
+		bool CreateBoxObject(EngineObjectDirectX **object);
+		bool CreateShader(string srcFile, EngineShaderDirectX **shader);
 
 		EngineWindowDirectX *mWindowInst;
 		EngineCoreDirectX *mCoreInst;

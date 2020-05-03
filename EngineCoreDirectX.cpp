@@ -307,3 +307,39 @@ bool Engine::Core::EngineCoreDirectX::CreateIndexBuffer(void *indices, UINT byte
 
 	return true;
 }
+
+bool Engine::Core::EngineCoreDirectX::CreateShader(string srcFile, ID3DX11Effect **effect)
+{
+	DWORD shaderFlags = 0;
+#if defined( DEBUG ) || defined( _DEBUG )
+	shaderFlags |= D3D10_SHADER_DEBUG;
+	shaderFlags |= D3D10_SHADER_SKIP_OPTIMIZATION;
+#endif
+
+	ID3D10Blob *compileShader = nullptr;
+	ID3D10Blob *compileMsg = nullptr;
+	HRESULT hr = D3DX11CompileFromFile(srcFile.c_str(), nullptr, nullptr, nullptr, "fx_5_0", shaderFlags, 0, nullptr,
+		&compileShader, &compileMsg, nullptr);
+	if (compileMsg != nullptr)
+	{
+		EngineLog::LogErrorMessageBox((char *)compileMsg->GetBufferPointer());
+		compileMsg->Release();
+		return false;
+	}
+	if (FAILED(hr))
+	{
+		EngineLog::LogErrorMessageBox("D3DX11CompileFromFile Failed");
+		return false;
+	}
+
+	hr = D3DX11CreateEffectFromMemory(compileShader->GetBufferPointer(), compileShader->GetBufferSize(), 0, mD3dDevice, 
+		effect);
+
+	compileShader->Release();
+	if (FAILED(hr))
+	{
+		EngineLog::LogErrorMessageBox("D3DX11CreateEffectFromMemory Failed");
+		return false;
+	}
+	return true;
+}

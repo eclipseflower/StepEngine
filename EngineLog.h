@@ -16,9 +16,9 @@ namespace Engine
 			static const string DEBUG_WARNING;
 			static const string DEBUG_ERROR;
 
-			static void LogMessageBox(const char *msg);
-			static void LogWarningMessageBox(const char *msg);
-			static void LogErrorMessageBox(const char *msg);
+			static void LogMessageBox(const string msg);
+			static void LogWarningMessageBox(const string msg);
+			static void LogErrorMessageBox(const string msg);
 		};
 	}
 }

@@ -1,9 +1,19 @@
 #ifndef __ENGINE_UTIL_DIRECTX_H__
 #define __ENGINE_UTIL_DIRECTX_H__
 
-#include <windows.h>
+#include <d3d11.h>
 #include <d3dx11.h>
-#include <xnamath.h>
+#include <d3dx11effect.h>
+#include <directxmath.h>
+#include <windows.h>
+
+
+using DirectX::XMVECTORF32;
+using DirectX::XMFLOAT3;
+using DirectX::XMFLOAT4;
+using DirectX::XMFLOAT4X4;
+using DirectX::XMMATRIX;
+using DirectX::XMMatrixIdentity;
 
 namespace Engine
 {
@@ -22,6 +32,12 @@ namespace Engine
 	{
 		XMFLOAT3 position;
 		XMFLOAT4 color;
+
+		EngineVertexDirectX(XMFLOAT3 position, const float *color)
+		{
+			this->position = position;
+			this->color = XMFLOAT4(color);
+		}
 	};
 }
 

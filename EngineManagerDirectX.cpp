@@ -145,7 +145,22 @@ bool Engine::EngineManagerDirectX::CreateIndexBuffer(void *indices, UINT byteWid
 	return false;
 }
 
-void Engine::EngineManagerDirectX::CreateBoxObject(EngineObjectDirectX **object)
+bool Engine::EngineManagerDirectX::CreateBoxObject(EngineObjectDirectX **object)
 {
-	mSceneMgrInst.CreateBoxObject(object);
+	return mSceneMgrInst.CreateBoxObject(object);
+}
+
+bool Engine::EngineManagerDirectX::CreateShader(string srcFile, EngineShaderDirectX ** shader)
+{
+	if (mCoreInst)
+	{
+		*shader = new EngineShaderDirectX;
+		if (mCoreInst->CreateShader(srcFile, &(*shader)->mEffect))
+		{
+			(*shader)->InitEffect();
+			return true;
+		}
+		return false;
+	}
+	return false;
 }

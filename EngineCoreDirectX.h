@@ -19,6 +19,7 @@ namespace Engine
 			bool ResizeBuffer();
 			bool CreateVertexBuffer(void * vertices, UINT byteWidth, D3D11_USAGE usage, UINT cpuAccessFlags, ID3D11Buffer ** buffer);
 			bool CreateIndexBuffer(void * indices, UINT byteWidth, D3D11_USAGE usage, ID3D11Buffer ** buffer);
+			bool CreateShader(string srcFile, ID3DX11Effect ** effect);
 
 		private:
 			bool mEnableMsaa;
