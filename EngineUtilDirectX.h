@@ -5,15 +5,22 @@
 #include <d3dx11.h>
 #include <d3dx11effect.h>
 #include <directxmath.h>
-#include <windows.h>
+#include <windowsx.h>
 
-
+using DirectX::XMVECTOR;
 using DirectX::XMVECTORF32;
 using DirectX::XMFLOAT3;
 using DirectX::XMFLOAT4;
 using DirectX::XMFLOAT4X4;
 using DirectX::XMMATRIX;
 using DirectX::XMMatrixIdentity;
+using DirectX::XMVectorSet;
+using DirectX::XMVectorZero;
+using DirectX::XMMatrixLookAtLH;
+using DirectX::XMMatrixPerspectiveFovLH;
+using DirectX::XMConvertToRadians;
+using DirectX::XM_PI;
+using DirectX::XM_PIDIV4;
 
 namespace Engine
 {
@@ -39,6 +46,9 @@ namespace Engine
 			this->color = XMFLOAT4(color);
 		}
 	};
+
+	extern const D3D11_INPUT_ELEMENT_DESC VertexDesc[];
+	extern const UINT VertexCount;
 }
 
 #endif // __ENGINE_UTIL_DIRECTX_H__

@@ -18,6 +18,7 @@ namespace Engine
 
 			UINT GetWidth();
 			UINT GetHeight();
+			float GetAspectRatio() const;
 			string GetCaption() const;
 
 		protected:

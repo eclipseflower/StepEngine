@@ -2,6 +2,9 @@
 #define __ENGINE_SHADER_DIRECTX_H__
 
 #include "EngineUtil.h"
+#include "EngineLog.h"
+
+using Engine::Debug::EngineLog;
 
 namespace Engine
 {
@@ -10,8 +13,10 @@ namespace Engine
 		class EngineShaderDirectX
 		{
 		public:
-			ID3DX11Effect *mEffect;
-			ID3DX11EffectVariable *mMVPMatrix;
+			ID3DX11Effect *mEffect = nullptr;
+			ID3D11InputLayout *mInputLayout = nullptr;
+			ID3DX11EffectTechnique *mMainTech = nullptr;
+			ID3DX11EffectMatrixVariable *mMVPMatrix = nullptr;
 
 			EngineShaderDirectX();
 			~EngineShaderDirectX();

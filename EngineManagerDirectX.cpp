@@ -62,7 +62,7 @@ int Engine::EngineManagerDirectX::RunEngine()
 	return 0;
 }
 
-void Engine::EngineManagerDirectX::EngnineLoop(bool paused)
+void Engine::EngineManagerDirectX::EngineLoop(bool paused)
 {
 	mTimerInst.Tick();
 	if (!paused)
@@ -81,6 +81,27 @@ void Engine::EngineManagerDirectX::EngnineLoop(bool paused)
 				mWindowInst->SetCaption(outs.str());
 			}
 		}
+
+		if (mUpdateFunc)
+		{
+			mUpdateFunc(mTimerInst.DeltaTime());
+		}
+
+		EngineDraw();
+	}
+}
+
+void Engine::EngineManagerDirectX::EngineDraw()
+{
+	if (mCoreInst)
+	{
+		mCoreInst->BeginDraw();
+		for (int i = 0; i < mSceneMgrInst.mSceneObjects.size(); ++i)
+		{
+			EngineObjectDirectX *object = mSceneMgrInst.mSceneObjects[i];
+			mCoreInst->DrawObject(object, &mCameraInst);
+		}
+		mCoreInst->EndDraw();
 	}
 }
 
@@ -98,6 +119,36 @@ void Engine::EngineManagerDirectX::OnPause(bool paused)
 
 void Engine::EngineManagerDirectX::OnResize()
 {
+	if (mCoreInst)
+	{
+		mCoreInst->ResizeBuffer();
+	}
+	float aspect = 0.0f;
+	if (mWindowInst)
+	{
+		aspect = mWindowInst->GetAspectRatio();
+		mCameraInst.SetLens(XM_PIDIV4, aspect, 1.0f, 1000.0f);
+	}
+}
+
+void Engine::EngineManagerDirectX::OnMouseDown(WPARAM btnState, int x, int y)
+{
+	mMouseDownFunc(btnState, x, y);
+}
+
+void Engine::EngineManagerDirectX::OnMouseUp(WPARAM btnState, int x, int y)
+{
+	mMouseUpFunc(btnState, x, y);
+}
+
+void Engine::EngineManagerDirectX::OnMouseMove(WPARAM btnState, int x, int y)
+{
+	mMouseMoveFunc(btnState, x, y);
+}
+
+void Engine::EngineManagerDirectX::CameraLookAt(const XMVECTOR & pos, const XMVECTOR & target, const XMVECTOR & up)
+{
+	mCameraInst.LookAt(pos, target, up);
 }
 
 UINT Engine::EngineManagerDirectX::GetWindowWidth()
@@ -161,6 +212,15 @@ bool Engine::EngineManagerDirectX::CreateShader(string srcFile, EngineShaderDire
 			return true;
 		}
 		return false;
+	}
+	return false;
+}
+
+bool Engine::EngineManagerDirectX::CreateInputLayout(D3DX11_PASS_DESC * passDesc, ID3D11InputLayout ** layout)
+{
+	if (mCoreInst)
+	{
+		return mCoreInst->CreateInputLayout(VertexDesc, VertexCount, passDesc, layout);
 	}
 	return false;
 }

@@ -7,23 +7,31 @@ Engine::Core::EngineSceneManagerDirectX::EngineSceneManagerDirectX()
 
 Engine::Core::EngineSceneManagerDirectX::~EngineSceneManagerDirectX()
 {
+	for (UINT i = 0; i < mSceneObjects.size(); ++i)
+	{
+		EngineObjectDirectX *object = mSceneObjects[i];
+		object->mVertexBuffer->Release();
+		object->mIndexBuffer->Release();
+		object->mShader->mEffect->Release();
+		object->mShader->mInputLayout->Release();
+	}
 }
 
 bool Engine::Core::EngineSceneManagerDirectX::CreateBoxObject(EngineObjectDirectX ** object)
 {
 	*object = new EngineObjectDirectX;
-	(*object)->mVertexCount = 8;
-	(*object)->mVertices.push_back({ XMFLOAT3(-1.0f, -1.0f, -1.0f), (const float*)&White });
-	(*object)->mVertices.push_back({ XMFLOAT3(-1.0f, -1.0f, -1.0f), (const float*)&White }),
-	(*object)->mVertices.push_back({ XMFLOAT3(-1.0f, +1.0f, -1.0f), (const float*)&White });
-	(*object)->mVertices.push_back({ XMFLOAT3(+1.0f, +1.0f, -1.0f), (const float*)&White });
-	(*object)->mVertices.push_back({ XMFLOAT3(+1.0f, -1.0f, -1.0f), (const float*)&White });
-	(*object)->mVertices.push_back({ XMFLOAT3(-1.0f, -1.0f, +1.0f), (const float*)&White });
-	(*object)->mVertices.push_back({ XMFLOAT3(-1.0f, +1.0f, +1.0f), (const float*)&White });
-	(*object)->mVertices.push_back({ XMFLOAT3(+1.0f, +1.0f, +1.0f), (const float*)&White });
-	(*object)->mVertices.push_back({ XMFLOAT3(+1.0f, -1.0f, +1.0f), (const float*)&White });
 
-	bool res = gManagerDirectX->CreateVertexBuffer(&(*object)->mVertices, 
+	(*object)->mVertexCount = 8;
+	(*object)->mVertices.push_back({ XMFLOAT3(-1.0f, -1.0f, -1.0f), (const float*)&White }),
+	(*object)->mVertices.push_back({ XMFLOAT3(-1.0f, +1.0f, -1.0f), (const float*)&Black });
+	(*object)->mVertices.push_back({ XMFLOAT3(+1.0f, +1.0f, -1.0f), (const float*)&Red });
+	(*object)->mVertices.push_back({ XMFLOAT3(+1.0f, -1.0f, -1.0f), (const float*)&Green });
+	(*object)->mVertices.push_back({ XMFLOAT3(-1.0f, -1.0f, +1.0f), (const float*)&Blue });
+	(*object)->mVertices.push_back({ XMFLOAT3(-1.0f, +1.0f, +1.0f), (const float*)&Yellow });
+	(*object)->mVertices.push_back({ XMFLOAT3(+1.0f, +1.0f, +1.0f), (const float*)&Cyan });
+	(*object)->mVertices.push_back({ XMFLOAT3(+1.0f, -1.0f, +1.0f), (const float*)&Magenta });
+
+	bool res = gManagerDirectX->CreateVertexBuffer(&(*object)->mVertices[0], 
 		sizeof(EngineVertexDirectX) * (*object)->mVertexCount, D3D11_USAGE_IMMUTABLE, 0, &(*object)->mVertexBuffer);
 
 	if (!res)
@@ -71,8 +79,9 @@ bool Engine::Core::EngineSceneManagerDirectX::CreateBoxObject(EngineObjectDirect
 		return false;
 	}
 
-	XMMATRIX matrix = XMMatrixIdentity();
-	XMStoreFloat4x4(&(*object)->mWorldMatrix, matrix);
+	XMMATRIX i = XMMatrixIdentity();
+	XMStoreFloat4x4(&(*object)->mWorldMatrix, i);
 
+	mSceneObjects.push_back(*object);
 	return true;
 }

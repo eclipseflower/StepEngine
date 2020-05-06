@@ -5,9 +5,7 @@
 #include <crtdbg.h>
 #endif
 
-#include "EngineManagerDirectX.h"
-
-using Engine::EngineManagerDirectX;
+#include "EngineBoxApp.h"
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance, PSTR cmdLine, int showCmd)
 {
@@ -16,20 +14,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance, PSTR cmdLine, in
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
-	EngineManagerDirectX manager;
-	if (!manager.InitEngineWindow(hInstance))
-	{
-		return -1;
-	}
-	if (!manager.InitEngineCore(true, 4))
-	{
-		return -1;
-	}
-
-	EngineObjectDirectX *boxObject;
-	manager.CreateBoxObject(&boxObject);
-
-	return manager.RunEngine();
+	EngineBoxApp app;
+	return app.Run(hInstance);
 }
 
 #endif // ENGINE_PLATFORM_DIRECTX

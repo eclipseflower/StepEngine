@@ -14,6 +14,8 @@ namespace Engine
 			EngineSceneManagerDirectX();
 			~EngineSceneManagerDirectX();
 			bool CreateBoxObject(EngineObjectDirectX **object);
+
+			vector<EngineObjectDirectX *> mSceneObjects;
 		};
 	}
 }

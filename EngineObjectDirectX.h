@@ -2,7 +2,9 @@
 #define __ENGINE_OBJECT_DIRECTX_H__
 
 #include "EngineUtil.h"
+#include "EngineShaderDirectX.h"
 
+using Engine::Shader::EngineShaderDirectX;
 using std::vector;
 
 namespace Engine
@@ -20,6 +22,8 @@ namespace Engine
 			ID3D11Buffer *mIndexBuffer;
 
 			XMFLOAT4X4 mWorldMatrix;
+
+			EngineShaderDirectX *mShader;
 
 			EngineObjectDirectX();
 			~EngineObjectDirectX();

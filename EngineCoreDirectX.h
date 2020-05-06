@@ -3,8 +3,12 @@
 
 #include "EngineUtil.h"
 #include "EngineLog.h"
+#include "EngineObjectDirectX.h"
+#include "EngineCameraDirectX.h"
 
 using Engine::Debug::EngineLog;
+using Engine::Object::EngineObjectDirectX;
+using Engine::Camera::EngineCameraDirectX;
 
 namespace Engine
 {
@@ -20,8 +24,13 @@ namespace Engine
 			bool CreateVertexBuffer(void * vertices, UINT byteWidth, D3D11_USAGE usage, UINT cpuAccessFlags, ID3D11Buffer ** buffer);
 			bool CreateIndexBuffer(void * indices, UINT byteWidth, D3D11_USAGE usage, ID3D11Buffer ** buffer);
 			bool CreateShader(string srcFile, ID3DX11Effect ** effect);
+			bool CreateInputLayout(const D3D11_INPUT_ELEMENT_DESC * vertexDesc, const UINT vertexDescCount, D3DX11_PASS_DESC * passDesc, ID3D11InputLayout ** layout);
 
-		private:
+			void BeginDraw();
+			void DrawObject(EngineObjectDirectX * object, EngineCameraDirectX * camera);
+			void EndDraw();
+
+		public:
 			bool mEnableMsaa;
 			UINT mMsaaCount;
 			UINT mMsaaQuality;

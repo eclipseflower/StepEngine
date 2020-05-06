@@ -4,6 +4,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <functional>
 
 #ifdef ENGINE_PLATFORM_DIRECTX
 

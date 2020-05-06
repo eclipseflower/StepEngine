@@ -23,6 +23,11 @@ UINT Engine::Window::EngineWindow::GetHeight()
 	return mHeight;
 }
 
+float Engine::Window::EngineWindow::GetAspectRatio() const
+{
+	return static_cast<float>(mWidth) / mHeight;
+}
+
 string Engine::Window::EngineWindow::GetCaption() const
 {
 	return mCaption;

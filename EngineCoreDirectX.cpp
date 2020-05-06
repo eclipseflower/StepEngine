@@ -46,7 +46,7 @@ bool Engine::Core::EngineCoreDirectX::Init()
 {
 	UINT createDeviceFlags = 0;
 #if defined(DEBUG) || defined(_DEBUG)  
-	//createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
+	createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
 
 	D3D_FEATURE_LEVEL featureLevel;
@@ -180,11 +180,6 @@ bool Engine::Core::EngineCoreDirectX::Init()
 
 bool Engine::Core::EngineCoreDirectX::ResizeBuffer()
 {
-	if (mDepthStencilBuffer)
-	{
-		mDepthStencilBuffer->Release();
-		mDepthStencilBuffer = nullptr;
-	}
 	if (mRenderTargetView)
 	{
 		mRenderTargetView->Release();
@@ -194,6 +189,11 @@ bool Engine::Core::EngineCoreDirectX::ResizeBuffer()
 	{
 		mDepthStencilView->Release();
 		mDepthStencilView = nullptr;
+	}
+	if (mDepthStencilBuffer)
+	{
+		mDepthStencilBuffer->Release();
+		mDepthStencilBuffer = nullptr;
 	}
 
 	UINT windowWidth = gManagerDirectX->GetWindowWidth();
@@ -213,6 +213,8 @@ bool Engine::Core::EngineCoreDirectX::ResizeBuffer()
 		return false;
 	}
 	hr = mD3dDevice->CreateRenderTargetView(backBuffer, nullptr, &mRenderTargetView);
+	// MUST RELEASE
+	backBuffer->Release();
 	if (FAILED(hr))
 	{
 		EngineLog::LogErrorMessageBox("CreateRenderTargetView Failed");
@@ -342,4 +344,64 @@ bool Engine::Core::EngineCoreDirectX::CreateShader(string srcFile, ID3DX11Effect
 		return false;
 	}
 	return true;
+}
+
+bool Engine::Core::EngineCoreDirectX::CreateInputLayout(const D3D11_INPUT_ELEMENT_DESC * vertexDesc, const UINT vertexDescCount, D3DX11_PASS_DESC * passDesc, ID3D11InputLayout ** layout)
+{
+	HRESULT hr = mD3dDevice->CreateInputLayout(vertexDesc, vertexDescCount, passDesc->pIAInputSignature, 
+		passDesc->IAInputSignatureSize, layout);
+	if (FAILED(hr))
+	{
+		EngineLog::LogErrorMessageBox("CreateInputLayout Failed");
+		return false;
+	}
+	return true;
+}
+
+void Engine::Core::EngineCoreDirectX::BeginDraw()
+{
+	mD3dImmediateContext->ClearRenderTargetView(mRenderTargetView, Black);
+	mD3dImmediateContext->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+}
+
+void Engine::Core::EngineCoreDirectX::DrawObject(EngineObjectDirectX * object, EngineCameraDirectX * camera)
+{
+	UINT stride = sizeof(EngineVertexDirectX);
+	UINT offset = 0;
+	mD3dImmediateContext->IASetInputLayout(object->mShader->mInputLayout);
+	mD3dImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	mD3dImmediateContext->IASetVertexBuffers(0, 1, &object->mVertexBuffer, &stride, &offset);
+	mD3dImmediateContext->IASetIndexBuffer(object->mIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+
+	D3D11_BUFFER_DESC a;
+	object->mVertexBuffer->GetDesc(&a);
+	D3D11_BUFFER_DESC b;
+	object->mIndexBuffer->GetDesc(&b);
+
+	ID3DX11EffectMatrixVariable *shaderMVP = object->mShader->mMVPMatrix;
+	if (shaderMVP && shaderMVP->IsValid())
+	{
+		XMMATRIX world = XMLoadFloat4x4(&object->mWorldMatrix);
+		XMMATRIX view = XMLoadFloat4x4(&camera->mViewMatrix);
+		XMMATRIX proj = XMLoadFloat4x4(&camera->mProjMatrix);
+		XMMATRIX worldViewProj = world * view * proj;
+		shaderMVP->SetMatrix(reinterpret_cast<float*>(&worldViewProj));
+	}
+
+	ID3DX11EffectTechnique *shaderTech = object->mShader->mMainTech;
+	if (shaderTech && shaderTech->IsValid())
+	{
+		D3DX11_TECHNIQUE_DESC techDesc;
+		shaderTech->GetDesc(&techDesc);
+		for (UINT i = 0; i < techDesc.Passes; ++i)
+		{
+			shaderTech->GetPassByIndex(i)->Apply(0, mD3dImmediateContext);
+			mD3dImmediateContext->DrawIndexed(object->mIndexCount, 0, 0);
+		}
+	}
+}
+
+void Engine::Core::EngineCoreDirectX::EndDraw()
+{
+	mSwapChain->Present(0, 0);
 }
