@@ -373,11 +373,6 @@ void Engine::Core::EngineCoreDirectX::DrawObject(EngineObjectDirectX * object, E
 	mD3dImmediateContext->IASetVertexBuffers(0, 1, &object->mVertexBuffer, &stride, &offset);
 	mD3dImmediateContext->IASetIndexBuffer(object->mIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
 
-	D3D11_BUFFER_DESC a;
-	object->mVertexBuffer->GetDesc(&a);
-	D3D11_BUFFER_DESC b;
-	object->mIndexBuffer->GetDesc(&b);
-
 	ID3DX11EffectMatrixVariable *shaderMVP = object->mShader->mMVPMatrix;
 	if (shaderMVP && shaderMVP->IsValid())
 	{
