@@ -25,7 +25,7 @@ int EngineBoxApp::Run(HINSTANCE hInstance)
 	}
 
 	EngineObjectDirectX *boxObject;
-	if (!manager.CreateBoxObject(&boxObject))
+	if (!manager.CreateCylinderObject(2, 2, 2, &boxObject))
 	{
 		return -1;
 	}

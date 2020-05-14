@@ -22,7 +22,7 @@ bool Engine::Core::EngineSceneManagerDirectX::CreateBoxObject(EngineObjectDirect
 	*object = new EngineObjectDirectX;
 
 	(*object)->mVertexCount = 8;
-	(*object)->mVertices.push_back({ XMFLOAT3(-1.0f, -1.0f, -1.0f), (const float*)&White }),
+	(*object)->mVertices.push_back({ XMFLOAT3(-1.0f, -1.0f, -1.0f), (const float*)&White });
 	(*object)->mVertices.push_back({ XMFLOAT3(-1.0f, +1.0f, -1.0f), (const float*)&Black });
 	(*object)->mVertices.push_back({ XMFLOAT3(+1.0f, +1.0f, -1.0f), (const float*)&Red });
 	(*object)->mVertices.push_back({ XMFLOAT3(+1.0f, -1.0f, -1.0f), (const float*)&Green });
@@ -71,7 +71,87 @@ bool Engine::Core::EngineSceneManagerDirectX::CreateBoxObject(EngineObjectDirect
 		(*object)->mIndices.push_back(indices[i]);
 	}
 
-	res = gManagerDirectX->CreateIndexBuffer(indices, sizeof(UINT) * (*object)->mIndexCount,
+	res = gManagerDirectX->CreateIndexBuffer(&(*object)->mIndices[0], sizeof(UINT) * (*object)->mIndexCount,
+		D3D11_USAGE_IMMUTABLE, &(*object)->mIndexBuffer);
+
+	if (!res)
+	{
+		return false;
+	}
+
+	XMMATRIX i = XMMatrixIdentity();
+	XMStoreFloat4x4(&(*object)->mWorldMatrix, i);
+
+	mSceneObjects.push_back(*object);
+	return true;
+}
+
+bool Engine::Core::EngineSceneManagerDirectX::CreateCylinderObject(float topRadius, float bottomRadius, float height, EngineObjectDirectX ** object)
+{
+	UINT sliceCount = 3;
+	UINT stackCount = 1;
+	float halfHeight = height / 2;
+	float heightPerStack = height / stackCount;
+	float radiusPerStack = (topRadius - bottomRadius) / stackCount;
+	float thetaPerSlice = XM_2PI / sliceCount;
+
+	*object = new EngineObjectDirectX;
+	(*object)->mVertexCount = (sliceCount + 1) * (stackCount + 1) + 2;
+	
+	for (UINT i = 0; i <= stackCount; i++)
+	{
+		float y = -halfHeight + i * heightPerStack;
+		float r = bottomRadius + i * radiusPerStack;
+
+		for (UINT j = 0; j <= sliceCount; j++)
+		{
+			float theta = j * thetaPerSlice;
+			float x = r * cos(theta);
+			float z = r * sin(theta);
+			(*object)->mVertices.push_back({ XMFLOAT3(x, y, z), (const float*)&Red });
+		}
+	}
+	(*object)->mVertices.push_back({ XMFLOAT3(0, -halfHeight, 0), (const float*)&Red });
+	(*object)->mVertices.push_back({ XMFLOAT3(0, halfHeight, 0), (const float*)&Red });
+
+	bool res = gManagerDirectX->CreateVertexBuffer(&(*object)->mVertices[0],
+		sizeof(EngineVertexDirectX) * (*object)->mVertexCount, D3D11_USAGE_IMMUTABLE, 0, &(*object)->mVertexBuffer);
+	
+	if (!res)
+	{
+		return false;
+	}
+
+	(*object)->mIndexCount = sliceCount * 3 * 2 + sliceCount * 4 * stackCount;
+	for (UINT i = 0; i < stackCount; i++)
+	{
+		for (UINT j = 0; j < sliceCount; j++)
+		{
+			(*object)->mIndices.push_back(i * stackCount + j);
+			(*object)->mIndices.push_back((i + 1) * stackCount + j);
+			(*object)->mIndices.push_back(i * stackCount + j + 1);
+
+			(*object)->mIndices.push_back((i + 1) * stackCount + j);
+			(*object)->mIndices.push_back((i + 1) * stackCount + j + 1);
+			(*object)->mIndices.push_back(i * stackCount + j + 1);
+		}
+	}
+
+	for (UINT i = 0; i < sliceCount; i++)
+	{
+		(*object)->mIndices.push_back((sliceCount + 1) * (stackCount + 1));
+		(*object)->mIndices.push_back(i);
+		(*object)->mIndices.push_back(i + 1);
+	}
+
+	for (UINT i = 0; i < sliceCount; i++)
+	{
+		(*object)->mIndices.push_back((sliceCount + 1) * (stackCount + 1) + 1);
+		(*object)->mIndices.push_back((sliceCount + 1) * stackCount + i);
+		(*object)->mIndices.push_back((sliceCount + 1) * stackCount + i + 1);
+	}
+
+	res = gManagerDirectX->CreateIndexBuffer(&(*object)->mIndices[0], sizeof(UINT) * (*object)->mIndexCount,
 		D3D11_USAGE_IMMUTABLE, &(*object)->mIndexBuffer);
 
 	if (!res)

@@ -96,7 +96,7 @@ void Engine::EngineManagerDirectX::EngineDraw()
 	if (mCoreInst)
 	{
 		mCoreInst->BeginDraw();
-		for (int i = 0; i < mSceneMgrInst.mSceneObjects.size(); ++i)
+		for (UINT i = 0; i < mSceneMgrInst.mSceneObjects.size(); ++i)
 		{
 			EngineObjectDirectX *object = mSceneMgrInst.mSceneObjects[i];
 			mCoreInst->DrawObject(object, &mCameraInst);
@@ -199,6 +199,11 @@ bool Engine::EngineManagerDirectX::CreateIndexBuffer(void *indices, UINT byteWid
 bool Engine::EngineManagerDirectX::CreateBoxObject(EngineObjectDirectX **object)
 {
 	return mSceneMgrInst.CreateBoxObject(object);
+}
+
+bool Engine::EngineManagerDirectX::CreateCylinderObject(float topRadius, float bottomRadius, float height, EngineObjectDirectX ** object)
+{
+	return mSceneMgrInst.CreateCylinderObject(topRadius, bottomRadius, height, object);
 }
 
 bool Engine::EngineManagerDirectX::CreateShader(string srcFile, EngineShaderDirectX ** shader)

@@ -21,6 +21,7 @@ using DirectX::XMMatrixPerspectiveFovLH;
 using DirectX::XMConvertToRadians;
 using DirectX::XM_PI;
 using DirectX::XM_PIDIV4;
+using DirectX::XM_2PI;
 
 namespace Engine
 {
