@@ -1,7 +1,41 @@
 #include <windows.h>
 #include <d3d12.h>
+#include <dxgi1_4.h>
+#include <string>
+#include <comdef.h>
+#include <wrl.h>
 
 #pragma comment(lib, "d3d12.lib")
+#pragma comment(lib, "dxgi.lib")
+
+#ifndef ThrowIfFailed
+#define ThrowIfFailed(x)                                              \
+{                                                                     \
+    HRESULT hr__ = (x);                                               \
+	_com_error err(hr__);												  \
+	LPCTSTR errMsg = err.ErrorMessage();							  \
+    if(FAILED(hr__)) { throw DxException(hr__, errMsg, __FILE__, __LINE__); } \
+}
+#endif
+
+class DxException
+{
+public:
+	DxException() = default;
+	DxException(HRESULT hr, const std::string& functionName, const std::string& filename, int lineNumber) :
+		ErrorCode(hr),
+		FunctionName(functionName),
+		Filename(filename),
+		LineNumber(lineNumber)
+	{
+
+	}
+
+	HRESULT ErrorCode = S_OK;
+	std::string FunctionName;
+	std::string Filename;
+	int LineNumber = -1;
+};
 
 LRESULT CALLBACK
 MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -73,8 +107,20 @@ bool InitMainWindow(HINSTANCE hInstance)
 
 bool InitDevice()
 {
-	ID3D12Device *device = nullptr;
+	Microsoft::WRL::ComPtr<ID3D12Device> device = nullptr;
+	Microsoft::WRL::ComPtr<IDXGIFactory4> dxgiFactory = nullptr;
+	Microsoft::WRL::ComPtr<ID3D12CommandQueue> commandQueue = nullptr;
+
 	ThrowIfFailed(D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&device)));
+	ThrowIfFailed(CreateDXGIFactory1(IID_PPV_ARGS(&dxgiFactory)));
+
+	D3D12_COMMAND_QUEUE_DESC queueDesc;
+	queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
+	queueDesc.Priority = D3D12_COMMAND_QUEUE_PRIORITY_NORMAL;
+	queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
+	queueDesc.NodeMask = 0;
+
+	ThrowIfFailed(device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&commandQueue)));
 
 	return true;
 }
@@ -83,6 +129,15 @@ bool InitDevice()
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance,
 	PSTR cmdLine, int showCmd)
 {
-	InitMainWindow(hInstance);
+	if (!InitMainWindow(hInstance))
+	{
+		return 0;
+	}
+
+	if (!InitDevice())
+	{
+		return 0;
+	}
+
 	return Run();
 }
