@@ -31,11 +31,22 @@ public:
 
 	}
 
+	std::string ToString()const
+	{
+		// Get the string description of the error code.
+		_com_error err(ErrorCode);
+		std::string msg = err.ErrorMessage();
+
+		return FunctionName + " failed in " + Filename + "; line " + std::to_string(LineNumber) + "; error: " + msg;
+	}
+
 	HRESULT ErrorCode = S_OK;
 	std::string FunctionName;
 	std::string Filename;
 	int LineNumber = -1;
 };
+
+HWND mhMainWnd;
 
 LRESULT CALLBACK
 MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -91,7 +102,7 @@ bool InitMainWindow(HINSTANCE hInstance)
 	int width = R.right - R.left;
 	int height = R.bottom - R.top;
 
-	HWND mhMainWnd = CreateWindow("MainWnd", "InitDX12",
+	mhMainWnd = CreateWindow("MainWnd", "InitDX12",
 		WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, width, height, 0, 0, hInstance, 0);
 	if (!mhMainWnd)
 	{
@@ -110,6 +121,9 @@ bool InitDevice()
 	Microsoft::WRL::ComPtr<ID3D12Device> device = nullptr;
 	Microsoft::WRL::ComPtr<IDXGIFactory4> dxgiFactory = nullptr;
 	Microsoft::WRL::ComPtr<ID3D12CommandQueue> commandQueue = nullptr;
+	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> commandAlloc = nullptr;
+	Microsoft::WRL::ComPtr<ID3D12CommandList> commandList = nullptr;
+	Microsoft::WRL::ComPtr<IDXGISwapChain> dxgiSwapChain = nullptr;
 
 	ThrowIfFailed(D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&device)));
 	ThrowIfFailed(CreateDXGIFactory1(IID_PPV_ARGS(&dxgiFactory)));
@@ -121,6 +135,36 @@ bool InitDevice()
 	queueDesc.NodeMask = 0;
 
 	ThrowIfFailed(device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&commandQueue)));
+	ThrowIfFailed(device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&commandAlloc)));
+	ThrowIfFailed(device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, commandAlloc.Get(), nullptr, IID_PPV_ARGS(&commandList)));
+
+	DXGI_SWAP_CHAIN_DESC chainDesc;
+	chainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	chainDesc.BufferDesc.Height = 600;
+	chainDesc.BufferDesc.Width = 800;
+	chainDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
+	chainDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+	chainDesc.BufferDesc.RefreshRate.Denominator = 1;
+	chainDesc.BufferDesc.RefreshRate.Numerator = 60;
+
+	D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS qualityLevels;
+	qualityLevels.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	qualityLevels.SampleCount = 4;
+	qualityLevels.NumQualityLevels = 0;
+	qualityLevels.Flags = D3D12_MULTISAMPLE_QUALITY_LEVELS_FLAG_NONE;
+	ThrowIfFailed(device->CheckFeatureSupport(D3D12_FEATURE_MULTISAMPLE_QUALITY_LEVELS, &qualityLevels, sizeof(qualityLevels)));
+
+	chainDesc.SampleDesc.Count = 4;
+	chainDesc.SampleDesc.Quality = qualityLevels.NumQualityLevels - 1;
+
+	chainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+	chainDesc.BufferCount = 2;
+	chainDesc.OutputWindow = mhMainWnd;
+	chainDesc.Windowed = true;
+	chainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+	chainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+
+	ThrowIfFailed(dxgiFactory->CreateSwapChain(commandQueue.Get(), &chainDesc, &dxgiSwapChain));
 
 	return true;
 }
@@ -129,15 +173,23 @@ bool InitDevice()
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance,
 	PSTR cmdLine, int showCmd)
 {
-	if (!InitMainWindow(hInstance))
+	try
 	{
+		if (!InitMainWindow(hInstance))
+		{
+			return 0;
+		}
+
+		if (!InitDevice())
+		{
+			return 0;
+		}
+
+		return Run();
+	}
+	catch (DxException& e)
+	{
+		MessageBox(nullptr, e.ToString().c_str(), "HR Failed", MB_OK);
 		return 0;
 	}
-
-	if (!InitDevice())
-	{
-		return 0;
-	}
-
-	return Run();
 }
