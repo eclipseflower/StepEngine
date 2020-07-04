@@ -5,6 +5,7 @@
 #include <comdef.h>
 #include <wrl.h>
 
+#pragma comment(lib, "d3dcompiler.lib")
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
 
@@ -118,12 +119,17 @@ bool InitMainWindow(HINSTANCE hInstance)
 
 bool InitDevice()
 {
+	Microsoft::WRL::ComPtr<ID3D12Debug> debugController = nullptr;
 	Microsoft::WRL::ComPtr<ID3D12Device> device = nullptr;
 	Microsoft::WRL::ComPtr<IDXGIFactory4> dxgiFactory = nullptr;
 	Microsoft::WRL::ComPtr<ID3D12CommandQueue> commandQueue = nullptr;
 	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> commandAlloc = nullptr;
 	Microsoft::WRL::ComPtr<ID3D12CommandList> commandList = nullptr;
 	Microsoft::WRL::ComPtr<IDXGISwapChain> dxgiSwapChain = nullptr;
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvHeap = nullptr;
+
+	ThrowIfFailed(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)));
+	debugController->EnableDebugLayer();
 
 	ThrowIfFailed(D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&device)));
 	ThrowIfFailed(CreateDXGIFactory1(IID_PPV_ARGS(&dxgiFactory)));
@@ -149,13 +155,20 @@ bool InitDevice()
 
 	D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS qualityLevels;
 	qualityLevels.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	qualityLevels.SampleCount = 4;
+	//https://stackoverflow.com/questions/40110699/creating-a-swap-chain-with-msaa-fails
+	/*
+		Direct3D 12 don't support creating MSAA swap chains
+		--attempts to create a swap chain with SampleDesc.Count > 1 will fail. 
+		Instead, you create your own MSAA render target and 
+		explicitly resolve to the DXGI back-buffer for presentation as shown here.
+	*/
+	qualityLevels.SampleCount = 1;
 	qualityLevels.NumQualityLevels = 0;
 	qualityLevels.Flags = D3D12_MULTISAMPLE_QUALITY_LEVELS_FLAG_NONE;
 	ThrowIfFailed(device->CheckFeatureSupport(D3D12_FEATURE_MULTISAMPLE_QUALITY_LEVELS, &qualityLevels, sizeof(qualityLevels)));
 
 	chainDesc.SampleDesc.Count = 4;
-	chainDesc.SampleDesc.Quality = qualityLevels.NumQualityLevels - 1;
+	chainDesc.SampleDesc.Quality = 0;
 
 	chainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	chainDesc.BufferCount = 2;
@@ -165,6 +178,12 @@ bool InitDevice()
 	chainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
 	ThrowIfFailed(dxgiFactory->CreateSwapChain(commandQueue.Get(), &chainDesc, &dxgiSwapChain));
+
+	UINT rtvIncSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+	UINT dsvIncSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
+	D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc;
+
+	device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&rtvHeap));
 
 	return true;
 }
