@@ -47,7 +47,14 @@ public:
 	int LineNumber = -1;
 };
 
-HWND mhMainWnd;
+HWND ghMainWnd;
+
+Microsoft::WRL::ComPtr<ID3D12Fence> gFence = nullptr;
+Microsoft::WRL::ComPtr<ID3D12CommandQueue> gCommandQueue = nullptr;
+Microsoft::WRL::ComPtr<ID3D12CommandList> gCommandList = nullptr;
+Microsoft::WRL::ComPtr<IDXGISwapChain> gSwapChain = nullptr;
+
+UINT fenceCount = 0;
 
 LRESULT CALLBACK
 MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -103,16 +110,16 @@ bool InitMainWindow(HINSTANCE hInstance)
 	int width = R.right - R.left;
 	int height = R.bottom - R.top;
 
-	mhMainWnd = CreateWindow("MainWnd", "InitDX12",
+	ghMainWnd = CreateWindow("MainWnd", "InitDX12",
 		WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, width, height, 0, 0, hInstance, 0);
-	if (!mhMainWnd)
+	if (!ghMainWnd)
 	{
 		MessageBox(0, "CreateWindow Failed.", 0, 0);
 		return false;
 	}
 
-	ShowWindow(mhMainWnd, SW_SHOW);
-	UpdateWindow(mhMainWnd);
+	ShowWindow(ghMainWnd, SW_SHOW);
+	UpdateWindow(ghMainWnd);
 
 	return true;
 }
@@ -122,11 +129,9 @@ bool InitDevice()
 	Microsoft::WRL::ComPtr<ID3D12Debug> debugController = nullptr;
 	Microsoft::WRL::ComPtr<ID3D12Device> device = nullptr;
 	Microsoft::WRL::ComPtr<IDXGIFactory4> dxgiFactory = nullptr;
-	Microsoft::WRL::ComPtr<ID3D12CommandQueue> commandQueue = nullptr;
 	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> commandAlloc = nullptr;
-	Microsoft::WRL::ComPtr<ID3D12CommandList> commandList = nullptr;
-	Microsoft::WRL::ComPtr<IDXGISwapChain> dxgiSwapChain = nullptr;
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvHeap = nullptr;
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvHeap = nullptr;
 
 	ThrowIfFailed(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)));
 	debugController->EnableDebugLayer();
@@ -134,15 +139,17 @@ bool InitDevice()
 	ThrowIfFailed(D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&device)));
 	ThrowIfFailed(CreateDXGIFactory1(IID_PPV_ARGS(&dxgiFactory)));
 
+	ThrowIfFailed(device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&gFence)));
+
 	D3D12_COMMAND_QUEUE_DESC queueDesc;
 	queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
 	queueDesc.Priority = D3D12_COMMAND_QUEUE_PRIORITY_NORMAL;
 	queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
 	queueDesc.NodeMask = 0;
 
-	ThrowIfFailed(device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&commandQueue)));
+	ThrowIfFailed(device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&gCommandQueue)));
 	ThrowIfFailed(device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&commandAlloc)));
-	ThrowIfFailed(device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, commandAlloc.Get(), nullptr, IID_PPV_ARGS(&commandList)));
+	ThrowIfFailed(device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, commandAlloc.Get(), nullptr, IID_PPV_ARGS(&gCommandList)));
 
 	DXGI_SWAP_CHAIN_DESC chainDesc;
 	chainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -167,27 +174,55 @@ bool InitDevice()
 	qualityLevels.Flags = D3D12_MULTISAMPLE_QUALITY_LEVELS_FLAG_NONE;
 	ThrowIfFailed(device->CheckFeatureSupport(D3D12_FEATURE_MULTISAMPLE_QUALITY_LEVELS, &qualityLevels, sizeof(qualityLevels)));
 
-	chainDesc.SampleDesc.Count = 4;
+	chainDesc.SampleDesc.Count = 1;
 	chainDesc.SampleDesc.Quality = 0;
 
 	chainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	chainDesc.BufferCount = 2;
-	chainDesc.OutputWindow = mhMainWnd;
+	chainDesc.OutputWindow = ghMainWnd;
 	chainDesc.Windowed = true;
 	chainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 	chainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
-	ThrowIfFailed(dxgiFactory->CreateSwapChain(commandQueue.Get(), &chainDesc, &dxgiSwapChain));
+	ThrowIfFailed(dxgiFactory->CreateSwapChain(gCommandQueue.Get(), &chainDesc, &gSwapChain));
 
 	UINT rtvIncSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 	UINT dsvIncSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
-	D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc;
 
-	device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&rtvHeap));
+	D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc;
+	rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
+	rtvHeapDesc.NumDescriptors = 2;
+	rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+	rtvHeapDesc.NodeMask = 0;
+	ThrowIfFailed(device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&rtvHeap)));
+
+	D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc;
+	dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
+	dsvHeapDesc.NumDescriptors = 1;
+	dsvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+	dsvHeapDesc.NodeMask = 0;
+	ThrowIfFailed(device->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(&dsvHeap)));
+
+	OnResize();
 
 	return true;
 }
 
+void OnResize()
+{
+	fenceCount++;
+	ThrowIfFailed(gCommandQueue->Signal(gFence.Get(), fenceCount));
+	if (gFence->GetCompletedValue() < fenceCount)
+	{
+		HANDLE handle = CreateEventEx(nullptr, false, false, EVENT_ALL_ACCESS);
+		ThrowIfFailed(gFence->SetEventOnCompletion(fenceCount, handle));
+
+		WaitForSingleObject(handle, INFINITE);
+		CloseHandle(handle);
+	}
+
+	ThrowIfFailed(gSwapChain->ResizeBuffers(2, 800, 600, DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH));
+}
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance,
 	PSTR cmdLine, int showCmd)
