@@ -4,6 +4,7 @@
 #include <string>
 #include <comdef.h>
 #include <wrl.h>
+#include "d3dx12.h"
 
 #pragma comment(lib, "d3dcompiler.lib")
 #pragma comment(lib, "d3d12.lib")
@@ -51,10 +52,18 @@ HWND ghMainWnd;
 
 Microsoft::WRL::ComPtr<ID3D12Fence> gFence = nullptr;
 Microsoft::WRL::ComPtr<ID3D12CommandQueue> gCommandQueue = nullptr;
-Microsoft::WRL::ComPtr<ID3D12CommandList> gCommandList = nullptr;
+Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> gCommandList = nullptr;
 Microsoft::WRL::ComPtr<IDXGISwapChain> gSwapChain = nullptr;
+Microsoft::WRL::ComPtr<ID3D12Resource> gBackBuffer[2];
+Microsoft::WRL::ComPtr<ID3D12Device> gDevice = nullptr;
+Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> gRtvHeap = nullptr;
+Microsoft::WRL::ComPtr<ID3D12Resource> gDepthStencilBuffer = nullptr;
+Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> gDsvHeap = nullptr;
 
+UINT gRtvIncSize = 0;
 UINT fenceCount = 0;
+
+void OnResize();
 
 LRESULT CALLBACK
 MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -127,19 +136,16 @@ bool InitMainWindow(HINSTANCE hInstance)
 bool InitDevice()
 {
 	Microsoft::WRL::ComPtr<ID3D12Debug> debugController = nullptr;
-	Microsoft::WRL::ComPtr<ID3D12Device> device = nullptr;
 	Microsoft::WRL::ComPtr<IDXGIFactory4> dxgiFactory = nullptr;
 	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> commandAlloc = nullptr;
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvHeap = nullptr;
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvHeap = nullptr;
 
 	ThrowIfFailed(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)));
 	debugController->EnableDebugLayer();
 
-	ThrowIfFailed(D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&device)));
+	ThrowIfFailed(D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&gDevice)));
 	ThrowIfFailed(CreateDXGIFactory1(IID_PPV_ARGS(&dxgiFactory)));
 
-	ThrowIfFailed(device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&gFence)));
+	ThrowIfFailed(gDevice->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&gFence)));
 
 	D3D12_COMMAND_QUEUE_DESC queueDesc;
 	queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
@@ -147,9 +153,9 @@ bool InitDevice()
 	queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
 	queueDesc.NodeMask = 0;
 
-	ThrowIfFailed(device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&gCommandQueue)));
-	ThrowIfFailed(device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&commandAlloc)));
-	ThrowIfFailed(device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, commandAlloc.Get(), nullptr, IID_PPV_ARGS(&gCommandList)));
+	ThrowIfFailed(gDevice->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&gCommandQueue)));
+	ThrowIfFailed(gDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&commandAlloc)));
+	ThrowIfFailed(gDevice->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, commandAlloc.Get(), nullptr, IID_PPV_ARGS(&gCommandList)));
 
 	DXGI_SWAP_CHAIN_DESC chainDesc;
 	chainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -172,7 +178,7 @@ bool InitDevice()
 	qualityLevels.SampleCount = 1;
 	qualityLevels.NumQualityLevels = 0;
 	qualityLevels.Flags = D3D12_MULTISAMPLE_QUALITY_LEVELS_FLAG_NONE;
-	ThrowIfFailed(device->CheckFeatureSupport(D3D12_FEATURE_MULTISAMPLE_QUALITY_LEVELS, &qualityLevels, sizeof(qualityLevels)));
+	ThrowIfFailed(gDevice->CheckFeatureSupport(D3D12_FEATURE_MULTISAMPLE_QUALITY_LEVELS, &qualityLevels, sizeof(qualityLevels)));
 
 	chainDesc.SampleDesc.Count = 1;
 	chainDesc.SampleDesc.Quality = 0;
@@ -186,29 +192,29 @@ bool InitDevice()
 
 	ThrowIfFailed(dxgiFactory->CreateSwapChain(gCommandQueue.Get(), &chainDesc, &gSwapChain));
 
-	UINT rtvIncSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-	UINT dsvIncSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
+	gRtvIncSize = gDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+	UINT dsvIncSize = gDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
 
 	D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc;
 	rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
 	rtvHeapDesc.NumDescriptors = 2;
 	rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 	rtvHeapDesc.NodeMask = 0;
-	ThrowIfFailed(device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&rtvHeap)));
+	ThrowIfFailed(gDevice->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&gRtvHeap)));
 
 	D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc;
 	dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
 	dsvHeapDesc.NumDescriptors = 1;
 	dsvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 	dsvHeapDesc.NodeMask = 0;
-	ThrowIfFailed(device->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(&dsvHeap)));
+	ThrowIfFailed(gDevice->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(&gDsvHeap)));
 
 	OnResize();
 
 	return true;
 }
 
-void OnResize()
+void FlushCommandQueue()
 {
 	fenceCount++;
 	ThrowIfFailed(gCommandQueue->Signal(gFence.Get(), fenceCount));
@@ -220,8 +226,52 @@ void OnResize()
 		WaitForSingleObject(handle, INFINITE);
 		CloseHandle(handle);
 	}
+}
+
+void OnResize()
+{
+	FlushCommandQueue();
 
 	ThrowIfFailed(gSwapChain->ResizeBuffers(2, 800, 600, DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH));
+	CD3DX12_CPU_DESCRIPTOR_HANDLE handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(gRtvHeap->GetCPUDescriptorHandleForHeapStart());
+	for (int i = 0; i < 2; i++)
+	{
+		ThrowIfFailed(gSwapChain->GetBuffer(i, IID_PPV_ARGS(&gBackBuffer[i])));
+		gDevice->CreateRenderTargetView(gBackBuffer[i].Get(), nullptr, handle);
+		handle.Offset(1, gRtvIncSize);
+	}
+
+	D3D12_RESOURCE_DESC desc;
+	desc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+	desc.Alignment = 0;
+	desc.Width = 800;
+	desc.Height = 600;
+	desc.DepthOrArraySize = 1;
+	desc.MipLevels = 1;
+	desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	desc.SampleDesc.Count = 1;
+	desc.SampleDesc.Quality = 0;
+	desc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+	desc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
+
+	D3D12_CLEAR_VALUE clearValue;
+	clearValue.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	clearValue.DepthStencil.Depth = 1.0f;
+	clearValue.DepthStencil.Stencil = 0;
+	ThrowIfFailed(gDevice->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT), D3D12_HEAP_FLAG_NONE, &desc, D3D12_RESOURCE_STATE_COMMON, &clearValue, IID_PPV_ARGS(&gDepthStencilBuffer)));
+	
+	D3D12_DEPTH_STENCIL_VIEW_DESC viewDesc;
+	viewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	viewDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+	viewDesc.Flags = D3D12_DSV_FLAG_NONE;
+	viewDesc.Texture2D.MipSlice = 0;
+
+	handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(gDsvHeap->GetCPUDescriptorHandleForHeapStart());
+	gDevice->CreateDepthStencilView(gDepthStencilBuffer.Get(), &viewDesc, handle);
+
+	gCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(gDepthStencilBuffer.Get(), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_DEPTH_WRITE));
+	gCommandList->Close();
+	gCommandQueue->ExecuteCommandLists(1, );
 }
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance,
