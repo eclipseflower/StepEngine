@@ -53,6 +53,7 @@ HWND ghMainWnd;
 Microsoft::WRL::ComPtr<ID3D12Fence> gFence = nullptr;
 Microsoft::WRL::ComPtr<ID3D12CommandQueue> gCommandQueue = nullptr;
 Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> gCommandList = nullptr;
+Microsoft::WRL::ComPtr<ID3D12CommandAllocator> gCommandAlloc = nullptr;
 Microsoft::WRL::ComPtr<IDXGISwapChain> gSwapChain = nullptr;
 Microsoft::WRL::ComPtr<ID3D12Resource> gBackBuffer[2];
 Microsoft::WRL::ComPtr<ID3D12Device> gDevice = nullptr;
@@ -62,6 +63,9 @@ Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> gDsvHeap = nullptr;
 
 UINT gRtvIncSize = 0;
 UINT fenceCount = 0;
+
+D3D12_VIEWPORT gViewport;
+D3D12_RECT gScissorRect;
 
 void OnResize();
 
@@ -137,7 +141,6 @@ bool InitDevice()
 {
 	Microsoft::WRL::ComPtr<ID3D12Debug> debugController = nullptr;
 	Microsoft::WRL::ComPtr<IDXGIFactory4> dxgiFactory = nullptr;
-	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> commandAlloc = nullptr;
 
 	ThrowIfFailed(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)));
 	debugController->EnableDebugLayer();
@@ -154,8 +157,9 @@ bool InitDevice()
 	queueDesc.NodeMask = 0;
 
 	ThrowIfFailed(gDevice->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&gCommandQueue)));
-	ThrowIfFailed(gDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&commandAlloc)));
-	ThrowIfFailed(gDevice->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, commandAlloc.Get(), nullptr, IID_PPV_ARGS(&gCommandList)));
+	ThrowIfFailed(gDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&gCommandAlloc)));
+	ThrowIfFailed(gDevice->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, gCommandAlloc.Get(), nullptr, IID_PPV_ARGS(&gCommandList)));
+	gCommandList->Close();
 
 	DXGI_SWAP_CHAIN_DESC chainDesc;
 	chainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -175,6 +179,7 @@ bool InitDevice()
 		Instead, you create your own MSAA render target and 
 		explicitly resolve to the DXGI back-buffer for presentation as shown here.
 	*/
+
 	qualityLevels.SampleCount = 1;
 	qualityLevels.NumQualityLevels = 0;
 	qualityLevels.Flags = D3D12_MULTISAMPLE_QUALITY_LEVELS_FLAG_NONE;
@@ -230,6 +235,10 @@ void FlushCommandQueue()
 
 void OnResize()
 {
+	assert(gDevice);
+	assert(gSwapChain);
+	assert(gCommandAlloc);
+
 	FlushCommandQueue();
 
 	ThrowIfFailed(gSwapChain->ResizeBuffers(2, 800, 600, DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH));
@@ -268,10 +277,29 @@ void OnResize()
 
 	handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(gDsvHeap->GetCPUDescriptorHandleForHeapStart());
 	gDevice->CreateDepthStencilView(gDepthStencilBuffer.Get(), &viewDesc, handle);
-
+	
+	ThrowIfFailed(gCommandAlloc->Reset());
+	ThrowIfFailed(gCommandList->Reset(gCommandAlloc.Get(), nullptr));
+	
 	gCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(gDepthStencilBuffer.Get(), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_DEPTH_WRITE));
-	gCommandList->Close();
-	gCommandQueue->ExecuteCommandLists(1, );
+	ThrowIfFailed(gCommandList->Close());
+
+	ID3D12CommandList *cmdList[] = { gCommandList.Get() };
+	gCommandQueue->ExecuteCommandLists(_countof(cmdList), cmdList);
+
+	FlushCommandQueue();
+
+	gViewport.TopLeftX = 0;
+	gViewport.TopLeftY = 0;
+	gViewport.Width = 800;
+	gViewport.Height = 600;
+	gViewport.MinDepth = 0.0f;
+	gViewport.MaxDepth = 1.0f;
+
+	gScissorRect.left = 0;
+	gScissorRect.right = 800;
+	gScissorRect.top = 0;
+	gScissorRect.bottom = 600;
 }
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance,
