@@ -68,6 +68,7 @@ D3D12_VIEWPORT gViewport;
 D3D12_RECT gScissorRect;
 
 void OnResize();
+void Draw();
 
 LRESULT CALLBACK
 MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -90,7 +91,7 @@ int Run()
 		// Otherwise, do animation/game stuff.
 		else
 		{
-
+			Draw();
 		}
 	}
 
@@ -300,6 +301,44 @@ void OnResize()
 	gScissorRect.right = 800;
 	gScissorRect.top = 0;
 	gScissorRect.bottom = 600;
+}
+
+void Draw()
+{
+	ThrowIfFailed(gCommandAlloc->Reset());
+	ThrowIfFailed(gCommandList->Reset(gCommandAlloc.Get(), nullptr));
+
+	// https://docs.microsoft.com/en-us/windows/win32/direct3d12/using-resource-barriers-to-synchronize-resource-states-in-direct3d-12#initial-states-for-resources
+	/*
+		Swap chain back buffers automatically start out in the D3D12_RESOURCE_STATE_COMMON state.
+		Before a back buffer is presented, it must be in the D3D12_RESOURCE_STATE_COMMON state. 
+		Note, the resource state D3D12_RESOURCE_STATE_PRESENT is a synonym for D3D12_RESOURCE_STATE_COMMON, 
+		and they both have a value of 0. 
+
+		If IDXGISwapChain::Present (or IDXGISwapChain1::Present1) is called on a resource that 
+		is not currently in this state, a debug layer warning is emitted.
+
+		The resource is used as a render target. 
+		A subresource must be in this state when it is rendered to or when it is cleared with 
+		ID3D12GraphicsCommandList::ClearRenderTargetView.
+	*/
+	gCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(gBackBuffer[0].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
+	gCommandList->RSSetScissorRects(1, &gScissorRect);
+	gCommandList->RSSetViewports(1, &gViewport);
+	CD3DX12_CPU_DESCRIPTOR_HANDLE dsv = CD3DX12_CPU_DESCRIPTOR_HANDLE(gDsvHeap->GetCPUDescriptorHandleForHeapStart());
+	gCommandList->ClearDepthStencilView(dsv, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
+	CD3DX12_CPU_DESCRIPTOR_HANDLE rtv = CD3DX12_CPU_DESCRIPTOR_HANDLE(gRtvHeap->GetCPUDescriptorHandleForHeapStart());
+	float color[4] = { 1, 0, 0, 1 };
+	gCommandList->ClearRenderTargetView(rtv, color, 0, nullptr);
+	gCommandList->OMSetRenderTargets(1, &rtv, true, &dsv);
+	gCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(gBackBuffer[0].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
+	ThrowIfFailed(gCommandList->Close());
+
+	ID3D12CommandList *cmdList[] = { gCommandList.Get() };
+	gCommandQueue->ExecuteCommandLists(_countof(cmdList), cmdList);
+
+	ThrowIfFailed(gSwapChain->Present(0, 0));
+	FlushCommandQueue();
 }
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance,
