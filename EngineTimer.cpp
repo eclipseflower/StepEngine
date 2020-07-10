@@ -3,11 +3,9 @@
 Engine::EngineTimer::EngineTimer() : mSecondsPerCount(0.0), mDeltaTime(-1.0), mBaseTime(0),
 	mPausedTime(0), mPrevTime(0), mCurrTime(0), mStopped(false)
 {
-#ifdef ENGINE_PLATFORM_DIRECTX
 	__int64 countsPerSec;
 	QueryPerformanceFrequency((LARGE_INTEGER*)&countsPerSec);
 	mSecondsPerCount = 1.0 / (double)countsPerSec;
-#endif
 }
 
 float Engine::EngineTimer::TotalTime() const
@@ -49,9 +47,7 @@ float Engine::EngineTimer::FPS() const
 void Engine::EngineTimer::Reset()
 {
 	__int64 currTime;
-#ifdef ENGINE_PLATFORM_DIRECTX
 	QueryPerformanceCounter((LARGE_INTEGER*)&currTime);
-#endif
 
 	mBaseTime = currTime;
 	mPrevTime = currTime;
@@ -62,9 +58,7 @@ void Engine::EngineTimer::Reset()
 void Engine::EngineTimer::Start()
 {
 	__int64 startTime;
-#ifdef ENGINE_PLATFORM_DIRECTX
 	QueryPerformanceCounter((LARGE_INTEGER*)&startTime);
-#endif
 
 	if (mStopped)
 	{
@@ -81,9 +75,7 @@ void Engine::EngineTimer::Stop()
 	if (!mStopped)
 	{
 		__int64 currTime;
-#ifdef ENGINE_PLATFORM_DIRECTX
 		QueryPerformanceCounter((LARGE_INTEGER*)&currTime);
-#endif
 
 		mStopTime = currTime;
 		mStopped = true;
@@ -99,9 +91,7 @@ void Engine::EngineTimer::Tick()
 	}
 
 	__int64 currTime;
-#ifdef ENGINE_PLATFORM_DIRECTX
 	QueryPerformanceCounter((LARGE_INTEGER*)&currTime);
-#endif
 	mCurrTime = currTime;
 
 	// Time difference between this frame and the previous.

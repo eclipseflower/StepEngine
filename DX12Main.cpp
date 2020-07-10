@@ -63,6 +63,7 @@ Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> gDsvHeap = nullptr;
 
 UINT gRtvIncSize = 0;
 UINT fenceCount = 0;
+UINT curBackBufferIndex = 0;
 
 D3D12_VIEWPORT gViewport;
 D3D12_RECT gScissorRect;
@@ -322,22 +323,23 @@ void Draw()
 		A subresource must be in this state when it is rendered to or when it is cleared with 
 		ID3D12GraphicsCommandList::ClearRenderTargetView.
 	*/
-	gCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(gBackBuffer[0].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
+	gCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(gBackBuffer[curBackBufferIndex].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
 	gCommandList->RSSetScissorRects(1, &gScissorRect);
 	gCommandList->RSSetViewports(1, &gViewport);
 	CD3DX12_CPU_DESCRIPTOR_HANDLE dsv = CD3DX12_CPU_DESCRIPTOR_HANDLE(gDsvHeap->GetCPUDescriptorHandleForHeapStart());
 	gCommandList->ClearDepthStencilView(dsv, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
-	CD3DX12_CPU_DESCRIPTOR_HANDLE rtv = CD3DX12_CPU_DESCRIPTOR_HANDLE(gRtvHeap->GetCPUDescriptorHandleForHeapStart());
+	CD3DX12_CPU_DESCRIPTOR_HANDLE rtv = CD3DX12_CPU_DESCRIPTOR_HANDLE(gRtvHeap->GetCPUDescriptorHandleForHeapStart(), curBackBufferIndex, gRtvIncSize);
 	float color[4] = { 1, 0, 0, 1 };
 	gCommandList->ClearRenderTargetView(rtv, color, 0, nullptr);
 	gCommandList->OMSetRenderTargets(1, &rtv, true, &dsv);
-	gCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(gBackBuffer[0].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
+	gCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(gBackBuffer[curBackBufferIndex].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
 	ThrowIfFailed(gCommandList->Close());
 
 	ID3D12CommandList *cmdList[] = { gCommandList.Get() };
 	gCommandQueue->ExecuteCommandLists(_countof(cmdList), cmdList);
 
 	ThrowIfFailed(gSwapChain->Present(0, 0));
+	curBackBufferIndex = (curBackBufferIndex + 1) % 2;
 	FlushCommandQueue();
 }
 

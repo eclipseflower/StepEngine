@@ -88,7 +88,7 @@ bool Engine::Core::EngineSceneManagerDirectX::CreateBoxObject(EngineObjectDirect
 
 bool Engine::Core::EngineSceneManagerDirectX::CreateCylinderObject(float topRadius, float bottomRadius, float height, EngineObjectDirectX ** object)
 {
-	UINT sliceCount = 3;
+	UINT sliceCount = 100;
 	UINT stackCount = 1;
 	float halfHeight = height / 2;
 	float heightPerStack = height / stackCount;
@@ -122,18 +122,18 @@ bool Engine::Core::EngineSceneManagerDirectX::CreateCylinderObject(float topRadi
 		return false;
 	}
 
-	(*object)->mIndexCount = sliceCount * 3 * 2 + sliceCount * 4 * stackCount;
+	(*object)->mIndexCount = sliceCount * 3 * 2 + sliceCount * 6 * stackCount;
 	for (UINT i = 0; i < stackCount; i++)
 	{
 		for (UINT j = 0; j < sliceCount; j++)
 		{
-			(*object)->mIndices.push_back(i * stackCount + j);
-			(*object)->mIndices.push_back((i + 1) * stackCount + j);
-			(*object)->mIndices.push_back(i * stackCount + j + 1);
+			(*object)->mIndices.push_back(i * (sliceCount + 1) + j);
+			(*object)->mIndices.push_back((i + 1) * (sliceCount + 1) + j);
+			(*object)->mIndices.push_back(i * (sliceCount + 1) + j + 1);
 
-			(*object)->mIndices.push_back((i + 1) * stackCount + j);
-			(*object)->mIndices.push_back((i + 1) * stackCount + j + 1);
-			(*object)->mIndices.push_back(i * stackCount + j + 1);
+			(*object)->mIndices.push_back((i + 1) * (sliceCount + 1) + j);
+			(*object)->mIndices.push_back((i + 1) * (sliceCount + 1) + j + 1);
+			(*object)->mIndices.push_back(i * (sliceCount + 1) + j + 1);
 		}
 	}
 
@@ -146,10 +146,12 @@ bool Engine::Core::EngineSceneManagerDirectX::CreateCylinderObject(float topRadi
 
 	for (UINT i = 0; i < sliceCount; i++)
 	{
-		(*object)->mIndices.push_back((sliceCount + 1) * (stackCount + 1) + 1);
-		(*object)->mIndices.push_back((sliceCount + 1) * stackCount + i);
 		(*object)->mIndices.push_back((sliceCount + 1) * stackCount + i + 1);
+		(*object)->mIndices.push_back((sliceCount + 1) * stackCount + i);
+		(*object)->mIndices.push_back((sliceCount + 1) * (stackCount + 1) + 1);
 	}
+
+
 
 	res = gManagerDirectX->CreateIndexBuffer(&(*object)->mIndices[0], sizeof(UINT) * (*object)->mIndexCount,
 		D3D11_USAGE_IMMUTABLE, &(*object)->mIndexBuffer);

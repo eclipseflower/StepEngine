@@ -1,7 +1,7 @@
 #ifndef __ENGINE_LOG_H__
 #define __ENGINE_LOG_H__
 
-#include "EngineUtil.h"
+#include "EngineUtilDirectX.h"
 
 using std::string;
 

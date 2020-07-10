@@ -24,6 +24,7 @@ int EngineBoxApp::Run(HINSTANCE hInstance)
 		return -1;
 	}
 
+	/*
 	EngineObjectDirectX *boxObject;
 	if (!manager.CreateCylinderObject(2, 2, 2, &boxObject))
 	{
@@ -42,6 +43,7 @@ int EngineBoxApp::Run(HINSTANCE hInstance)
 	manager.mMouseDownFunc = bind(&EngineBoxApp::OnMouseDown, this, _1, _2, _3);
 	manager.mMouseUpFunc = bind(&EngineBoxApp::OnMouseUp, this, _1, _2, _3);
 	manager.mMouseMoveFunc = bind(&EngineBoxApp::OnMouseMove, this, _1, _2, _3);
+	*/
 	return manager.RunEngine();
 }
 

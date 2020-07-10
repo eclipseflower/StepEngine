@@ -1,12 +1,54 @@
 #ifndef __ENGINE_UTIL_DIRECTX_H__
 #define __ENGINE_UTIL_DIRECTX_H__
 
-#include <d3d11.h>
-#include <d3dx11.h>
-#include <d3dx11effect.h>
-#include <directxmath.h>
-#include <windowsx.h>
+#include <string>
+#include <sstream>
+#include <vector>
+#include <functional>
 
+#include <windows.h>
+#include <d3d12.h>
+#include <dxgi1_4.h>
+#include <string>
+#include <comdef.h>
+#include <wrl.h>
+#include "d3dx12.h"
+
+using std::wstring;
+
+namespace Engine
+{
+	class DxException
+	{
+	public:
+		DxException() = default;
+		DxException(HRESULT hr, const wstring& functionName, const wstring& filename, int lineNumber);
+
+		wstring ToString()const;
+
+		HRESULT ErrorCode = S_OK;
+		wstring FunctionName;
+		wstring Filename;
+		int LineNumber = -1;
+	};
+
+	inline wstring AnsiToWString(const string& str)
+	{
+		WCHAR buffer[512];
+		MultiByteToWideChar(CP_ACP, 0, str.c_str(), -1, buffer, 512);
+		return wstring(buffer);
+	}
+
+	#ifndef ThrowIfFailed
+	#define ThrowIfFailed(x)                                              \
+	{                                                                     \
+		HRESULT hr__ = (x);                                               \
+		wstring wfn = AnsiToWString(__FILE__);                       \
+		if(FAILED(hr__)) { throw DxException(hr__, L#x, wfn, __LINE__); } \
+	}
+	#endif
+}
+/*
 using DirectX::XMVECTOR;
 using DirectX::XMVECTORF32;
 using DirectX::XMFLOAT3;
@@ -22,6 +64,7 @@ using DirectX::XMConvertToRadians;
 using DirectX::XM_PI;
 using DirectX::XM_PIDIV4;
 using DirectX::XM_2PI;
+
 
 namespace Engine
 {
@@ -51,5 +94,5 @@ namespace Engine
 	extern const D3D11_INPUT_ELEMENT_DESC VertexDesc[];
 	extern const UINT VertexCount;
 }
-
+*/
 #endif // __ENGINE_UTIL_DIRECTX_H__

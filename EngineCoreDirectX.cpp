@@ -6,174 +6,24 @@ Engine::Core::EngineCoreDirectX::EngineCoreDirectX(bool enableMsaa, UINT msaaCou
 	mEnableMsaa = enableMsaa;
 	mMsaaCount = msaaCount;
 	mMsaaQuality = 0;
-	mD3dDevice = nullptr;
-	mD3dImmediateContext = nullptr;
-	mSwapChain = nullptr;
-	mDepthStencilBuffer = nullptr;
-	mRenderTargetView = nullptr;
-	mDepthStencilView = nullptr;
 }
 
 Engine::Core::EngineCoreDirectX::~EngineCoreDirectX()
 {
-	if (mD3dDevice)
-	{
-		mD3dDevice->Release();
-	}
-	if (mD3dImmediateContext)
-	{
-		mD3dImmediateContext->Release();
-	}
-	if (mSwapChain)
-	{
-		mSwapChain->Release();
-	}
-	if (mDepthStencilBuffer)
-	{
-		mDepthStencilBuffer->Release();
-	}
-	if (mRenderTargetView)
-	{
-		mRenderTargetView->Release();
-	}
-	if (mDepthStencilView)
-	{
-		mDepthStencilView->Release();
-	}
+
 }
 
 bool Engine::Core::EngineCoreDirectX::Init()
 {
 	UINT createDeviceFlags = 0;
 #if defined(DEBUG) || defined(_DEBUG)  
-	//createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
+	ComPtr<ID3D12Debug> debugController = nullptr;
+	ThrowIfFailed(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)));
+	debugController->EnableDebugLayer();
 #endif
 
-	D3D_FEATURE_LEVEL featureLevel;
-	HRESULT hr = D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, createDeviceFlags, nullptr, 0, 
-		D3D11_SDK_VERSION, &mD3dDevice, &featureLevel, &mD3dImmediateContext);
-
-	if (FAILED(hr))
-	{
-		EngineLog::LogErrorMessageBox("D3D11CreateDevice Failed");
-		return false;
-	}
-
-	if (featureLevel != D3D_FEATURE_LEVEL_11_0)
-	{
-		EngineLog::LogErrorMessageBox("Direct3D Feature Level 11 Unsupported");
-		return false;
-	}
-
-	if (mEnableMsaa)
-	{
-		hr = mD3dDevice->CheckMultisampleQualityLevels(DXGI_FORMAT_R8G8B8A8_UNORM, mMsaaCount, &mMsaaQuality);
-		if (FAILED(hr))
-		{
-			EngineLog::LogErrorMessageBox("CheckMultisampleQualityLevels Failed");
-			return false;
-		}
-
-		if (mMsaaQuality <= 0)
-		{
-			EngineLog::LogErrorMessageBox("Current MSAA Count Unsupported");
-			return false;
-		}
-	}
-
-	IDXGIDevice *dxgiDevice = nullptr;
-	hr = mD3dDevice->QueryInterface(__uuidof(IDXGIDevice), (void **)&dxgiDevice);
-	if (FAILED(hr))
-	{
-		EngineLog::LogErrorMessageBox("QueryInterface Failed");
-		if (dxgiDevice)
-		{
-			dxgiDevice->Release();
-			dxgiDevice = nullptr;
-		}
-		return false;
-	}
-
-	IDXGIAdapter *dxgiAdapter = nullptr;
-	hr = dxgiDevice->GetAdapter(&dxgiAdapter);
-	if (FAILED(hr))
-	{
-		EngineLog::LogErrorMessageBox("IDXGIDevice GetAdapter Failed");
-		if (dxgiAdapter)
-		{
-			dxgiAdapter->Release();
-			dxgiAdapter = nullptr;
-		}
-		return false;
-	}
-
-	IDXGIFactory *dxgiFactory = nullptr;
-	hr = dxgiAdapter->GetParent(__uuidof(IDXGIFactory), (void **)&dxgiFactory);
-	if (FAILED(hr))
-	{
-		EngineLog::LogErrorMessageBox("IDXGIAdapter GetParent Failed");
-		if (dxgiFactory)
-		{
-			dxgiFactory->Release();
-			dxgiFactory = nullptr;
-		}
-		return false;
-	}
-
-	DXGI_SWAP_CHAIN_DESC swapChainDesc;
-	swapChainDesc.BufferCount = 1;
-	swapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	swapChainDesc.BufferDesc.Width = gManagerDirectX->GetWindowWidth();
-	swapChainDesc.BufferDesc.Height = gManagerDirectX->GetWindowHeight();
-	swapChainDesc.BufferDesc.RefreshRate.Numerator = 60;
-	swapChainDesc.BufferDesc.RefreshRate.Denominator = 1;
-	swapChainDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
-	swapChainDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
-	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-	swapChainDesc.Flags = 0;
-	swapChainDesc.OutputWindow = gManagerDirectX->GetHwnd();
-	if (mEnableMsaa)
-	{
-		swapChainDesc.SampleDesc.Count = mMsaaCount;
-		swapChainDesc.SampleDesc.Quality = mMsaaQuality - 1;
-	}
-	else
-	{
-		swapChainDesc.SampleDesc.Count = 1;
-		swapChainDesc.SampleDesc.Quality = 0;
-	}
-	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
-	swapChainDesc.Windowed = true;
-
-	hr = dxgiFactory->CreateSwapChain(mD3dDevice, &swapChainDesc, &mSwapChain);
-
-	if (dxgiDevice)
-	{
-		dxgiDevice->Release();
-		dxgiDevice = nullptr;
-	}
-	if (dxgiAdapter)
-	{
-		dxgiAdapter->Release();
-		dxgiAdapter = nullptr;
-	}
-	if (dxgiFactory)
-	{
-		dxgiFactory->Release();
-		dxgiFactory = nullptr;
-	}
-
-	if (FAILED(hr))
-	{
-		EngineLog::LogErrorMessageBox("CreateSwapChain Failed");
-		return false;
-	}
-
-	if (!ResizeBuffer())
-	{
-		EngineLog::LogErrorMessageBox("ResizeBuffer Failed");
-		return false;
-	}
+	ThrowIfFailed(D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&mDevice)));
+	ThrowIfFailed(CreateDXGIFactory1(IID_PPV_ARGS(&mDxGiFactory)));
 
 	return true;
 }

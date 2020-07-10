@@ -1,7 +1,7 @@
 #ifndef __ENGINE_CORE_DIRECTX_H__
 #define __ENGINE_CORE_DIRECTX_H__
 
-#include "EngineUtil.h"
+#include "EngineUtilDirectX.h"
 #include "EngineLog.h"
 #include "EngineObjectDirectX.h"
 #include "EngineCameraDirectX.h"
@@ -9,6 +9,8 @@
 using Engine::Debug::EngineLog;
 using Engine::Object::EngineObjectDirectX;
 using Engine::Camera::EngineCameraDirectX;
+
+using Microsoft::WRL::ComPtr;
 
 namespace Engine
 {
@@ -34,13 +36,23 @@ namespace Engine
 			bool mEnableMsaa;
 			UINT mMsaaCount;
 			UINT mMsaaQuality;
-			ID3D11Device *mD3dDevice;
-			ID3D11DeviceContext *mD3dImmediateContext;
-			IDXGISwapChain *mSwapChain;
-			ID3D11Texture2D *mDepthStencilBuffer;
-			ID3D11RenderTargetView *mRenderTargetView;
-			ID3D11DepthStencilView *mDepthStencilView;
-			D3D11_VIEWPORT mScreenViewport;
+
+			static const UINT mBackBufferCount = 2;
+
+			ComPtr<ID3D12Device> mDevice = nullptr;
+			ComPtr<IDXGISwapChain> mSwapChain = nullptr;
+			ComPtr<IDXGIFactory4> mDxGiFactory = nullptr;
+
+			ComPtr<ID3D12Resource> mBackBuffer[mBackBufferCount];
+			ComPtr<ID3D12Resource> mDepthStencilBuffer = nullptr;
+
+			ComPtr<ID3D12CommandQueue> mCommandQueue = nullptr;
+			ComPtr<ID3D12GraphicsCommandList> mCommandList = nullptr;
+			ComPtr<ID3D12CommandAllocator> mCommandAlloc = nullptr;
+			ComPtr<ID3D12Fence> mFence = nullptr;
+
+			ComPtr<ID3D12DescriptorHeap> mRtvHeap = nullptr;
+			ComPtr<ID3D12DescriptorHeap> mDsvHeap = nullptr;
 		};
 	}
 }
