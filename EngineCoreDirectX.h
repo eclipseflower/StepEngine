@@ -33,9 +33,10 @@ namespace Engine
 			void EndDraw();
 
 		public:
-			bool mEnableMsaa;
-			UINT mMsaaCount;
-			UINT mMsaaQuality;
+			bool mEnableMsaa = false;
+			UINT mMsaaCount = 1;
+			UINT mMsaaQuality = 0;
+			DXGI_FORMAT mBackBufferFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
 
 			static const UINT mBackBufferCount = 2;
 
@@ -53,6 +54,8 @@ namespace Engine
 
 			ComPtr<ID3D12DescriptorHeap> mRtvHeap = nullptr;
 			ComPtr<ID3D12DescriptorHeap> mDsvHeap = nullptr;
+			UINT mRtvHeapIncSize = 0;
+			UINT mDsvHeapIncSize = 0;
 		};
 	}
 }

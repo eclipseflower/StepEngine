@@ -22,8 +22,85 @@ bool Engine::Core::EngineCoreDirectX::Init()
 	debugController->EnableDebugLayer();
 #endif
 
+	// 1. create device and gi factory
 	ThrowIfFailed(D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&mDevice)));
 	ThrowIfFailed(CreateDXGIFactory1(IID_PPV_ARGS(&mDxGiFactory)));
+
+	// 2. create gpu related objects, command, fence
+	ThrowIfFailed(mDevice->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&mFence)));
+
+	D3D12_COMMAND_QUEUE_DESC queueDesc;
+	queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
+	queueDesc.Priority = D3D12_COMMAND_QUEUE_PRIORITY_NORMAL;
+	queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
+	queueDesc.NodeMask = 0;
+
+	ThrowIfFailed(mDevice->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&mCommandQueue)));
+	ThrowIfFailed(mDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&mCommandAlloc)));
+	ThrowIfFailed(mDevice->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, mCommandAlloc.Get(), nullptr, 
+		IID_PPV_ARGS(&mCommandList)));
+	// must close otherwise call reset will raise a error
+	mCommandList->Close();
+
+	// 3. create swap chain
+	UINT windowWidth = gManagerDirectX->GetWindowWidth();
+	UINT windowHeight = gManagerDirectX->GetWindowHeight();
+	DXGI_SWAP_CHAIN_DESC chainDesc;
+	chainDesc.BufferDesc.Format = mBackBufferFormat;
+	chainDesc.BufferDesc.Height = windowHeight;
+	chainDesc.BufferDesc.Width = windowWidth;
+	chainDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
+	chainDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+	chainDesc.BufferDesc.RefreshRate.Denominator = 1;
+	chainDesc.BufferDesc.RefreshRate.Numerator = 60;
+
+	D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS qualityLevels;
+	qualityLevels.Format = mBackBufferFormat;
+	qualityLevels.SampleCount = mMsaaCount;
+	qualityLevels.NumQualityLevels = 0;
+	qualityLevels.Flags = D3D12_MULTISAMPLE_QUALITY_LEVELS_FLAG_NONE;
+	ThrowIfFailed(mDevice->CheckFeatureSupport(D3D12_FEATURE_MULTISAMPLE_QUALITY_LEVELS, &qualityLevels, 
+		sizeof(qualityLevels)));
+	mMsaaQuality = qualityLevels.NumQualityLevels;
+
+	//https://stackoverflow.com/questions/40110699/creating-a-swap-chain-with-msaa-fails
+	/*
+		Direct3D 12 don't support creating MSAA swap chains
+		--attempts to create a swap chain with SampleDesc.Count > 1 will fail.
+		Instead, you create your own MSAA render target and
+		explicitly resolve to the DXGI back-buffer for presentation as shown here.
+	*/
+	chainDesc.SampleDesc.Count = mMsaaCount;
+	chainDesc.SampleDesc.Quality = mMsaaQuality - 1;
+
+	chainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+	chainDesc.BufferCount = mBackBufferCount;
+	chainDesc.OutputWindow = gManagerDirectX->GetHwnd();
+	chainDesc.Windowed = true;
+	chainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+	chainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+
+	ThrowIfFailed(mDxGiFactory->CreateSwapChain(mCommandQueue.Get(), &chainDesc, &mSwapChain));
+
+	// 4. create rtv & dsv heap
+	mRtvHeapIncSize = mDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+	mDsvHeapIncSize = mDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
+
+	D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc;
+	rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
+	rtvHeapDesc.NumDescriptors = mBackBufferCount;
+	rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+	rtvHeapDesc.NodeMask = 0;
+	ThrowIfFailed(mDevice->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&mRtvHeap)));
+
+	D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc;
+	dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
+	dsvHeapDesc.NumDescriptors = 1;
+	dsvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+	dsvHeapDesc.NodeMask = 0;
+	ThrowIfFailed(mDevice->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(&mDsvHeap)));
+
+	ResizeBuffer();
 
 	return true;
 }
