@@ -7,6 +7,7 @@ Engine::Core::EngineSceneManagerDirectX::EngineSceneManagerDirectX()
 
 Engine::Core::EngineSceneManagerDirectX::~EngineSceneManagerDirectX()
 {
+	/*
 	for (UINT i = 0; i < mSceneObjects.size(); ++i)
 	{
 		EngineObjectDirectX *object = mSceneObjects[i];
@@ -15,10 +16,12 @@ Engine::Core::EngineSceneManagerDirectX::~EngineSceneManagerDirectX()
 		object->mShader->mEffect->Release();
 		object->mShader->mInputLayout->Release();
 	}
+	*/
 }
 
 bool Engine::Core::EngineSceneManagerDirectX::CreateBoxObject(EngineObjectDirectX ** object)
 {
+	/*
 	*object = new EngineObjectDirectX;
 
 	(*object)->mVertexCount = 8;
@@ -83,11 +86,13 @@ bool Engine::Core::EngineSceneManagerDirectX::CreateBoxObject(EngineObjectDirect
 	XMStoreFloat4x4(&(*object)->mWorldMatrix, i);
 
 	mSceneObjects.push_back(*object);
+	*/
 	return true;
 }
 
 bool Engine::Core::EngineSceneManagerDirectX::CreateCylinderObject(float topRadius, float bottomRadius, float height, EngineObjectDirectX ** object)
 {
+	/*
 	UINT sliceCount = 100;
 	UINT stackCount = 1;
 	float halfHeight = height / 2;
@@ -165,5 +170,6 @@ bool Engine::Core::EngineSceneManagerDirectX::CreateCylinderObject(float topRadi
 	XMStoreFloat4x4(&(*object)->mWorldMatrix, i);
 
 	mSceneObjects.push_back(*object);
+	*/
 	return true;
 }

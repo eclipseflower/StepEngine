@@ -11,6 +11,7 @@ Engine::Shader::EngineShaderDirectX::~EngineShaderDirectX()
 
 void Engine::Shader::EngineShaderDirectX::InitEffect()
 {
+	/*
 	if (mEffect)
 	{
 		ID3DX11EffectTechnique *tech = mEffect->GetTechniqueByName("MainTech");
@@ -43,4 +44,5 @@ void Engine::Shader::EngineShaderDirectX::InitEffect()
 			}
 		}
 	}
+	*/
 }

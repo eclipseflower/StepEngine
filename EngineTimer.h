@@ -1,7 +1,7 @@
 #ifndef __ENGINE_TIMER_H__
 #define __ENGINE_TIMER_H__
 
-#include "EngineUtil.h"
+#include "EngineUtilDirectX.h"
 
 namespace Engine
 {

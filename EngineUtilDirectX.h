@@ -12,9 +12,28 @@
 #include <string>
 #include <comdef.h>
 #include <wrl.h>
+#include <DirectXMath.h>
 #include "d3dx12.h"
 
+using std::string;
 using std::wstring;
+
+using DirectX::XMVECTORF32;
+using DirectX::XMVECTOR;
+using DirectX::XMVECTORF32;
+using DirectX::XMFLOAT3;
+using DirectX::XMFLOAT4;
+using DirectX::XMFLOAT4X4;
+using DirectX::XMMATRIX;
+using DirectX::XMMatrixIdentity;
+using DirectX::XMVectorSet;
+using DirectX::XMVectorZero;
+using DirectX::XMMatrixLookAtLH;
+using DirectX::XMMatrixPerspectiveFovLH;
+using DirectX::XMConvertToRadians;
+using DirectX::XM_PI;
+using DirectX::XM_PIDIV4;
+using DirectX::XM_2PI;
 
 namespace Engine
 {
@@ -47,24 +66,10 @@ namespace Engine
 		if(FAILED(hr__)) { throw DxException(hr__, L#x, wfn, __LINE__); } \
 	}
 	#endif
+
+	XMGLOBALCONST XMVECTORF32 LightSteelBlue = { { { 0.690196097f, 0.768627524f, 0.870588303f, 1.000000000f } } };
 }
 /*
-using DirectX::XMVECTOR;
-using DirectX::XMVECTORF32;
-using DirectX::XMFLOAT3;
-using DirectX::XMFLOAT4;
-using DirectX::XMFLOAT4X4;
-using DirectX::XMMATRIX;
-using DirectX::XMMatrixIdentity;
-using DirectX::XMVectorSet;
-using DirectX::XMVectorZero;
-using DirectX::XMMatrixLookAtLH;
-using DirectX::XMMatrixPerspectiveFovLH;
-using DirectX::XMConvertToRadians;
-using DirectX::XM_PI;
-using DirectX::XM_PIDIV4;
-using DirectX::XM_2PI;
-
 
 namespace Engine
 {

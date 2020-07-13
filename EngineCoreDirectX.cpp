@@ -70,8 +70,8 @@ bool Engine::Core::EngineCoreDirectX::Init()
 		Instead, you create your own MSAA render target and
 		explicitly resolve to the DXGI back-buffer for presentation as shown here.
 	*/
-	chainDesc.SampleDesc.Count = mMsaaCount;
-	chainDesc.SampleDesc.Quality = mMsaaQuality - 1;
+	chainDesc.SampleDesc.Count = mEnableMsaa ? mMsaaCount : 1;
+	chainDesc.SampleDesc.Quality = mEnableMsaa ? mMsaaQuality - 1 : 0;
 
 	chainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	chainDesc.BufferCount = mBackBufferCount;
@@ -107,86 +107,87 @@ bool Engine::Core::EngineCoreDirectX::Init()
 
 bool Engine::Core::EngineCoreDirectX::ResizeBuffer()
 {
-	if (mRenderTargetView)
-	{
-		mRenderTargetView->Release();
-		mRenderTargetView = nullptr;
-	}
-	if (mDepthStencilView)
-	{
-		mDepthStencilView->Release();
-		mDepthStencilView = nullptr;
-	}
-	if (mDepthStencilBuffer)
-	{
-		mDepthStencilBuffer->Release();
-		mDepthStencilBuffer = nullptr;
-	}
+	assert(mDevice);
+	assert(mSwapChain);
+	assert(mCommandAlloc);
+
+	FlushCommandQueue();
 
 	UINT windowWidth = gManagerDirectX->GetWindowWidth();
 	UINT windowHeight = gManagerDirectX->GetWindowHeight();
 
-	HRESULT hr = mSwapChain->ResizeBuffers(1, windowWidth, windowHeight, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
-	if (FAILED(hr))
+	// 1. re-create back buffer and view
+	ThrowIfFailed(mSwapChain->ResizeBuffers(mBackBufferCount, windowWidth, windowHeight, mBackBufferFormat, 
+		DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH));
+	CD3DX12_CPU_DESCRIPTOR_HANDLE handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
+		mRtvHeap->GetCPUDescriptorHandleForHeapStart());
+
+	for (int i = 0; i < mBackBufferCount; i++)
 	{
-		EngineLog::LogErrorMessageBox("ResizeBuffers Failed");
-		return false;
-	}
-	ID3D11Texture2D *backBuffer = nullptr;
-	hr = mSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void **>(&backBuffer));
-	if (FAILED(hr))
-	{
-		EngineLog::LogErrorMessageBox("GetBuffer Failed");
-		return false;
-	}
-	hr = mD3dDevice->CreateRenderTargetView(backBuffer, nullptr, &mRenderTargetView);
-	// MUST RELEASE
-	backBuffer->Release();
-	if (FAILED(hr))
-	{
-		EngineLog::LogErrorMessageBox("CreateRenderTargetView Failed");
-		return false;
+		ThrowIfFailed(mSwapChain->GetBuffer(i, IID_PPV_ARGS(&mBackBuffer[i])));
+		mDevice->CreateRenderTargetView(mBackBuffer[i].Get(), nullptr, handle);
+		handle.Offset(1, mRtvHeapIncSize);
 	}
 
-	D3D11_TEXTURE2D_DESC depthStencilDesc;
-	depthStencilDesc.ArraySize = 1;
-	depthStencilDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-	depthStencilDesc.CPUAccessFlags = 0;
-	depthStencilDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	depthStencilDesc.Height = windowHeight;
-	depthStencilDesc.Width = windowWidth;
-	depthStencilDesc.MipLevels = 1;
-	depthStencilDesc.MiscFlags = 0;
-	if (mEnableMsaa)
-	{
-		depthStencilDesc.SampleDesc.Count = mMsaaCount;
-		depthStencilDesc.SampleDesc.Quality = mMsaaQuality - 1;
-	}
-	else
-	{
-		depthStencilDesc.SampleDesc.Count = 1;
-		depthStencilDesc.SampleDesc.Quality = 0;
-	}
-	depthStencilDesc.Usage = D3D11_USAGE_DEFAULT;
-	hr = mD3dDevice->CreateTexture2D(&depthStencilDesc, nullptr, &mDepthStencilBuffer);
-	if (FAILED(hr))
-	{
-		EngineLog::LogErrorMessageBox("CreateTexture2D Failed");
-		return false;
-	}
-	mD3dDevice->CreateDepthStencilView(mDepthStencilBuffer, nullptr, &mDepthStencilView);
-	mD3dImmediateContext->OMSetRenderTargets(1, &mRenderTargetView, mDepthStencilView);
+	// 2. re-create depth stencil buffer and view
+	D3D12_RESOURCE_DESC desc;
+	desc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+	desc.Alignment = 0;
+	desc.Width = windowWidth;
+	desc.Height = windowHeight;
+	desc.DepthOrArraySize = 1;
+	desc.MipLevels = 1;
+	desc.Format = mDepthStencilBufferFormat;
+	desc.SampleDesc.Count = mEnableMsaa ? mMsaaCount : 1;
+	desc.SampleDesc.Quality = mEnableMsaa ? mMsaaQuality - 1 : 0;
+	desc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+	desc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
 
-	mScreenViewport.Height = windowHeight;
-	mScreenViewport.MaxDepth = 1.0f;
-	mScreenViewport.MinDepth = 0.0f;
-	mScreenViewport.TopLeftX = 0.0f;
-	mScreenViewport.TopLeftY = 0.0f;
-	mScreenViewport.Width = windowWidth;
-	mD3dImmediateContext->RSSetViewports(1, &mScreenViewport);
+	D3D12_CLEAR_VALUE clearValue;
+	clearValue.Format = mDepthStencilBufferFormat;
+	clearValue.DepthStencil.Depth = 1.0f;
+	clearValue.DepthStencil.Stencil = 0;
+	ThrowIfFailed(mDevice->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT), 
+		D3D12_HEAP_FLAG_NONE, &desc, D3D12_RESOURCE_STATE_COMMON, &clearValue, IID_PPV_ARGS(&mDepthStencilBuffer)));
+
+	D3D12_DEPTH_STENCIL_VIEW_DESC viewDesc;
+	viewDesc.Format = mDepthStencilBufferFormat;
+	viewDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+	viewDesc.Flags = D3D12_DSV_FLAG_NONE;
+	viewDesc.Texture2D.MipSlice = 0;
+
+	handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(mDsvHeap->GetCPUDescriptorHandleForHeapStart());
+	mDevice->CreateDepthStencilView(mDepthStencilBuffer.Get(), &viewDesc, handle);
+
+	ThrowIfFailed(mCommandAlloc->Reset());
+	ThrowIfFailed(mCommandList->Reset(mCommandAlloc.Get(), nullptr));
+
+	mCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(mDepthStencilBuffer.Get(), 
+		D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_DEPTH_WRITE));
+	ThrowIfFailed(mCommandList->Close());
+
+	ID3D12CommandList *cmdList[] = { mCommandList.Get() };
+	mCommandQueue->ExecuteCommandLists(_countof(cmdList), cmdList);
+
+	FlushCommandQueue();
+
+	// 3. set viewport and scissor rect
+	mViewport.TopLeftX = 0;
+	mViewport.TopLeftY = 0;
+	mViewport.Width = windowWidth;
+	mViewport.Height = windowHeight;
+	mViewport.MinDepth = 0.0f;
+	mViewport.MaxDepth = 1.0f;
+
+	mScissorRect.left = 0;
+	mScissorRect.right = windowWidth;
+	mScissorRect.top = 0;
+	mScissorRect.bottom = windowHeight;
+
 	return true;
 }
 
+/*
 bool Engine::Core::EngineCoreDirectX::CreateVertexBuffer(void *vertices, UINT byteWidth, D3D11_USAGE usage, UINT cpuAccessFlags, ID3D11Buffer **buffer)
 {
 	D3D11_BUFFER_DESC desc;
@@ -284,46 +285,71 @@ bool Engine::Core::EngineCoreDirectX::CreateInputLayout(const D3D11_INPUT_ELEMEN
 	}
 	return true;
 }
+*/
+
+void Engine::Core::EngineCoreDirectX::FlushCommandQueue()
+{
+	mCurrentFence++;
+	ThrowIfFailed(mCommandQueue->Signal(mFence.Get(), mCurrentFence));
+	if (mFence->GetCompletedValue() < mCurrentFence)
+	{
+		HANDLE handle = CreateEventEx(nullptr, false, false, EVENT_ALL_ACCESS);
+		ThrowIfFailed(mFence->SetEventOnCompletion(mCurrentFence, handle));
+
+		WaitForSingleObject(handle, INFINITE);
+		CloseHandle(handle);
+	}
+}
 
 void Engine::Core::EngineCoreDirectX::BeginDraw()
 {
-	mD3dImmediateContext->ClearRenderTargetView(mRenderTargetView, Black);
-	mD3dImmediateContext->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+	ThrowIfFailed(mCommandAlloc->Reset());
+	ThrowIfFailed(mCommandList->Reset(mCommandAlloc.Get(), nullptr));
+
+	// D3D12_RESOURCE_STATE_COMMON = D3D12_RESOURCE_STATE_PRESENT = 0
+	mCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(mBackBuffer[mCurBackBuffer].Get(), 
+		D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
+	mCommandList->RSSetScissorRects(1, &mScissorRect);
+	mCommandList->RSSetViewports(1, &mViewport);
+	CD3DX12_CPU_DESCRIPTOR_HANDLE dsv = CD3DX12_CPU_DESCRIPTOR_HANDLE(
+		mDsvHeap->GetCPUDescriptorHandleForHeapStart());
+	mCommandList->ClearDepthStencilView(dsv, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, 
+		nullptr);
+	CD3DX12_CPU_DESCRIPTOR_HANDLE rtv = CD3DX12_CPU_DESCRIPTOR_HANDLE(
+		mRtvHeap->GetCPUDescriptorHandleForHeapStart(), mCurBackBuffer, mRtvHeapIncSize);
+	mCommandList->ClearRenderTargetView(rtv, LightSteelBlue, 0, nullptr);
+	mCommandList->OMSetRenderTargets(1, &rtv, true, &dsv);
 }
 
 void Engine::Core::EngineCoreDirectX::DrawObject(EngineObjectDirectX * object, EngineCameraDirectX * camera)
 {
-	UINT stride = sizeof(EngineVertexDirectX);
-	UINT offset = 0;
-	mD3dImmediateContext->IASetInputLayout(object->mShader->mInputLayout);
-	mD3dImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	mD3dImmediateContext->IASetVertexBuffers(0, 1, &object->mVertexBuffer, &stride, &offset);
-	mD3dImmediateContext->IASetIndexBuffer(object->mIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
-
-	ID3DX11EffectMatrixVariable *shaderMVP = object->mShader->mMVPMatrix;
-	if (shaderMVP && shaderMVP->IsValid())
-	{
-		XMMATRIX world = XMLoadFloat4x4(&object->mWorldMatrix);
-		XMMATRIX view = XMLoadFloat4x4(&camera->mViewMatrix);
-		XMMATRIX proj = XMLoadFloat4x4(&camera->mProjMatrix);
-		XMMATRIX worldViewProj = world * view * proj;
-		shaderMVP->SetMatrix(reinterpret_cast<float*>(&worldViewProj));
-	}
-
-	ID3DX11EffectTechnique *shaderTech = object->mShader->mMainTech;
-	if (shaderTech && shaderTech->IsValid())
-	{
-		D3DX11_TECHNIQUE_DESC techDesc;
-		shaderTech->GetDesc(&techDesc);
-		for (UINT i = 0; i < techDesc.Passes; ++i)
-		{
-			shaderTech->GetPassByIndex(i)->Apply(0, mD3dImmediateContext);
-			mD3dImmediateContext->DrawIndexed(object->mIndexCount, 0, 0);
-		}
-	}
+	
 }
 
 void Engine::Core::EngineCoreDirectX::EndDraw()
 {
-	mSwapChain->Present(0, 0);
+	// https://docs.microsoft.com/en-us/windows/win32/direct3d12/using-resource-barriers-to-synchronize-resource-states-in-direct3d-12#initial-states-for-resources
+	/*
+		Swap chain back buffers automatically start out in the D3D12_RESOURCE_STATE_COMMON state.
+		Before a back buffer is presented, it must be in the D3D12_RESOURCE_STATE_COMMON state.
+		Note, the resource state D3D12_RESOURCE_STATE_PRESENT is a synonym for D3D12_RESOURCE_STATE_COMMON,
+		and they both have a value of 0.
+
+		If IDXGISwapChain::Present (or IDXGISwapChain1::Present1) is called on a resource that
+		is not currently in this state, a debug layer warning is emitted.
+
+		The resource is used as a render target.
+		A subresource must be in this state when it is rendered to or when it is cleared with
+		ID3D12GraphicsCommandList::ClearRenderTargetView.
+	*/
+	mCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(mBackBuffer[mCurBackBuffer].Get(),
+		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
+	ThrowIfFailed(mCommandList->Close());
+
+	ID3D12CommandList *cmdList[] = { mCommandList.Get() };
+	mCommandQueue->ExecuteCommandLists(_countof(cmdList), cmdList);
+
+	ThrowIfFailed(mSwapChain->Present(0, 0));
+	mCurBackBuffer = (mCurBackBuffer + 1) % 2;
+	FlushCommandQueue();
 }

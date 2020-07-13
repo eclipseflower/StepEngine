@@ -1,7 +1,7 @@
 #ifndef __ENGINE_OBJECT_DIRECTX_H__
 #define __ENGINE_OBJECT_DIRECTX_H__
 
-#include "EngineUtil.h"
+#include "EngineUtilDirectX.h"
 #include "EngineShaderDirectX.h"
 
 using Engine::Shader::EngineShaderDirectX;
@@ -16,12 +16,12 @@ namespace Engine
 		public:
 			int mVertexCount;
 			int mIndexCount;
-			vector<EngineVertexDirectX> mVertices;
+			//vector<EngineVertexDirectX> mVertices;
 			vector<UINT> mIndices;
-			ID3D11Buffer *mVertexBuffer;
-			ID3D11Buffer *mIndexBuffer;
+			//ID3D11Buffer *mVertexBuffer;
+			//ID3D11Buffer *mIndexBuffer;
 
-			XMFLOAT4X4 mWorldMatrix;
+			//XMFLOAT4X4 mWorldMatrix;
 
 			EngineShaderDirectX *mShader;
 

@@ -19,7 +19,7 @@ int EngineBoxApp::Run(HINSTANCE hInstance)
 	{
 		return -1;
 	}
-	if (!manager.InitEngineCore(true, 4))
+	if (!manager.InitEngineCore(false, 4))
 	{
 		return -1;
 	}

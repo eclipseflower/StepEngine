@@ -148,7 +148,7 @@ void Engine::EngineManagerDirectX::OnMouseMove(WPARAM btnState, int x, int y)
 
 void Engine::EngineManagerDirectX::CameraLookAt(const XMVECTOR & pos, const XMVECTOR & target, const XMVECTOR & up)
 {
-	mCameraInst.LookAt(pos, target, up);
+	//mCameraInst.LookAt(pos, target, up);
 }
 
 UINT Engine::EngineManagerDirectX::GetWindowWidth()
@@ -178,6 +178,7 @@ HWND Engine::EngineManagerDirectX::GetHwnd()
 	return nullptr;
 }
 
+/*
 bool Engine::EngineManagerDirectX::CreateVertexBuffer(void *vertices, UINT byteWidth, D3D11_USAGE usage, UINT cpuAccessFlags, ID3D11Buffer **buffer)
 {
 	if (mCoreInst)
@@ -195,7 +196,7 @@ bool Engine::EngineManagerDirectX::CreateIndexBuffer(void *indices, UINT byteWid
 	}
 	return false;
 }
-
+*/
 bool Engine::EngineManagerDirectX::CreateBoxObject(EngineObjectDirectX **object)
 {
 	return mSceneMgrInst.CreateBoxObject(object);
@@ -208,6 +209,7 @@ bool Engine::EngineManagerDirectX::CreateCylinderObject(float topRadius, float b
 
 bool Engine::EngineManagerDirectX::CreateShader(string srcFile, EngineShaderDirectX ** shader)
 {
+	/*
 	if (mCoreInst)
 	{
 		*shader = new EngineShaderDirectX;
@@ -218,9 +220,11 @@ bool Engine::EngineManagerDirectX::CreateShader(string srcFile, EngineShaderDire
 		}
 		return false;
 	}
+	*/
 	return false;
 }
 
+/*
 bool Engine::EngineManagerDirectX::CreateInputLayout(D3DX11_PASS_DESC * passDesc, ID3D11InputLayout ** layout)
 {
 	if (mCoreInst)
@@ -229,3 +233,4 @@ bool Engine::EngineManagerDirectX::CreateInputLayout(D3DX11_PASS_DESC * passDesc
 	}
 	return false;
 }
+*/

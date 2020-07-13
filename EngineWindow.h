@@ -1,7 +1,7 @@
 #ifndef __ENGINE_WINDOW_H__
 #define __ENGINE_WINDOW_H__
 
-#include "EngineUtil.h"
+#include "EngineUtilDirectX.h"
 using std::string;
 
 namespace Engine

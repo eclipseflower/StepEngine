@@ -41,12 +41,12 @@ namespace Engine
 		UINT GetWindowHeight();
 		HWND GetHwnd();
 
-		bool CreateVertexBuffer(void * vertices, UINT byteWidth, D3D11_USAGE usage, UINT cpuAccessFlags, ID3D11Buffer ** buffer);
-		bool CreateIndexBuffer(void * indices, UINT byteWidth, D3D11_USAGE usage, ID3D11Buffer ** buffer);
+		//bool CreateVertexBuffer(void * vertices, UINT byteWidth, D3D11_USAGE usage, UINT cpuAccessFlags, ID3D11Buffer ** buffer);
+		//bool CreateIndexBuffer(void * indices, UINT byteWidth, D3D11_USAGE usage, ID3D11Buffer ** buffer);
 		bool CreateBoxObject(EngineObjectDirectX **object);
 		bool CreateCylinderObject(float topRadius, float bottomRadius, float height, EngineObjectDirectX **object);
 		bool CreateShader(string srcFile, EngineShaderDirectX **shader);
-		bool CreateInputLayout(D3DX11_PASS_DESC * passDesc, ID3D11InputLayout ** layout);
+		//bool CreateInputLayout(D3DX11_PASS_DESC * passDesc, ID3D11InputLayout ** layout);
 
 		EngineWindowDirectX *mWindowInst;
 		EngineCoreDirectX *mCoreInst;
