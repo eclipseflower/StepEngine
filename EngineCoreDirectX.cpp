@@ -16,7 +16,7 @@ Engine::Core::EngineCoreDirectX::~EngineCoreDirectX()
 bool Engine::Core::EngineCoreDirectX::Init()
 {
 	UINT createDeviceFlags = 0;
-#if defined(DEBUG) || defined(_DEBUG)  
+#if defined(DEBUG) || defined(_DEBUG)
 	ComPtr<ID3D12Debug> debugController = nullptr;
 	ThrowIfFailed(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)));
 	debugController->EnableDebugLayer();
@@ -37,7 +37,7 @@ bool Engine::Core::EngineCoreDirectX::Init()
 
 	ThrowIfFailed(mDevice->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&mCommandQueue)));
 	ThrowIfFailed(mDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&mCommandAlloc)));
-	ThrowIfFailed(mDevice->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, mCommandAlloc.Get(), nullptr, 
+	ThrowIfFailed(mDevice->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, mCommandAlloc.Get(), nullptr,
 		IID_PPV_ARGS(&mCommandList)));
 	// must close otherwise call reset will raise a error
 	mCommandList->Close();
@@ -59,7 +59,7 @@ bool Engine::Core::EngineCoreDirectX::Init()
 	qualityLevels.SampleCount = mMsaaCount;
 	qualityLevels.NumQualityLevels = 0;
 	qualityLevels.Flags = D3D12_MULTISAMPLE_QUALITY_LEVELS_FLAG_NONE;
-	ThrowIfFailed(mDevice->CheckFeatureSupport(D3D12_FEATURE_MULTISAMPLE_QUALITY_LEVELS, &qualityLevels, 
+	ThrowIfFailed(mDevice->CheckFeatureSupport(D3D12_FEATURE_MULTISAMPLE_QUALITY_LEVELS, &qualityLevels,
 		sizeof(qualityLevels)));
 	mMsaaQuality = qualityLevels.NumQualityLevels;
 
@@ -117,7 +117,7 @@ bool Engine::Core::EngineCoreDirectX::ResizeBuffer()
 	UINT windowHeight = gManagerDirectX->GetWindowHeight();
 
 	// 1. re-create back buffer and view
-	ThrowIfFailed(mSwapChain->ResizeBuffers(mBackBufferCount, windowWidth, windowHeight, mBackBufferFormat, 
+	ThrowIfFailed(mSwapChain->ResizeBuffers(mBackBufferCount, windowWidth, windowHeight, mBackBufferFormat,
 		DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH));
 	CD3DX12_CPU_DESCRIPTOR_HANDLE handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
 		mRtvHeap->GetCPUDescriptorHandleForHeapStart());
@@ -147,7 +147,7 @@ bool Engine::Core::EngineCoreDirectX::ResizeBuffer()
 	clearValue.Format = mDepthStencilBufferFormat;
 	clearValue.DepthStencil.Depth = 1.0f;
 	clearValue.DepthStencil.Stencil = 0;
-	ThrowIfFailed(mDevice->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT), 
+	ThrowIfFailed(mDevice->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
 		D3D12_HEAP_FLAG_NONE, &desc, D3D12_RESOURCE_STATE_COMMON, &clearValue, IID_PPV_ARGS(&mDepthStencilBuffer)));
 
 	D3D12_DEPTH_STENCIL_VIEW_DESC viewDesc;
@@ -162,7 +162,7 @@ bool Engine::Core::EngineCoreDirectX::ResizeBuffer()
 	ThrowIfFailed(mCommandAlloc->Reset());
 	ThrowIfFailed(mCommandList->Reset(mCommandAlloc.Get(), nullptr));
 
-	mCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(mDepthStencilBuffer.Get(), 
+	mCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(mDepthStencilBuffer.Get(),
 		D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_DEPTH_WRITE));
 	ThrowIfFailed(mCommandList->Close());
 
@@ -222,7 +222,7 @@ bool Engine::Core::EngineCoreDirectX::CreateIndexBuffer(void *indices, UINT byte
 	desc.MiscFlags = 0;
 	desc.StructureByteStride = 0;
 	desc.Usage = usage;
-	
+
 	D3D11_SUBRESOURCE_DATA data;
 	data.pSysMem = indices;
 	data.SysMemPitch = 0;
@@ -262,7 +262,7 @@ bool Engine::Core::EngineCoreDirectX::CreateShader(string srcFile, ID3DX11Effect
 		return false;
 	}
 
-	hr = D3DX11CreateEffectFromMemory(compileShader->GetBufferPointer(), compileShader->GetBufferSize(), 0, mD3dDevice, 
+	hr = D3DX11CreateEffectFromMemory(compileShader->GetBufferPointer(), compileShader->GetBufferSize(), 0, mD3dDevice,
 		effect);
 
 	compileShader->Release();
@@ -276,7 +276,7 @@ bool Engine::Core::EngineCoreDirectX::CreateShader(string srcFile, ID3DX11Effect
 
 bool Engine::Core::EngineCoreDirectX::CreateInputLayout(const D3D11_INPUT_ELEMENT_DESC * vertexDesc, const UINT vertexDescCount, D3DX11_PASS_DESC * passDesc, ID3D11InputLayout ** layout)
 {
-	HRESULT hr = mD3dDevice->CreateInputLayout(vertexDesc, vertexDescCount, passDesc->pIAInputSignature, 
+	HRESULT hr = mD3dDevice->CreateInputLayout(vertexDesc, vertexDescCount, passDesc->pIAInputSignature,
 		passDesc->IAInputSignatureSize, layout);
 	if (FAILED(hr))
 	{
@@ -307,13 +307,18 @@ void Engine::Core::EngineCoreDirectX::BeginDraw()
 	ThrowIfFailed(mCommandList->Reset(mCommandAlloc.Get(), nullptr));
 
 	// D3D12_RESOURCE_STATE_COMMON = D3D12_RESOURCE_STATE_PRESENT = 0
-	mCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(mBackBuffer[mCurBackBuffer].Get(), 
+	/*
+		The resource is used as a render target.
+		A subresource must be in this state when it is rendered to or when it is cleared with
+		ID3D12GraphicsCommandList::ClearRenderTargetView.
+	*/
+	mCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(mBackBuffer[mCurBackBuffer].Get(),
 		D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
 	mCommandList->RSSetScissorRects(1, &mScissorRect);
 	mCommandList->RSSetViewports(1, &mViewport);
 	CD3DX12_CPU_DESCRIPTOR_HANDLE dsv = CD3DX12_CPU_DESCRIPTOR_HANDLE(
 		mDsvHeap->GetCPUDescriptorHandleForHeapStart());
-	mCommandList->ClearDepthStencilView(dsv, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, 
+	mCommandList->ClearDepthStencilView(dsv, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0,
 		nullptr);
 	CD3DX12_CPU_DESCRIPTOR_HANDLE rtv = CD3DX12_CPU_DESCRIPTOR_HANDLE(
 		mRtvHeap->GetCPUDescriptorHandleForHeapStart(), mCurBackBuffer, mRtvHeapIncSize);
@@ -323,7 +328,7 @@ void Engine::Core::EngineCoreDirectX::BeginDraw()
 
 void Engine::Core::EngineCoreDirectX::DrawObject(EngineObjectDirectX * object, EngineCameraDirectX * camera)
 {
-	
+
 }
 
 void Engine::Core::EngineCoreDirectX::EndDraw()
@@ -337,10 +342,6 @@ void Engine::Core::EngineCoreDirectX::EndDraw()
 
 		If IDXGISwapChain::Present (or IDXGISwapChain1::Present1) is called on a resource that
 		is not currently in this state, a debug layer warning is emitted.
-
-		The resource is used as a render target.
-		A subresource must be in this state when it is rendered to or when it is cleared with
-		ID3D12GraphicsCommandList::ClearRenderTargetView.
 	*/
 	mCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(mBackBuffer[mCurBackBuffer].Get(),
 		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
@@ -350,6 +351,6 @@ void Engine::Core::EngineCoreDirectX::EndDraw()
 	mCommandQueue->ExecuteCommandLists(_countof(cmdList), cmdList);
 
 	ThrowIfFailed(mSwapChain->Present(0, 0));
-	mCurBackBuffer = (mCurBackBuffer + 1) % 2;
+	mCurBackBuffer = (mCurBackBuffer + 1) % mBackBufferCount;
 	FlushCommandQueue();
 }
