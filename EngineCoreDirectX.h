@@ -62,8 +62,11 @@ namespace Engine
 
 			ComPtr<ID3D12DescriptorHeap> mRtvHeap = nullptr;
 			ComPtr<ID3D12DescriptorHeap> mDsvHeap = nullptr;
+			ComPtr<ID3D12DescriptorHeap> mCbvHeap = nullptr;
+
 			UINT mRtvHeapIncSize = 0;
 			UINT mDsvHeapIncSize = 0;
+			UINT mCbvHeapIncSize = 0;
 
 			D3D12_VIEWPORT mViewport;
 			D3D12_RECT mScissorRect;
