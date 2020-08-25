@@ -107,9 +107,29 @@ bool Engine::Core::EngineCoreDirectX::Init()
 	cbvHeapDesc.NumDescriptors = 1;
 	cbvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	cbvHeapDesc.NodeMask = 0;
-	mDevice->CreateDescriptorHeap(&cbvHeapDesc, IID_PPV_ARGS(&mCbvHeap));
+	ThrowIfFailed(mDevice->CreateDescriptorHeap(&cbvHeapDesc, IID_PPV_ARGS(&mCbvHeap)));
 
-	// 6. create const buffer
+	// 6. create const buffer and view
+	UINT cbSize = CalcConstantBufferByteSize(sizeof(ObjectConstants));
+	ThrowIfFailed(mDevice->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+		D3D12_HEAP_FLAG_NONE, &CD3DX12_RESOURCE_DESC::Buffer(cbSize), D3D12_RESOURCE_STATE_GENERIC_READ,
+		nullptr, IID_PPV_ARGS(&mConstBuffer)));
+
+	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
+	cbvDesc.BufferLocation = mConstBuffer->GetGPUVirtualAddress();
+	cbvDesc.SizeInBytes = cbSize;
+	CD3DX12_CPU_DESCRIPTOR_HANDLE handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
+		mCbvHeap->GetCPUDescriptorHandleForHeapStart());
+	mDevice->CreateConstantBufferView(&cbvDesc, handle);
+
+	// 7. create root signature
+	CD3DX12_ROOT_PARAMETER rootParams[1];
+	CD3DX12_ROOT_SIGNATURE_DESC sigDesc(1, rootParams, 0, nullptr, 
+		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+	ComPtr<ID3DBlob> signature;
+	ComPtr<ID3DBlob> error;
+	D3D12SerializeRootSignature(&sigDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, &error);
+	mDevice->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), );
 
 	ResizeBuffer();
 

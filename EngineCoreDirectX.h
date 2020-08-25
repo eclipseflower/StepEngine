@@ -68,6 +68,8 @@ namespace Engine
 			UINT mDsvHeapIncSize = 0;
 			UINT mCbvHeapIncSize = 0;
 
+			ComPtr<ID3D12Resource> mConstBuffer = nullptr;
+
 			D3D12_VIEWPORT mViewport;
 			D3D12_RECT mScissorRect;
 		};
