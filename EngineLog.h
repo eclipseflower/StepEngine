@@ -19,6 +19,7 @@ namespace Engine
 			static void LogMessageBox(const string msg);
 			static void LogWarningMessageBox(const string msg);
 			static void LogErrorMessageBox(const string msg);
+			static void LogDebugString(const string msg);
 		};
 	}
 }

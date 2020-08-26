@@ -13,6 +13,7 @@
 #include <comdef.h>
 #include <wrl.h>
 #include <DirectXMath.h>
+#include <d3dcompiler.h>
 #include "d3dx12.h"
 
 using std::string;

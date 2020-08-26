@@ -18,3 +18,8 @@ void Engine::Debug::EngineLog::LogErrorMessageBox(const string msg)
 {
 	MessageBox(nullptr, msg.c_str(), DEBUG_ERROR.c_str(), MB_ICONERROR);
 }
+
+void Engine::Debug::EngineLog::LogDebugString(const string msg)
+{
+	OutputDebugString(msg.c_str());
+}

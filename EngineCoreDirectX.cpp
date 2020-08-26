@@ -286,9 +286,21 @@ bool Engine::Core::EngineCoreDirectX::CreateIndexBuffer(void *indices, UINT byte
 }
 */
 
-bool Engine::Core::EngineCoreDirectX::CreateShader(string srcFile, ID3DBlob **vs, ID3DBlob **ps)
+bool Engine::Core::EngineCoreDirectX::CreateShader(wstring srcFile, ID3DBlob **vs, ID3DBlob **ps)
 {
-
+	UINT compileFlags = 0;
+#if defined(DEBUG) || defined(_DEBUG)  
+	compileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+#endif
+	ID3DBlob *error = nullptr;
+	HRESULT hr;
+	hr = D3DCompileFromFile(srcFile.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, "VS", "vs_5_0", compileFlags, 0, 
+		vs, &error);
+	if (error != nullptr)
+	{
+		EngineLog::LogErrorMessageBox((char *)error->GetBufferPointer());
+	}
+	ThrowIfFailed(hr);
 	return true;
 }
 
