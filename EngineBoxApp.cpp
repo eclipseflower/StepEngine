@@ -19,7 +19,14 @@ int EngineBoxApp::Run(HINSTANCE hInstance)
 	{
 		return -1;
 	}
+
 	if (!manager.InitEngineCore(false, 4))
+	{
+		return -1;
+	}
+
+	EngineShaderDirectX *shader;
+	if (!manager.CreateShader("color.hlsl", &shader))
 	{
 		return -1;
 	}
@@ -27,12 +34,6 @@ int EngineBoxApp::Run(HINSTANCE hInstance)
 	/*
 	EngineObjectDirectX *boxObject;
 	if (!manager.CreateCylinderObject(2, 2, 2, &boxObject))
-	{
-		return -1;
-	}
-
-	EngineShaderDirectX *shader;
-	if (!manager.CreateShader("color.fx", &shader))
 	{
 		return -1;
 	}

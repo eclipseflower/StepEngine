@@ -209,7 +209,6 @@ bool Engine::EngineManagerDirectX::CreateCylinderObject(float topRadius, float b
 
 bool Engine::EngineManagerDirectX::CreateShader(string srcFile, EngineShaderDirectX ** shader)
 {
-	/*
 	if (mCoreInst)
 	{
 		*shader = new EngineShaderDirectX;
@@ -220,17 +219,5 @@ bool Engine::EngineManagerDirectX::CreateShader(string srcFile, EngineShaderDire
 		}
 		return false;
 	}
-	*/
 	return false;
 }
-
-/*
-bool Engine::EngineManagerDirectX::CreateInputLayout(D3DX11_PASS_DESC * passDesc, ID3D11InputLayout ** layout)
-{
-	if (mCoreInst)
-	{
-		return mCoreInst->CreateInputLayout(VertexDesc, VertexCount, passDesc, layout);
-	}
-	return false;
-}
-*/

@@ -123,13 +123,29 @@ bool Engine::Core::EngineCoreDirectX::Init()
 	mDevice->CreateConstantBufferView(&cbvDesc, handle);
 
 	// 7. create root signature
+	CD3DX12_DESCRIPTOR_RANGE cbvTable;
+	cbvTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0);
 	CD3DX12_ROOT_PARAMETER rootParams[1];
+	rootParams[1].InitAsDescriptorTable(1, &cbvTable);
 	CD3DX12_ROOT_SIGNATURE_DESC sigDesc(1, rootParams, 0, nullptr, 
 		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
-	ComPtr<ID3DBlob> signature;
-	ComPtr<ID3DBlob> error;
-	D3D12SerializeRootSignature(&sigDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, &error);
-	mDevice->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), );
+	ComPtr<ID3DBlob> signature = nullptr;
+	ComPtr<ID3DBlob> error = nullptr;
+	HRESULT hr = D3D12SerializeRootSignature(&sigDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, &error);
+	if (error != nullptr)
+	{
+		EngineLog::LogErrorMessageBox((char *)error->GetBufferPointer());
+	}
+	ThrowIfFailed(hr);
+	ThrowIfFailed(mDevice->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), 
+		IID_PPV_ARGS(&mRootSignature)));
+
+	// 8. create input layout
+	mInputLayout =
+	{
+		{"POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
+		{"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0}
+	};
 
 	ResizeBuffer();
 
@@ -268,55 +284,13 @@ bool Engine::Core::EngineCoreDirectX::CreateIndexBuffer(void *indices, UINT byte
 
 	return true;
 }
-
-bool Engine::Core::EngineCoreDirectX::CreateShader(string srcFile, ID3DX11Effect **effect)
-{
-	DWORD shaderFlags = 0;
-#if defined( DEBUG ) || defined( _DEBUG )
-	shaderFlags |= D3D10_SHADER_DEBUG;
-	shaderFlags |= D3D10_SHADER_SKIP_OPTIMIZATION;
-#endif
-
-	ID3D10Blob *compileShader = nullptr;
-	ID3D10Blob *compileMsg = nullptr;
-	HRESULT hr = D3DX11CompileFromFile(srcFile.c_str(), nullptr, nullptr, nullptr, "fx_5_0", shaderFlags, 0, nullptr,
-		&compileShader, &compileMsg, nullptr);
-	if (compileMsg != nullptr)
-	{
-		EngineLog::LogErrorMessageBox((char *)compileMsg->GetBufferPointer());
-		compileMsg->Release();
-		return false;
-	}
-	if (FAILED(hr))
-	{
-		EngineLog::LogErrorMessageBox("D3DX11CompileFromFile Failed");
-		return false;
-	}
-
-	hr = D3DX11CreateEffectFromMemory(compileShader->GetBufferPointer(), compileShader->GetBufferSize(), 0, mD3dDevice,
-		effect);
-
-	compileShader->Release();
-	if (FAILED(hr))
-	{
-		EngineLog::LogErrorMessageBox("D3DX11CreateEffectFromMemory Failed");
-		return false;
-	}
-	return true;
-}
-
-bool Engine::Core::EngineCoreDirectX::CreateInputLayout(const D3D11_INPUT_ELEMENT_DESC * vertexDesc, const UINT vertexDescCount, D3DX11_PASS_DESC * passDesc, ID3D11InputLayout ** layout)
-{
-	HRESULT hr = mD3dDevice->CreateInputLayout(vertexDesc, vertexDescCount, passDesc->pIAInputSignature,
-		passDesc->IAInputSignatureSize, layout);
-	if (FAILED(hr))
-	{
-		EngineLog::LogErrorMessageBox("CreateInputLayout Failed");
-		return false;
-	}
-	return true;
-}
 */
+
+bool Engine::Core::EngineCoreDirectX::CreateShader(string srcFile, ID3DBlob **vs, ID3DBlob **ps)
+{
+
+	return true;
+}
 
 void Engine::Core::EngineCoreDirectX::FlushCommandQueue()
 {

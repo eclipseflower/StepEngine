@@ -46,7 +46,6 @@ namespace Engine
 		bool CreateBoxObject(EngineObjectDirectX **object);
 		bool CreateCylinderObject(float topRadius, float bottomRadius, float height, EngineObjectDirectX **object);
 		bool CreateShader(string srcFile, EngineShaderDirectX **shader);
-		//bool CreateInputLayout(D3DX11_PASS_DESC * passDesc, ID3D11InputLayout ** layout);
 
 		EngineWindowDirectX *mWindowInst;
 		EngineCoreDirectX *mCoreInst;

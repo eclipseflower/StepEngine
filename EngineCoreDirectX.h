@@ -29,8 +29,7 @@ namespace Engine
 			bool ResizeBuffer();
 			//bool CreateVertexBuffer(void * vertices, UINT byteWidth, D3D11_USAGE usage, UINT cpuAccessFlags, ID3D11Buffer ** buffer);
 			//bool CreateIndexBuffer(void * indices, UINT byteWidth, D3D11_USAGE usage, ID3D11Buffer ** buffer);
-			//bool CreateShader(string srcFile, ID3DX11Effect ** effect);
-			//bool CreateInputLayout(const D3D11_INPUT_ELEMENT_DESC * vertexDesc, const UINT vertexDescCount, D3DX11_PASS_DESC * passDesc, ID3D11InputLayout ** layout);
+			bool CreateShader(string srcFile);
 
 			void FlushCommandQueue();
 			void BeginDraw();
@@ -69,6 +68,9 @@ namespace Engine
 			UINT mCbvHeapIncSize = 0;
 
 			ComPtr<ID3D12Resource> mConstBuffer = nullptr;
+			ComPtr<ID3D12RootSignature> mRootSignature = nullptr;
+
+			vector<D3D12_INPUT_ELEMENT_DESC> mInputLayout;
 
 			D3D12_VIEWPORT mViewport;
 			D3D12_RECT mScissorRect;
