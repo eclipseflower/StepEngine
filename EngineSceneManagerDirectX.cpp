@@ -21,7 +21,6 @@ Engine::Core::EngineSceneManagerDirectX::~EngineSceneManagerDirectX()
 
 bool Engine::Core::EngineSceneManagerDirectX::CreateBoxObject(EngineObjectDirectX ** object)
 {
-	/*
 	*object = new EngineObjectDirectX;
 
 	(*object)->mVertexCount = 8;
@@ -86,7 +85,7 @@ bool Engine::Core::EngineSceneManagerDirectX::CreateBoxObject(EngineObjectDirect
 	XMStoreFloat4x4(&(*object)->mWorldMatrix, i);
 
 	mSceneObjects.push_back(*object);
-	*/
+
 	return true;
 }
 

@@ -234,32 +234,45 @@ bool Engine::Core::EngineCoreDirectX::ResizeBuffer()
 	return true;
 }
 
+// https://gamedev.stackexchange.com/questions/60668/how-to-use-updatesubresource-and-map-unmap
 /*
-bool Engine::Core::EngineCoreDirectX::CreateVertexBuffer(void *vertices, UINT byteWidth, D3D11_USAGE usage, UINT cpuAccessFlags, ID3D11Buffer **buffer)
+	They may have been referring to the actual act of updating a resource and not to the actual function call. 
+	In general, UpdateSubResource should be used for default resources that are not subject to frequent updates 
+	(i.e.: not every frame. 
+	In this case, it is more likely that the buffer could be to be copied to a temporary buffer accessible from 
+	the command buffer (due to race conditions for example). 
+	It will also allow you the update sub resources (in textures, for example).
+
+	Map/Unmap should be used when a resource is going to be updated very frequently (i.e. every frame), 
+	such as some constant buffers. 
+	The most common case is when you are overwriting the whole buffer with WriteDiscard. 
+	There's an nVidia presentation where they reccommend this practice.
+*/
+bool Engine::Core::EngineCoreDirectX::CreateDefaultBuffer(void *data, UINT byteWidth, ID3D12Resource **defaultBuffer, ID3D12Resource **uploadBuffer)
 {
-	D3D11_BUFFER_DESC desc;
-	desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	desc.ByteWidth = byteWidth;
-	desc.CPUAccessFlags = cpuAccessFlags;
-	desc.MiscFlags = 0;
-	desc.StructureByteStride = 0;
-	desc.Usage = usage;
+	ID3DBlob *bufferCPU = nullptr;
+	D3DCreateBlob(byteWidth, &bufferCPU);
+	CopyMemory(bufferCPU->GetBufferPointer(), data, byteWidth);
 
-	D3D11_SUBRESOURCE_DATA data;
-	data.pSysMem = vertices;
-	data.SysMemPitch = 0;
-	data.SysMemSlicePitch = 0;
+	ThrowIfFailed(mDevice->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD), 
+		D3D12_HEAP_FLAG_NONE, &CD3DX12_RESOURCE_DESC::Buffer(byteWidth), D3D12_RESOURCE_STATE_GENERIC_READ, 
+		nullptr, IID_PPV_ARGS(uploadBuffer)));
 
-	HRESULT hr = mD3dDevice->CreateBuffer(&desc, &data, buffer);
-	if (FAILED(hr))
-	{
-		EngineLog::LogErrorMessageBox("CreateBuffer Failed");
-		return false;
-	}
+	ThrowIfFailed(mDevice->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+		D3D12_HEAP_FLAG_NONE, &CD3DX12_RESOURCE_DESC::Buffer(byteWidth), D3D12_RESOURCE_STATE_COMMON,
+		nullptr, IID_PPV_ARGS(defaultBuffer)));
 
+	mCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(*defaultBuffer, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST));
+	D3D12_SUBRESOURCE_DATA subResourceData;
+	subResourceData.pData = data;
+	subResourceData.RowPitch = byteWidth;
+	subResourceData.SlicePitch = byteWidth;
+	UpdateSubresources<1>(mCommandList.Get(), *defaultBuffer, *uploadBuffer, 0, 0, 1, &subResourceData);
+	mCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(*defaultBuffer, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_GENERIC_READ));
 	return true;
 }
 
+/*
 bool Engine::Core::EngineCoreDirectX::CreateIndexBuffer(void *indices, UINT byteWidth, D3D11_USAGE usage, ID3D11Buffer **buffer)
 {
 	D3D11_BUFFER_DESC desc;
@@ -294,8 +307,17 @@ bool Engine::Core::EngineCoreDirectX::CreateShader(wstring srcFile, ID3DBlob **v
 #endif
 	ID3DBlob *error = nullptr;
 	HRESULT hr;
-	hr = D3DCompileFromFile(srcFile.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, "VS", "vs_5_0", compileFlags, 0, 
-		vs, &error);
+	hr = D3DCompileFromFile(srcFile.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, "VS", "vs_5_0", 
+		compileFlags, 0, vs, &error);
+	if (error != nullptr)
+	{
+		EngineLog::LogErrorMessageBox((char *)error->GetBufferPointer());
+	}
+	ThrowIfFailed(hr);
+
+	error = nullptr;
+	hr = D3DCompileFromFile(srcFile.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, "PS", "ps_5_0", 
+		compileFlags, 0, ps, &error);
 	if (error != nullptr)
 	{
 		EngineLog::LogErrorMessageBox((char *)error->GetBufferPointer());

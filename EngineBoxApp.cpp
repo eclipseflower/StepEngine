@@ -31,13 +31,13 @@ int EngineBoxApp::Run(HINSTANCE hInstance)
 		return -1;
 	}
 
-	/*
+
 	EngineObjectDirectX *boxObject;
-	if (!manager.CreateCylinderObject(2, 2, 2, &boxObject))
+	if (!manager.CreateBoxObject(&boxObject))
 	{
 		return -1;
 	}
-
+	/*
 	boxObject->mShader = shader;
 
 	manager.mUpdateFunc = bind(&EngineBoxApp::Update, this, _1);

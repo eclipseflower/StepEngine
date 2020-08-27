@@ -27,7 +27,7 @@ namespace Engine
 			~EngineCoreDirectX();
 			bool Init();
 			bool ResizeBuffer();
-			//bool CreateVertexBuffer(void * vertices, UINT byteWidth, D3D11_USAGE usage, UINT cpuAccessFlags, ID3D11Buffer ** buffer);
+			bool CreateDefaultBuffer(void *data, UINT byteWidth, ID3D12Resource **bufferGPU, ID3D12Resource **uploadBuffer);
 			//bool CreateIndexBuffer(void * indices, UINT byteWidth, D3D11_USAGE usage, ID3D11Buffer ** buffer);
 			bool CreateShader(wstring srcFile, ID3DBlob **vs, ID3DBlob **ps);
 
