@@ -67,6 +67,7 @@ namespace Engine
 
 			ComPtr<ID3D12Resource> mConstBuffer = nullptr;
 			ComPtr<ID3D12RootSignature> mRootSignature = nullptr;
+			ComPtr<ID3D12PipelineState> mPipelineState = nullptr;
 
 			vector<D3D12_INPUT_ELEMENT_DESC> mInputLayout;
 
