@@ -178,25 +178,15 @@ HWND Engine::EngineManagerDirectX::GetHwnd()
 	return nullptr;
 }
 
-/*
-bool Engine::EngineManagerDirectX::CreateVertexBuffer(void *vertices, UINT byteWidth, D3D11_USAGE usage, UINT cpuAccessFlags, ID3D11Buffer **buffer)
+bool Engine::EngineManagerDirectX::CreateDefaultBuffer(void *data, UINT byteWidth, ID3D12Resource **bufferGPU, ID3D12Resource **uploadBuffer)
 {
 	if (mCoreInst)
 	{
-		return mCoreInst->CreateVertexBuffer(vertices, byteWidth, usage, cpuAccessFlags, buffer);
+		return mCoreInst->CreateDefaultBuffer(data, byteWidth, bufferGPU, uploadBuffer);
 	}
 	return false;
 }
 
-bool Engine::EngineManagerDirectX::CreateIndexBuffer(void *indices, UINT byteWidth, D3D11_USAGE usage, ID3D11Buffer **buffer)
-{
-	if (mCoreInst)
-	{
-		return mCoreInst->CreateIndexBuffer(indices, byteWidth, usage, buffer);
-	}
-	return false;
-}
-*/
 bool Engine::EngineManagerDirectX::CreateBoxObject(EngineObjectDirectX **object)
 {
 	return mSceneMgrInst.CreateBoxObject(object);
@@ -207,14 +197,13 @@ bool Engine::EngineManagerDirectX::CreateCylinderObject(float topRadius, float b
 	return mSceneMgrInst.CreateCylinderObject(topRadius, bottomRadius, height, object);
 }
 
-bool Engine::EngineManagerDirectX::CreateShader(string srcFile, EngineShaderDirectX ** shader)
+bool Engine::EngineManagerDirectX::CreateShader(wstring srcFile, EngineShaderDirectX ** shader)
 {
 	if (mCoreInst)
 	{
 		*shader = new EngineShaderDirectX;
-		if (mCoreInst->CreateShader(srcFile, &(*shader)->mEffect))
+		if (mCoreInst->CreateShader(srcFile, &(*shader)->mVSByteCode, &(*shader)->mPSByteCode));
 		{
-			(*shader)->InitEffect();
 			return true;
 		}
 		return false;

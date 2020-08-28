@@ -16,10 +16,14 @@ namespace Engine
 		public:
 			int mVertexCount;
 			int mIndexCount;
-			//vector<EngineVertexDirectX> mVertices;
+			vector<EngineVertexDirectX> mVertices;
 			vector<UINT> mIndices;
-			//ID3D11Buffer *mVertexBuffer;
-			//ID3D11Buffer *mIndexBuffer;
+			
+			ComPtr<ID3D12Resource> mVertexBufferGPU = nullptr;
+			ComPtr<ID3D12Resource> mVertexBufferUploader = nullptr;
+			ComPtr<ID3D12Resource> mIndexBufferGPU = nullptr;
+			ComPtr<ID3D12Resource> mIndexBufferUploader = nullptr;
+
 
 			//XMFLOAT4X4 mWorldMatrix;
 

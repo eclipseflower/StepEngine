@@ -14,8 +14,6 @@ using Engine::Debug::EngineLog;
 using Engine::Object::EngineObjectDirectX;
 using Engine::Camera::EngineCameraDirectX;
 
-using Microsoft::WRL::ComPtr;
-
 namespace Engine
 {
 	namespace Core

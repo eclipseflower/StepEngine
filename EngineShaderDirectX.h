@@ -13,6 +13,9 @@ namespace Engine
 		class EngineShaderDirectX
 		{
 		public:
+			ComPtr<ID3DBlob> mVSByteCode = nullptr;
+			ComPtr<ID3DBlob> mPSByteCode = nullptr;
+
 			//ID3DX11Effect *mEffect = nullptr;
 			//ID3D11InputLayout *mInputLayout = nullptr;
 			//ID3DX11EffectTechnique *mMainTech = nullptr;

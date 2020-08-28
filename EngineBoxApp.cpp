@@ -26,7 +26,7 @@ int EngineBoxApp::Run(HINSTANCE hInstance)
 	}
 
 	EngineShaderDirectX *shader;
-	if (!manager.CreateShader("color.hlsl", &shader))
+	if (!manager.CreateShader(L"color.hlsl", &shader))
 	{
 		return -1;
 	}
@@ -37,14 +37,16 @@ int EngineBoxApp::Run(HINSTANCE hInstance)
 	{
 		return -1;
 	}
+
 	/*
 	boxObject->mShader = shader;
+	*/
 
 	manager.mUpdateFunc = bind(&EngineBoxApp::Update, this, _1);
 	manager.mMouseDownFunc = bind(&EngineBoxApp::OnMouseDown, this, _1, _2, _3);
 	manager.mMouseUpFunc = bind(&EngineBoxApp::OnMouseUp, this, _1, _2, _3);
 	manager.mMouseMoveFunc = bind(&EngineBoxApp::OnMouseMove, this, _1, _2, _3);
-	*/
+	
 	return manager.RunEngine();
 }
 

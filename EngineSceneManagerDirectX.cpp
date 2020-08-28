@@ -24,17 +24,18 @@ bool Engine::Core::EngineSceneManagerDirectX::CreateBoxObject(EngineObjectDirect
 	*object = new EngineObjectDirectX;
 
 	(*object)->mVertexCount = 8;
-	(*object)->mVertices.push_back({ XMFLOAT3(-1.0f, -1.0f, -1.0f), (const float*)&White });
-	(*object)->mVertices.push_back({ XMFLOAT3(-1.0f, +1.0f, -1.0f), (const float*)&Black });
-	(*object)->mVertices.push_back({ XMFLOAT3(+1.0f, +1.0f, -1.0f), (const float*)&Red });
-	(*object)->mVertices.push_back({ XMFLOAT3(+1.0f, -1.0f, -1.0f), (const float*)&Green });
-	(*object)->mVertices.push_back({ XMFLOAT3(-1.0f, -1.0f, +1.0f), (const float*)&Blue });
-	(*object)->mVertices.push_back({ XMFLOAT3(-1.0f, +1.0f, +1.0f), (const float*)&Yellow });
-	(*object)->mVertices.push_back({ XMFLOAT3(+1.0f, +1.0f, +1.0f), (const float*)&Cyan });
-	(*object)->mVertices.push_back({ XMFLOAT3(+1.0f, -1.0f, +1.0f), (const float*)&Magenta });
+	(*object)->mVertices.push_back({ XMFLOAT3(-1.0f, -1.0f, -1.0f), (XMFLOAT4)White });
+	(*object)->mVertices.push_back({ XMFLOAT3(-1.0f, +1.0f, -1.0f), (XMFLOAT4)Black });
+	(*object)->mVertices.push_back({ XMFLOAT3(+1.0f, +1.0f, -1.0f), (XMFLOAT4)Red });
+	(*object)->mVertices.push_back({ XMFLOAT3(+1.0f, -1.0f, -1.0f), (XMFLOAT4)Green });
+	(*object)->mVertices.push_back({ XMFLOAT3(-1.0f, -1.0f, +1.0f), (XMFLOAT4)Blue });
+	(*object)->mVertices.push_back({ XMFLOAT3(-1.0f, +1.0f, +1.0f), (XMFLOAT4)Yellow });
+	(*object)->mVertices.push_back({ XMFLOAT3(+1.0f, +1.0f, +1.0f), (XMFLOAT4)Cyan });
+	(*object)->mVertices.push_back({ XMFLOAT3(+1.0f, -1.0f, +1.0f), (XMFLOAT4)Magenta });
 
-	bool res = gManagerDirectX->CreateVertexBuffer(&(*object)->mVertices[0], 
-		sizeof(EngineVertexDirectX) * (*object)->mVertexCount, D3D11_USAGE_IMMUTABLE, 0, &(*object)->mVertexBuffer);
+	bool res = gManagerDirectX->CreateDefaultBuffer(&(*object)->mVertices[0], 
+		sizeof(EngineVertexDirectX) * (*object)->mVertexCount, 
+		&(*object)->mVertexBufferGPU, &(*object)->mVertexBufferUploader);
 
 	if (!res)
 	{
@@ -73,16 +74,13 @@ bool Engine::Core::EngineSceneManagerDirectX::CreateBoxObject(EngineObjectDirect
 		(*object)->mIndices.push_back(indices[i]);
 	}
 
-	res = gManagerDirectX->CreateIndexBuffer(&(*object)->mIndices[0], sizeof(UINT) * (*object)->mIndexCount,
-		D3D11_USAGE_IMMUTABLE, &(*object)->mIndexBuffer);
+	res = gManagerDirectX->CreateDefaultBuffer(&(*object)->mIndices[0], sizeof(UINT) * (*object)->mIndexCount,
+		&(*object)->mIndexBufferGPU, &(*object)->mIndexBufferUploader);
 
 	if (!res)
 	{
 		return false;
 	}
-
-	XMMATRIX i = XMMatrixIdentity();
-	XMStoreFloat4x4(&(*object)->mWorldMatrix, i);
 
 	mSceneObjects.push_back(*object);
 

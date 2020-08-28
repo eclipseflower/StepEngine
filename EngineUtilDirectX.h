@@ -14,10 +14,23 @@
 #include <wrl.h>
 #include <DirectXMath.h>
 #include <d3dcompiler.h>
+#include <DirectXColors.h>
 #include "d3dx12.h"
 
 using std::string;
 using std::wstring;
+
+using Microsoft::WRL::ComPtr;
+
+using DirectX::Colors::White;
+using DirectX::Colors::Black;
+using DirectX::Colors::Red;
+using DirectX::Colors::Green;
+using DirectX::Colors::Blue;
+using DirectX::Colors::Yellow;
+using DirectX::Colors::Cyan;
+using DirectX::Colors::Magenta;
+using DirectX::Colors::LightSteelBlue;
 
 using DirectX::XMVECTORF32;
 using DirectX::XMVECTOR;
@@ -68,6 +81,18 @@ namespace Engine
 	}
 	#endif
 
+	struct EngineVertexDirectX
+	{
+		XMFLOAT3 position;
+		XMFLOAT4 color;
+
+		EngineVertexDirectX(XMFLOAT3 position, XMFLOAT4 color)
+		{
+			this->position = position;
+			this->color = color;
+		}
+	};
+
 	static XMFLOAT4X4 Identity4x4()
 	{
 		static XMFLOAT4X4 I(
@@ -99,8 +124,6 @@ namespace Engine
 		// 512
 		return (byteSize + 255) & ~255;
 	}
-
-	XMGLOBALCONST XMVECTORF32 LightSteelBlue = { { { 0.690196097f, 0.768627524f, 0.870588303f, 1.000000000f } } };
 }
 /*
 
@@ -116,18 +139,6 @@ namespace Engine
 	XMGLOBALCONST XMVECTORF32 Yellow	= { 1.0f, 1.0f, 0.0f, 1.0f };
 	XMGLOBALCONST XMVECTORF32 Cyan		= { 0.0f, 1.0f, 1.0f, 1.0f };
 	XMGLOBALCONST XMVECTORF32 Magenta	= { 1.0f, 0.0f, 1.0f, 1.0f };
-
-	struct EngineVertexDirectX
-	{
-		XMFLOAT3 position;
-		XMFLOAT4 color;
-
-		EngineVertexDirectX(XMFLOAT3 position, const float *color)
-		{
-			this->position = position;
-			this->color = XMFLOAT4(color);
-		}
-	};
 
 	extern const D3D11_INPUT_ELEMENT_DESC VertexDesc[];
 	extern const UINT VertexCount;
