@@ -147,29 +147,6 @@ bool Engine::Core::EngineCoreDirectX::Init()
 		{"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0}
 	};
 
-	// 9. create pipeline state object
-	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc;
-	ZeroMemory(&psoDesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
-	psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
-	psoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
-	psoDesc.DSVFormat = mDepthStencilBufferFormat;
-	psoDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
-	psoDesc.IBStripCutValue = D3D12_INDEX_BUFFER_STRIP_CUT_VALUE_DISABLED;
-	psoDesc.InputLayout = { mInputLayout.data(), mInputLayout.size() };
-	psoDesc.NodeMask = 0;
-	psoDesc.NumRenderTargets = 1;
-	psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-	psoDesc.pRootSignature = mRootSignature.Get();
-	psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
-	psoDesc.RTVFormats[0] = mBackBufferFormat;
-	psoDesc.SampleDesc.Count = mEnableMsaa ? mMsaaCount : 1;
-	psoDesc.SampleDesc.Quality = mEnableMsaa ? mMsaaQuality - 1 : 0;
-	psoDesc.SampleMask = UINT_MAX;
-	psoDesc.PS = 
-	psoDesc.VS =
-
-	ThrowIfFailed(mDevice->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&mPipelineState)));
-
 	ResizeBuffer();
 
 	return true;
@@ -346,6 +323,33 @@ bool Engine::Core::EngineCoreDirectX::CreateShader(wstring srcFile, ID3DBlob **v
 		EngineLog::LogErrorMessageBox((char *)error->GetBufferPointer());
 	}
 	ThrowIfFailed(hr);
+	return true;
+}
+
+bool Engine::Core::EngineCoreDirectX::CreatePipelineStateObject(ID3DBlob * vs, ID3DBlob * ps, ID3D12PipelineState **pipelineStateObject)
+{
+	// create pipeline state object
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc;
+	ZeroMemory(&psoDesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
+	psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
+	psoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
+	psoDesc.DSVFormat = mDepthStencilBufferFormat;
+	psoDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
+	psoDesc.IBStripCutValue = D3D12_INDEX_BUFFER_STRIP_CUT_VALUE_DISABLED;
+	psoDesc.InputLayout = { mInputLayout.data(), mInputLayout.size() };
+	psoDesc.NodeMask = 0;
+	psoDesc.NumRenderTargets = 1;
+	psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	psoDesc.pRootSignature = mRootSignature.Get();
+	psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+	psoDesc.RTVFormats[0] = mBackBufferFormat;
+	psoDesc.SampleDesc.Count = mEnableMsaa ? mMsaaCount : 1;
+	psoDesc.SampleDesc.Quality = mEnableMsaa ? mMsaaQuality - 1 : 0;
+	psoDesc.SampleMask = UINT_MAX;
+	psoDesc.PS = { ps->GetBufferPointer(), ps->GetBufferSize() };
+	psoDesc.VS = { vs->GetBufferPointer(), vs->GetBufferSize() };
+
+	ThrowIfFailed(mDevice->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(pipelineStateObject)));
 	return true;
 }
 

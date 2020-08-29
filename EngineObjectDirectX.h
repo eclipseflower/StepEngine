@@ -23,7 +23,7 @@ namespace Engine
 			ComPtr<ID3D12Resource> mVertexBufferUploader = nullptr;
 			ComPtr<ID3D12Resource> mIndexBufferGPU = nullptr;
 			ComPtr<ID3D12Resource> mIndexBufferUploader = nullptr;
-
+			ComPtr<ID3D12PipelineState> mPipelineState = nullptr;
 
 			//XMFLOAT4X4 mWorldMatrix;
 
@@ -31,6 +31,8 @@ namespace Engine
 
 			EngineObjectDirectX();
 			~EngineObjectDirectX();
+
+			void SetShader(EngineShaderDirectX *shader);
 		};
 	}
 }

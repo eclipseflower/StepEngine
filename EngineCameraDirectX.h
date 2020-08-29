@@ -17,7 +17,7 @@ namespace Engine
 //			void LookAt(const XMVECTOR& pos, const XMVECTOR& target, const XMVECTOR& up);
 
 //			XMFLOAT4X4 mViewMatrix;
-//			XMFLOAT4X4 mProjMatrix;
+			XMFLOAT4X4 mProjMatrix;
 		};
 	}
 }

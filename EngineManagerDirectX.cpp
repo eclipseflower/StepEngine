@@ -210,3 +210,15 @@ bool Engine::EngineManagerDirectX::CreateShader(wstring srcFile, EngineShaderDir
 	}
 	return false;
 }
+
+bool Engine::EngineManagerDirectX::CreatePipelineStateObject(EngineShaderDirectX * shader, ID3D12PipelineState **pipelineStateObject)
+{
+	if (mCoreInst)
+	{
+		if (mCoreInst->CreatePipelineStateObject(shader->mVSByteCode.Get(), shader->mPSByteCode.Get(), pipelineStateObject))
+		{
+			return true;
+		}
+	}
+	return false;
+}
