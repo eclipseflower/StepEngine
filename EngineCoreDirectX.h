@@ -26,7 +26,6 @@ namespace Engine
 			bool Init();
 			bool ResizeBuffer();
 			bool CreateDefaultBuffer(void *data, UINT byteWidth, ID3D12Resource **bufferGPU, ID3D12Resource **uploadBuffer);
-			//bool CreateIndexBuffer(void * indices, UINT byteWidth, D3D11_USAGE usage, ID3D11Buffer ** buffer);
 			bool CreateShader(wstring srcFile, ID3DBlob **vs, ID3DBlob **ps);
 			bool CreatePipelineStateObject(ID3DBlob *vs, ID3DBlob *ps, ID3D12PipelineState **pipelineStateObject);
 
@@ -67,6 +66,7 @@ namespace Engine
 			UINT mCbvHeapIncSize = 0;
 
 			ComPtr<ID3D12Resource> mConstBuffer = nullptr;
+			void *mConstBufferData = nullptr;
 			ComPtr<ID3D12RootSignature> mRootSignature = nullptr;
 
 			vector<D3D12_INPUT_ELEMENT_DESC> mInputLayout;

@@ -272,33 +272,6 @@ bool Engine::Core::EngineCoreDirectX::CreateDefaultBuffer(void *data, UINT byteW
 	return true;
 }
 
-/*
-bool Engine::Core::EngineCoreDirectX::CreateIndexBuffer(void *indices, UINT byteWidth, D3D11_USAGE usage, ID3D11Buffer **buffer)
-{
-	D3D11_BUFFER_DESC desc;
-	desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	desc.ByteWidth = byteWidth;
-	desc.CPUAccessFlags = 0;
-	desc.MiscFlags = 0;
-	desc.StructureByteStride = 0;
-	desc.Usage = usage;
-
-	D3D11_SUBRESOURCE_DATA data;
-	data.pSysMem = indices;
-	data.SysMemPitch = 0;
-	data.SysMemSlicePitch = 0;
-
-	HRESULT hr = mD3dDevice->CreateBuffer(&desc, &data, buffer);
-	if (FAILED(hr))
-	{
-		EngineLog::LogErrorMessageBox("CreateBuffer Failed");
-		return false;
-	}
-
-	return true;
-}
-*/
-
 bool Engine::Core::EngineCoreDirectX::CreateShader(wstring srcFile, ID3DBlob **vs, ID3DBlob **ps)
 {
 	UINT compileFlags = 0;
@@ -390,11 +363,39 @@ void Engine::Core::EngineCoreDirectX::BeginDraw()
 		mRtvHeap->GetCPUDescriptorHandleForHeapStart(), mCurBackBuffer, mRtvHeapIncSize);
 	mCommandList->ClearRenderTargetView(rtv, LightSteelBlue, 0, nullptr);
 	mCommandList->OMSetRenderTargets(1, &rtv, true, &dsv);
+
+	ID3D12DescriptorHeap* descriptorHeaps[] = { mCbvHeap.Get() };
+	mCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
+	mCommandList->SetGraphicsRootSignature(mRootSignature.Get());
+	mCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
 void Engine::Core::EngineCoreDirectX::DrawObject(EngineObjectDirectX * object, EngineCameraDirectX * camera)
 {
+	ThrowIfFailed(mConstBuffer->Map(0, nullptr, &mConstBufferData));
+	XMMATRIX world = XMLoadFloat4x4(&object->mWorldMatrix);
+	XMMATRIX view = XMLoadFloat4x4(&camera->mViewMatrix);
+	XMMATRIX proj = XMLoadFloat4x4(&camera->mProjMatrix);
+	XMMATRIX worldViewProj = world * view * proj;
+	ObjectConstants objConstants;
+	// https://blog.csdn.net/u014038143/article/details/78192194
+	XMStoreFloat4x4(&objConstants.WorldViewProj, XMMatrixTranspose(worldViewProj));
+	memcpy(mConstBufferData, &objConstants, sizeof(sizeof(ObjectConstants)));
+	mConstBuffer->Unmap(0, nullptr);
 
+	mCommandList->SetPipelineState(object->mPipelineState.Get());
+
+	D3D12_VERTEX_BUFFER_VIEW vbv;
+	vbv.BufferLocation = object->mVertexBufferGPU->GetGPUVirtualAddress();
+	vbv.SizeInBytes = sizeof(EngineVertexDirectX) * object->mVertexCount;
+	vbv.StrideInBytes = sizeof(EngineVertexDirectX);
+	mCommandList->IASetVertexBuffers(0, 1, &vbv);
+
+	D3D12_INDEX_BUFFER_VIEW ibv;
+	ibv.BufferLocation = object->mIndexBufferGPU->GetGPUVirtualAddress();
+	ibv.Format = DXGI_FORMAT_R32_UINT;
+	ibv.SizeInBytes = object->mIndexCount * sizeof(UINT);
+	mCommandList->IASetIndexBuffer(&ibv);
 }
 
 void Engine::Core::EngineCoreDirectX::EndDraw()

@@ -14,9 +14,9 @@ namespace Engine
 			~EngineCameraDirectX();
 
 			void SetLens(float fovY, float aspect, float zn, float zf);
-//			void LookAt(const XMVECTOR& pos, const XMVECTOR& target, const XMVECTOR& up);
+			void LookAt(const XMVECTOR& pos, const XMVECTOR& target, const XMVECTOR& up);
 
-//			XMFLOAT4X4 mViewMatrix;
+			XMFLOAT4X4 mViewMatrix;
 			XMFLOAT4X4 mProjMatrix;
 		};
 	}

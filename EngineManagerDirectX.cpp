@@ -148,7 +148,7 @@ void Engine::EngineManagerDirectX::OnMouseMove(WPARAM btnState, int x, int y)
 
 void Engine::EngineManagerDirectX::CameraLookAt(const XMVECTOR & pos, const XMVECTOR & target, const XMVECTOR & up)
 {
-	//mCameraInst.LookAt(pos, target, up);
+	mCameraInst.LookAt(pos, target, up);
 }
 
 UINT Engine::EngineManagerDirectX::GetWindowWidth()

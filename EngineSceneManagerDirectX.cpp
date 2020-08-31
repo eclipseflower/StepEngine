@@ -82,6 +82,9 @@ bool Engine::Core::EngineSceneManagerDirectX::CreateBoxObject(EngineObjectDirect
 		return false;
 	}
 
+	XMMATRIX i = XMMatrixIdentity();
+	XMStoreFloat4x4(&(*object)->mWorldMatrix, i);
+
 	mSceneObjects.push_back(*object);
 
 	return true;

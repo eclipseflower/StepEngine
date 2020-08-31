@@ -14,10 +14,8 @@ void Engine::Camera::EngineCameraDirectX::SetLens(float fovY, float aspect, floa
 	XMStoreFloat4x4(&mProjMatrix, p);
 }
 
-/*
 void Engine::Camera::EngineCameraDirectX::LookAt(const XMVECTOR & pos, const XMVECTOR & target, const XMVECTOR & up)
 {
 	XMMATRIX v = XMMatrixLookAtLH(pos, target, up);
 	XMStoreFloat4x4(&mViewMatrix, v);
 }
-*/
