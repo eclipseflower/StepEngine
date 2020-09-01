@@ -202,7 +202,7 @@ bool Engine::EngineManagerDirectX::CreateShader(wstring srcFile, EngineShaderDir
 	if (mCoreInst)
 	{
 		*shader = new EngineShaderDirectX;
-		if (mCoreInst->CreateShader(srcFile, &(*shader)->mVSByteCode, &(*shader)->mPSByteCode));
+		if (mCoreInst->CreateShader(srcFile, &(*shader)->mVSByteCode, &(*shader)->mPSByteCode))
 		{
 			return true;
 		}

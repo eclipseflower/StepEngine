@@ -126,7 +126,7 @@ bool Engine::Core::EngineCoreDirectX::Init()
 	CD3DX12_DESCRIPTOR_RANGE cbvTable;
 	cbvTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0);
 	CD3DX12_ROOT_PARAMETER rootParams[1];
-	rootParams[1].InitAsDescriptorTable(1, &cbvTable);
+	rootParams[0].InitAsDescriptorTable(1, &cbvTable);
 	CD3DX12_ROOT_SIGNATURE_DESC sigDesc(1, rootParams, 0, nullptr, 
 		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 	ComPtr<ID3DBlob> signature = nullptr;
@@ -367,6 +367,7 @@ void Engine::Core::EngineCoreDirectX::BeginDraw()
 	ID3D12DescriptorHeap* descriptorHeaps[] = { mCbvHeap.Get() };
 	mCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 	mCommandList->SetGraphicsRootSignature(mRootSignature.Get());
+	mCommandList->SetGraphicsRootDescriptorTable(0, mCbvHeap->GetGPUDescriptorHandleForHeapStart());
 	mCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
@@ -396,6 +397,8 @@ void Engine::Core::EngineCoreDirectX::DrawObject(EngineObjectDirectX * object, E
 	ibv.Format = DXGI_FORMAT_R32_UINT;
 	ibv.SizeInBytes = object->mIndexCount * sizeof(UINT);
 	mCommandList->IASetIndexBuffer(&ibv);
+
+	mCommandList->DrawIndexedInstanced(object->mIndexCount, 1, 0, 0, 0);
 }
 
 void Engine::Core::EngineCoreDirectX::EndDraw()
