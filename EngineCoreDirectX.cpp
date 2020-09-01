@@ -164,6 +164,12 @@ bool Engine::Core::EngineCoreDirectX::ResizeBuffer()
 	UINT windowHeight = gManagerDirectX->GetWindowHeight();
 
 	// 1. re-create back buffer and view
+	// You need to release all resources associated to your swap chain before to resize it
+	for (int i = 0; i < mBackBufferCount; i++)
+	{
+		mBackBuffer[i].Reset();
+	}
+
 	ThrowIfFailed(mSwapChain->ResizeBuffers(mBackBufferCount, windowWidth, windowHeight, mBackBufferFormat,
 		DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH));
 	CD3DX12_CPU_DESCRIPTOR_HANDLE handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
@@ -177,6 +183,8 @@ bool Engine::Core::EngineCoreDirectX::ResizeBuffer()
 	}
 
 	// 2. re-create depth stencil buffer and view
+	// You need to release all resources associated to your swap chain before to resize it
+	mDepthStencilBuffer.Reset();
 	D3D12_RESOURCE_DESC desc;
 	desc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 	desc.Alignment = 0;
