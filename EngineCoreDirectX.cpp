@@ -258,9 +258,6 @@ bool Engine::Core::EngineCoreDirectX::ResizeBuffer()
 */
 bool Engine::Core::EngineCoreDirectX::CreateDefaultBuffer(void *data, UINT byteWidth, ID3D12Resource **defaultBuffer, ID3D12Resource **uploadBuffer)
 {
-	ThrowIfFailed(mCommandAlloc->Reset());
-	ThrowIfFailed(mCommandList->Reset(mCommandAlloc.Get(), nullptr));
-
 	ID3DBlob *bufferCPU = nullptr;
 	D3DCreateBlob(byteWidth, &bufferCPU);
 	CopyMemory(bufferCPU->GetBufferPointer(), data, byteWidth);
@@ -273,6 +270,9 @@ bool Engine::Core::EngineCoreDirectX::CreateDefaultBuffer(void *data, UINT byteW
 		D3D12_HEAP_FLAG_NONE, &CD3DX12_RESOURCE_DESC::Buffer(byteWidth), D3D12_RESOURCE_STATE_COMMON,
 		nullptr, IID_PPV_ARGS(defaultBuffer)));
 
+	ThrowIfFailed(mCommandAlloc->Reset());
+	ThrowIfFailed(mCommandList->Reset(mCommandAlloc.Get(), nullptr));
+
 	mCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(*defaultBuffer, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST));
 	D3D12_SUBRESOURCE_DATA subResourceData;
 	subResourceData.pData = data;
@@ -280,6 +280,10 @@ bool Engine::Core::EngineCoreDirectX::CreateDefaultBuffer(void *data, UINT byteW
 	subResourceData.SlicePitch = byteWidth;
 	UpdateSubresources<1>(mCommandList.Get(), *defaultBuffer, *uploadBuffer, 0, 0, 1, &subResourceData);
 	mCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(*defaultBuffer, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_GENERIC_READ));
+	ThrowIfFailed(mCommandList->Close());
+
+	ID3D12CommandList *cmdList[] = { mCommandList.Get() };
+	mCommandQueue->ExecuteCommandLists(_countof(cmdList), cmdList);
 	FlushCommandQueue();
 	return true;
 }
