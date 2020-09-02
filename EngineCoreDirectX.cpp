@@ -169,7 +169,7 @@ bool Engine::Core::EngineCoreDirectX::ResizeBuffer()
 	{
 		mBackBuffer[i].Reset();
 	}
-
+	mCurBackBuffer = 0;
 	ThrowIfFailed(mSwapChain->ResizeBuffers(mBackBufferCount, windowWidth, windowHeight, mBackBufferFormat,
 		DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH));
 	CD3DX12_CPU_DESCRIPTOR_HANDLE handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
@@ -258,6 +258,9 @@ bool Engine::Core::EngineCoreDirectX::ResizeBuffer()
 */
 bool Engine::Core::EngineCoreDirectX::CreateDefaultBuffer(void *data, UINT byteWidth, ID3D12Resource **defaultBuffer, ID3D12Resource **uploadBuffer)
 {
+	ThrowIfFailed(mCommandAlloc->Reset());
+	ThrowIfFailed(mCommandList->Reset(mCommandAlloc.Get(), nullptr));
+
 	ID3DBlob *bufferCPU = nullptr;
 	D3DCreateBlob(byteWidth, &bufferCPU);
 	CopyMemory(bufferCPU->GetBufferPointer(), data, byteWidth);
@@ -277,6 +280,7 @@ bool Engine::Core::EngineCoreDirectX::CreateDefaultBuffer(void *data, UINT byteW
 	subResourceData.SlicePitch = byteWidth;
 	UpdateSubresources<1>(mCommandList.Get(), *defaultBuffer, *uploadBuffer, 0, 0, 1, &subResourceData);
 	mCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(*defaultBuffer, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_GENERIC_READ));
+	FlushCommandQueue();
 	return true;
 }
 
@@ -389,7 +393,7 @@ void Engine::Core::EngineCoreDirectX::DrawObject(EngineObjectDirectX * object, E
 	ObjectConstants objConstants;
 	// https://blog.csdn.net/u014038143/article/details/78192194
 	XMStoreFloat4x4(&objConstants.WorldViewProj, XMMatrixTranspose(worldViewProj));
-	memcpy(mConstBufferData, &objConstants, sizeof(sizeof(ObjectConstants)));
+	memcpy(mConstBufferData, &objConstants, sizeof(ObjectConstants));
 	mConstBuffer->Unmap(0, nullptr);
 
 	mCommandList->SetPipelineState(object->mPipelineState.Get());
