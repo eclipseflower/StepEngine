@@ -402,17 +402,9 @@ void Engine::Core::EngineCoreDirectX::DrawObject(EngineObjectDirectX * object, E
 
 	mCommandList->SetPipelineState(object->mPipelineState.Get());
 
-	D3D12_VERTEX_BUFFER_VIEW vbv;
-	vbv.BufferLocation = object->mVertexBufferGPU->GetGPUVirtualAddress();
-	vbv.SizeInBytes = sizeof(EngineVertexDirectX) * object->mVertexCount;
-	vbv.StrideInBytes = sizeof(EngineVertexDirectX);
-	mCommandList->IASetVertexBuffers(0, 1, &vbv);
+	mCommandList->IASetVertexBuffers(0, 2, object->VertexBufferViews());
 
-	D3D12_INDEX_BUFFER_VIEW ibv;
-	ibv.BufferLocation = object->mIndexBufferGPU->GetGPUVirtualAddress();
-	ibv.Format = DXGI_FORMAT_R32_UINT;
-	ibv.SizeInBytes = object->mIndexCount * sizeof(UINT);
-	mCommandList->IASetIndexBuffer(&ibv);
+	mCommandList->IASetIndexBuffer(&object->IndexBufferView());
 
 	mCommandList->DrawIndexedInstanced(object->mIndexCount, 1, 0, 0, 0);
 }

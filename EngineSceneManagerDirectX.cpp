@@ -7,16 +7,7 @@ Engine::Core::EngineSceneManagerDirectX::EngineSceneManagerDirectX()
 
 Engine::Core::EngineSceneManagerDirectX::~EngineSceneManagerDirectX()
 {
-	/*
-	for (UINT i = 0; i < mSceneObjects.size(); ++i)
-	{
-		EngineObjectDirectX *object = mSceneObjects[i];
-		object->mVertexBuffer->Release();
-		object->mIndexBuffer->Release();
-		object->mShader->mEffect->Release();
-		object->mShader->mInputLayout->Release();
-	}
-	*/
+
 }
 
 bool Engine::Core::EngineSceneManagerDirectX::CreateBoxObject(EngineObjectDirectX ** object)

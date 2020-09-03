@@ -82,14 +82,22 @@ namespace Engine
 	}
 	#endif
 
-	struct EngineVertexDirectX
+	struct EngineVertexPosDirectX
 	{
 		XMFLOAT3 position;
-		XMFLOAT4 color;
 
-		EngineVertexDirectX(XMFLOAT3 position, XMFLOAT4 color)
+		EngineVertexPosDirectX(XMFLOAT3 position)
 		{
 			this->position = position;
+		}
+	};
+
+	struct EngineVertexPropDirectX
+	{
+		XMFLOAT4 color;
+
+		EngineVertexPropDirectX(XMFLOAT4 color)
+		{
 			this->color = color;
 		}
 	};
@@ -131,15 +139,6 @@ namespace Engine
 namespace Engine
 {
 	XMGLOBALCONST XMVECTORF32 Zero = { 0.0f, 0.0f, 0.0f, 0.0f };
-
-	XMGLOBALCONST XMVECTORF32 White		= { 1.0f, 1.0f, 1.0f, 1.0f };
-	XMGLOBALCONST XMVECTORF32 Black		= { 0.0f, 0.0f, 0.0f, 1.0f };
-	XMGLOBALCONST XMVECTORF32 Red		= { 1.0f, 0.0f, 0.0f, 1.0f };
-	XMGLOBALCONST XMVECTORF32 Green		= { 0.0f, 1.0f, 0.0f, 1.0f };
-	XMGLOBALCONST XMVECTORF32 Blue		= { 0.0f, 0.0f, 1.0f, 1.0f };
-	XMGLOBALCONST XMVECTORF32 Yellow	= { 1.0f, 1.0f, 0.0f, 1.0f };
-	XMGLOBALCONST XMVECTORF32 Cyan		= { 0.0f, 1.0f, 1.0f, 1.0f };
-	XMGLOBALCONST XMVECTORF32 Magenta	= { 1.0f, 0.0f, 1.0f, 1.0f };
 
 	extern const D3D11_INPUT_ELEMENT_DESC VertexDesc[];
 	extern const UINT VertexCount;
