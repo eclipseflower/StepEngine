@@ -15,18 +15,36 @@ bool Engine::Core::EngineSceneManagerDirectX::CreateBoxObject(EngineObjectDirect
 	*object = new EngineObjectDirectX;
 
 	(*object)->mVertexCount = 8;
-	(*object)->mVertices.push_back({ XMFLOAT3(-1.0f, -1.0f, -1.0f), (XMFLOAT4)White });
-	(*object)->mVertices.push_back({ XMFLOAT3(-1.0f, +1.0f, -1.0f), (XMFLOAT4)Black });
-	(*object)->mVertices.push_back({ XMFLOAT3(+1.0f, +1.0f, -1.0f), (XMFLOAT4)Red });
-	(*object)->mVertices.push_back({ XMFLOAT3(+1.0f, -1.0f, -1.0f), (XMFLOAT4)Green });
-	(*object)->mVertices.push_back({ XMFLOAT3(-1.0f, -1.0f, +1.0f), (XMFLOAT4)Blue });
-	(*object)->mVertices.push_back({ XMFLOAT3(-1.0f, +1.0f, +1.0f), (XMFLOAT4)Yellow });
-	(*object)->mVertices.push_back({ XMFLOAT3(+1.0f, +1.0f, +1.0f), (XMFLOAT4)Cyan });
-	(*object)->mVertices.push_back({ XMFLOAT3(+1.0f, -1.0f, +1.0f), (XMFLOAT4)Magenta });
+	(*object)->mPosVertices.push_back({ XMFLOAT3(-1.0f, -1.0f, -1.0f) });
+	(*object)->mPosVertices.push_back({ XMFLOAT3(-1.0f, +1.0f, -1.0f) });
+	(*object)->mPosVertices.push_back({ XMFLOAT3(+1.0f, +1.0f, -1.0f) });
+	(*object)->mPosVertices.push_back({ XMFLOAT3(+1.0f, -1.0f, -1.0f) });
+	(*object)->mPosVertices.push_back({ XMFLOAT3(-1.0f, -1.0f, +1.0f) });
+	(*object)->mPosVertices.push_back({ XMFLOAT3(-1.0f, +1.0f, +1.0f) });
+	(*object)->mPosVertices.push_back({ XMFLOAT3(+1.0f, +1.0f, +1.0f) });
+	(*object)->mPosVertices.push_back({ XMFLOAT3(+1.0f, -1.0f, +1.0f) });
 
-	bool res = gManagerDirectX->CreateDefaultBuffer(&(*object)->mVertices[0], 
-		sizeof(EngineVertexDirectX) * (*object)->mVertexCount, 
-		&(*object)->mVertexBufferGPU, &(*object)->mVertexBufferUploader);
+	bool res = gManagerDirectX->CreateDefaultBuffer((*object)->mPosVertices.data(),
+		sizeof(EngineVertexPosDirectX) * (*object)->mVertexCount,
+		&(*object)->mPosVertexBufferGPU, &(*object)->mPosVertexBufferUploader);
+
+	if (!res)
+	{
+		return false;
+	}
+
+	(*object)->mPropVertices.push_back({ (XMFLOAT4)White });
+	(*object)->mPropVertices.push_back({ (XMFLOAT4)Black });
+	(*object)->mPropVertices.push_back({ (XMFLOAT4)Red });
+	(*object)->mPropVertices.push_back({ (XMFLOAT4)Green });
+	(*object)->mPropVertices.push_back({ (XMFLOAT4)Blue });
+	(*object)->mPropVertices.push_back({ (XMFLOAT4)Yellow });
+	(*object)->mPropVertices.push_back({ (XMFLOAT4)Cyan });
+	(*object)->mPropVertices.push_back({ (XMFLOAT4)Magenta });
+
+	res = gManagerDirectX->CreateDefaultBuffer((*object)->mPropVertices.data(),
+		sizeof(EngineVertexPropDirectX) * (*object)->mVertexCount,
+		&(*object)->mPropVertexBufferGPU, &(*object)->mPropVertexBufferUploader);
 
 	if (!res)
 	{
@@ -65,7 +83,7 @@ bool Engine::Core::EngineSceneManagerDirectX::CreateBoxObject(EngineObjectDirect
 		(*object)->mIndices.push_back(indices[i]);
 	}
 
-	res = gManagerDirectX->CreateDefaultBuffer(&(*object)->mIndices[0], sizeof(UINT) * (*object)->mIndexCount,
+	res = gManagerDirectX->CreateDefaultBuffer((*object)->mIndices.data(), sizeof(UINT) * (*object)->mIndexCount,
 		&(*object)->mIndexBufferGPU, &(*object)->mIndexBufferUploader);
 
 	if (!res)

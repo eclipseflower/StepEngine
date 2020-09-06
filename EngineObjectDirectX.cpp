@@ -12,14 +12,13 @@ Engine::Object::EngineObjectDirectX::~EngineObjectDirectX()
 
 const D3D12_VERTEX_BUFFER_VIEW * Engine::Object::EngineObjectDirectX::VertexBufferViews()
 {
-	for (int i = 0; i < mVertexBufferViews.size(); i++)
-	{
-		mVertexBufferViews[i].BufferLocation = mVertexBufferGPU->GetGPUVirtualAddress();
-	}
-	D3D12_VERTEX_BUFFER_VIEW vbv;
-	vbv.BufferLocation = mVertexBufferGPU->GetGPUVirtualAddress();
-	vbv.SizeInBytes = sizeof(EngineVertexDirectX) * mVertexCount;
-	vbv.StrideInBytes = sizeof(EngineVertexDirectX);
+	mVertexBufferViews[0].BufferLocation = mPosVertexBufferGPU->GetGPUVirtualAddress();
+	mVertexBufferViews[0].SizeInBytes = sizeof(EngineVertexPosDirectX) * mVertexCount;
+	mVertexBufferViews[0].StrideInBytes = sizeof(EngineVertexPosDirectX);
+
+	mVertexBufferViews[1].BufferLocation = mPropVertexBufferGPU->GetGPUVirtualAddress();
+	mVertexBufferViews[1].SizeInBytes = sizeof(EngineVertexPropDirectX) * mVertexCount;
+	mVertexBufferViews[1].StrideInBytes = sizeof(EngineVertexPropDirectX);
 
 	return mVertexBufferViews.data();
 }
