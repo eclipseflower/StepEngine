@@ -387,7 +387,7 @@ void Engine::Core::EngineCoreDirectX::BeginDraw()
 	mCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
-void Engine::Core::EngineCoreDirectX::DrawObject(EngineObjectDirectX * object, EngineCameraDirectX * camera)
+void Engine::Core::EngineCoreDirectX::DrawObject(EngineObjectDirectX * object, EngineCameraDirectX * camera, D3D12_VERTEX_BUFFER_VIEW *vbv, D3D12_INDEX_BUFFER_VIEW *ibv)
 {
 	ThrowIfFailed(mConstBuffer->Map(0, nullptr, &mConstBufferData));
 	XMMATRIX world = XMLoadFloat4x4(&object->mWorldMatrix);
@@ -402,9 +402,9 @@ void Engine::Core::EngineCoreDirectX::DrawObject(EngineObjectDirectX * object, E
 
 	mCommandList->SetPipelineState(object->mPipelineState.Get());
 
-	mCommandList->IASetVertexBuffers(0, 2, object->VertexBufferViews());
+	mCommandList->IASetVertexBuffers(0, 2, vbv == nullptr ? object->VertexBufferViews() : vbv);
 
-	mCommandList->IASetIndexBuffer(&object->IndexBufferView());
+	mCommandList->IASetIndexBuffer(ibv == nullptr ? &object->IndexBufferView() : ibv);
 
 	mCommandList->DrawIndexedInstanced(object->mIndexCount, 1, 0, 0, 0);
 }

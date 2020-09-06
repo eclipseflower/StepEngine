@@ -32,7 +32,7 @@ namespace Engine
 
 			void FlushCommandQueue();
 			void BeginDraw();
-			void DrawObject(EngineObjectDirectX * object, EngineCameraDirectX * camera);
+			void DrawObject(EngineObjectDirectX * object, EngineCameraDirectX * camera, D3D12_VERTEX_BUFFER_VIEW *vbv, D3D12_INDEX_BUFFER_VIEW *ibv);
 			void EndDraw();
 
 		public:
