@@ -40,6 +40,12 @@ int EngineBoxApp::Run(HINSTANCE hInstance)
 
 	boxObject->SetShader(shader);
 
+	EngineObjectDirectX *pyramidObject;
+	if (!manager.CreatePyramidObject(&pyramidObject))
+	{
+		return -1;
+	}
+
 	manager.mUpdateFunc = bind(&EngineBoxApp::Update, this, _1);
 	manager.mMouseDownFunc = bind(&EngineBoxApp::OnMouseDown, this, _1, _2, _3);
 	manager.mMouseUpFunc = bind(&EngineBoxApp::OnMouseUp, this, _1, _2, _3);

@@ -192,6 +192,11 @@ bool Engine::EngineManagerDirectX::CreateBoxObject(EngineObjectDirectX **object)
 	return mSceneMgrInst.CreateBoxObject(object);
 }
 
+bool Engine::EngineManagerDirectX::CreatePyramidObject(EngineObjectDirectX ** object)
+{
+	return mSceneMgrInst.CreateCylinderObject(object);
+}
+
 bool Engine::EngineManagerDirectX::CreateCylinderObject(float topRadius, float bottomRadius, float height, EngineObjectDirectX ** object)
 {
 	return mSceneMgrInst.CreateCylinderObject(topRadius, bottomRadius, height, object);

@@ -35,7 +35,7 @@ namespace Engine
 
 			void FlushCommandQueue();
 			void BeginDraw();
-			void DrawObject(EngineObjectDirectX * object, EngineCameraDirectX * camera, D3D12_VERTEX_BUFFER_VIEW *vbv, D3D12_INDEX_BUFFER_VIEW *ibv);
+			void DrawObject(EngineObjectDirectX * object, EngineCameraDirectX * camera);
 			void EndDraw();
 
 		public:
@@ -88,6 +88,9 @@ namespace Engine
 			UINT mIndexBufferOffset = 0;
 			ComPtr<ID3D12Resource> mIndexBufferGPU = nullptr;
 			void *mIndexBufferData = nullptr;
+
+			vector<D3D12_VERTEX_BUFFER_VIEW> mVertexBufferViews;
+			D3D12_INDEX_BUFFER_VIEW mIndexBufferView;
 
 			D3D12_VIEWPORT mViewport;
 			D3D12_RECT mScissorRect;

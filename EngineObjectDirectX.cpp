@@ -23,14 +23,13 @@ const D3D12_VERTEX_BUFFER_VIEW * Engine::Object::EngineObjectDirectX::VertexBuff
 	return mVertexBufferViews.data();
 }
 
-D3D12_INDEX_BUFFER_VIEW Engine::Object::EngineObjectDirectX::IndexBufferView() const
+const D3D12_INDEX_BUFFER_VIEW * Engine::Object::EngineObjectDirectX::IndexBufferView()
 {
-	D3D12_INDEX_BUFFER_VIEW ibv;
-	ibv.BufferLocation = mIndexBufferGPU->GetGPUVirtualAddress();
-	ibv.Format = DXGI_FORMAT_R32_UINT;
-	ibv.SizeInBytes = mIndexCount * sizeof(UINT);
+	mIndexBufferView.BufferLocation = mIndexBufferGPU->GetGPUVirtualAddress();
+	mIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
+	mIndexBufferView.SizeInBytes = mIndexCount * sizeof(UINT);
 
-	return ibv;
+	return &mIndexBufferView;
 }
 
 void Engine::Object::EngineObjectDirectX::SetShader(EngineShaderDirectX * shader)

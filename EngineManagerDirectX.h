@@ -43,6 +43,7 @@ namespace Engine
 
 		bool CreateDefaultBuffer(void *data, UINT byteWidth, ID3D12Resource **bufferGPU, ID3D12Resource **uploadBuffer);
 		bool CreateBoxObject(EngineObjectDirectX **object);
+		bool CreatePyramidObject(EngineObjectDirectX **object);
 		bool CreateCylinderObject(float topRadius, float bottomRadius, float height, EngineObjectDirectX **object);
 		bool CreateShader(wstring srcFile, EngineShaderDirectX **shader);
 		bool CreatePipelineStateObject(EngineShaderDirectX *shader, ID3D12PipelineState **pipelineStateObject);

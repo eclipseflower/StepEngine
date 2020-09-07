@@ -15,6 +15,8 @@ bool Engine::Core::EngineSceneManagerDirectX::CreateBoxObject(EngineObjectDirect
 	*object = new EngineObjectDirectX;
 
 	(*object)->mVertexCount = 8;
+	(*object)->mBatched = true;
+
 	(*object)->mPosVertices.push_back({ XMFLOAT3(-1.0f, -1.0f, -1.0f) });
 	(*object)->mPosVertices.push_back({ XMFLOAT3(-1.0f, +1.0f, -1.0f) });
 	(*object)->mPosVertices.push_back({ XMFLOAT3(+1.0f, +1.0f, -1.0f) });
@@ -125,9 +127,97 @@ bool Engine::Core::EngineSceneManagerDirectX::CreateBoxObject(EngineObjectDirect
 bool Engine::Core::EngineSceneManagerDirectX::CreatePyramidObject(EngineObjectDirectX ** object)
 {
 	*object = new EngineObjectDirectX;
-	(*object)->mVertexCount = 5;
 
-	return false;
+	(*object)->mVertexCount = 5;
+	(*object)->mBatched = true;
+
+	(*object)->mPosVertices.push_back({ XMFLOAT3(+0.0f, +2.0f, +0.0f) });
+	(*object)->mPosVertices.push_back({ XMFLOAT3(-1.0f, +0.0f, +1.0f) });
+	(*object)->mPosVertices.push_back({ XMFLOAT3(+1.0f, +0.0f, +1.0f) });
+	(*object)->mPosVertices.push_back({ XMFLOAT3(-1.0f, +0.0f, -1.0f) });
+	(*object)->mPosVertices.push_back({ XMFLOAT3(+1.0f, +0.0f, -1.0f) });
+
+	bool res = gManagerDirectX->CreateDefaultBuffer((*object)->mPosVertices.data(),
+		sizeof(EngineVertexPosDirectX) * (*object)->mVertexCount,
+		&(*object)->mPosVertexBufferGPU, &(*object)->mPosVertexBufferUploader);
+
+	if (!res)
+	{
+		return false;
+	}
+
+	res = gManagerDirectX->UpdatePosVertexBuffer((*object)->mPosVertices.data(),
+		sizeof(EngineVertexPosDirectX) * (*object)->mVertexCount);
+
+	if (!res)
+	{
+		return false;
+	}
+
+	(*object)->mPropVertices.push_back({ (XMFLOAT4)White });
+	(*object)->mPropVertices.push_back({ (XMFLOAT4)Black });
+	(*object)->mPropVertices.push_back({ (XMFLOAT4)Red });
+	(*object)->mPropVertices.push_back({ (XMFLOAT4)Green });
+	(*object)->mPropVertices.push_back({ (XMFLOAT4)Blue });
+
+	res = gManagerDirectX->CreateDefaultBuffer((*object)->mPropVertices.data(),
+		sizeof(EngineVertexPropDirectX) * (*object)->mVertexCount,
+		&(*object)->mPropVertexBufferGPU, &(*object)->mPropVertexBufferUploader);
+
+	if (!res)
+	{
+		return false;
+	}
+
+	res = gManagerDirectX->UpdatePropVertexBuffer((*object)->mPropVertices.data(),
+		sizeof(EngineVertexPropDirectX) * (*object)->mVertexCount);
+
+	if (!res)
+	{
+		return false;
+	}
+
+	(*object)->mIndexCount = 18;
+	UINT indices[] = {
+		// front face
+		0, 3, 1,
+		0, 2, 4,
+
+		// back face
+		0, 4, 3,
+		0, 1, 2,
+
+		// left face
+		1, 3, 2,
+		2, 3, 4
+	};
+
+	for (int i = 0; i < (*object)->mIndexCount; ++i)
+	{
+		(*object)->mIndices.push_back(indices[i]);
+	}
+
+	res = gManagerDirectX->CreateDefaultBuffer((*object)->mIndices.data(), sizeof(UINT) * (*object)->mIndexCount,
+		&(*object)->mIndexBufferGPU, &(*object)->mIndexBufferUploader);
+
+	if (!res)
+	{
+		return false;
+	}
+
+	res = gManagerDirectX->UpdateIndexBuffer((*object)->mIndices.data(), sizeof(UINT) * (*object)->mIndexCount);
+
+	if (!res)
+	{
+		return false;
+	}
+
+	XMMATRIX i = XMMatrixIdentity();
+	XMStoreFloat4x4(&(*object)->mWorldMatrix, i);
+
+	mSceneObjects.push_back(*object);
+
+	return true;
 }
 
 bool Engine::Core::EngineSceneManagerDirectX::CreateCylinderObject(float topRadius, float bottomRadius, float height, EngineObjectDirectX ** object)

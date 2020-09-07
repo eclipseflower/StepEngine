@@ -20,6 +20,10 @@ namespace Engine
 			vector<EngineVertexPropDirectX> mPropVertices;
 			vector<UINT> mIndices;
 			vector<D3D12_VERTEX_BUFFER_VIEW> mVertexBufferViews;
+			D3D12_INDEX_BUFFER_VIEW mIndexBufferView;
+			bool mBatched = false;
+			UINT mStartIndexLocation = 0;
+			int mBaseVertexLocation = 0;
 			
 			ComPtr<ID3D12Resource> mPosVertexBufferGPU = nullptr;
 			ComPtr<ID3D12Resource> mPosVertexBufferUploader = nullptr;
@@ -37,7 +41,7 @@ namespace Engine
 			~EngineObjectDirectX();
 
 			const D3D12_VERTEX_BUFFER_VIEW *VertexBufferViews();
-			D3D12_INDEX_BUFFER_VIEW IndexBufferView() const;
+			const D3D12_INDEX_BUFFER_VIEW *IndexBufferView();
 
 			void SetShader(EngineShaderDirectX *shader);
 		};
