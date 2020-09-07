@@ -14,16 +14,10 @@ namespace Engine
 			EngineSceneManagerDirectX();
 			~EngineSceneManagerDirectX();
 			bool CreateBoxObject(EngineObjectDirectX **object);
+			bool CreatePyramidObject(EngineObjectDirectX **object);
 			bool CreateCylinderObject(float topRadius, float bottomRadius, float height, EngineObjectDirectX **object);
 
 			vector<EngineObjectDirectX *> mSceneObjects;
-
-			vector<ComPtr<ID3D12Resource>> mPosVertexBuffersGPU;
-			vector<ComPtr<ID3D12Resource>> mPosVertexBuffersUploader;
-			vector<ComPtr<ID3D12Resource>> mPropVertexBuffersGPU;
-			vector<ComPtr<ID3D12Resource>> mPropVertexBuffersUploader;
-			vector<ComPtr<ID3D12Resource>> mIndexBuffersGPU;
-			vector<ComPtr<ID3D12Resource>> mIndexBuffersUploader;
 		};
 	}
 }

@@ -222,3 +222,39 @@ bool Engine::EngineManagerDirectX::CreatePipelineStateObject(EngineShaderDirectX
 	}
 	return false;
 }
+
+bool Engine::EngineManagerDirectX::UpdatePosVertexBuffer(void * data, UINT byteWidth)
+{
+	if (mCoreInst)
+	{
+		if (mCoreInst->UpdatePosVertexBuffer(data, byteWidth))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+bool Engine::EngineManagerDirectX::UpdatePropVertexBuffer(void * data, UINT byteWidth)
+{
+	if (mCoreInst)
+	{
+		if (mCoreInst->UpdatePropVertexBuffer(data, byteWidth))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+bool Engine::EngineManagerDirectX::UpdateIndexBuffer(void * data, UINT byteWidth)
+{
+	if (mCoreInst)
+	{
+		if (mCoreInst->UpdateIndexBuffer(data, byteWidth))
+		{
+			return true;
+		}
+	}
+	return false;
+}

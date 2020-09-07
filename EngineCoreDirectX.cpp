@@ -147,6 +147,19 @@ bool Engine::Core::EngineCoreDirectX::Init()
 		{"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0}
 	};
 
+	// 9. create vertex buffer and index buffer
+	ThrowIfFailed(mDevice->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+		D3D12_HEAP_FLAG_NONE, &CD3DX12_RESOURCE_DESC::Buffer(mVertexBufferSize * sizeof(EngineVertexPosDirectX)), 
+		D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&mPosVertexBufferGPU)));
+
+	ThrowIfFailed(mDevice->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+		D3D12_HEAP_FLAG_NONE, &CD3DX12_RESOURCE_DESC::Buffer(mVertexBufferSize * sizeof(EngineVertexPropDirectX)),
+		D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&mPropVertexBufferGPU)));
+
+	ThrowIfFailed(mDevice->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+		D3D12_HEAP_FLAG_NONE, &CD3DX12_RESOURCE_DESC::Buffer(mIndexBufferSize * sizeof(UINT)),
+		D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&mIndexBufferGPU)));
+
 	ResizeBuffer();
 
 	return true;
@@ -339,6 +352,33 @@ bool Engine::Core::EngineCoreDirectX::CreatePipelineStateObject(ID3DBlob * vs, I
 	psoDesc.VS = { vs->GetBufferPointer(), vs->GetBufferSize() };
 
 	ThrowIfFailed(mDevice->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(pipelineStateObject)));
+	return true;
+}
+
+bool Engine::Core::EngineCoreDirectX::UpdatePosVertexBuffer(void * data, UINT byteWidth)
+{
+	ThrowIfFailed(mPosVertexBufferGPU->Map(0, nullptr, &mPosVertexBufferData));
+	memcpy((BYTE *)mPosVertexBufferData + mPosVertexBufferOffset, data, byteWidth);
+	mPosVertexBufferGPU->Unmap(0, nullptr);
+	mPosVertexBufferOffset += byteWidth;
+	return true;
+}
+
+bool Engine::Core::EngineCoreDirectX::UpdatePropVertexBuffer(void * data, UINT byteWidth)
+{
+	ThrowIfFailed(mPropVertexBufferGPU->Map(0, nullptr, &mPropVertexBufferData));
+	memcpy((BYTE *)mPropVertexBufferData + mPropVertexBufferOffset, data, byteWidth);
+	mPropVertexBufferGPU->Unmap(0, nullptr);
+	mPropVertexBufferOffset += byteWidth;
+	return true;
+}
+
+bool Engine::Core::EngineCoreDirectX::UpdateIndexBuffer(void * data, UINT byteWidth)
+{
+	ThrowIfFailed(mIndexBufferGPU->Map(0, nullptr, &mIndexBufferData));
+	memcpy((BYTE *)mIndexBufferData + mIndexBufferOffset, data, byteWidth);
+	mIndexBufferGPU->Unmap(0, nullptr);
+	mIndexBufferOffset += byteWidth;
 	return true;
 }
 

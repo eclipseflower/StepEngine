@@ -46,6 +46,9 @@ namespace Engine
 		bool CreateCylinderObject(float topRadius, float bottomRadius, float height, EngineObjectDirectX **object);
 		bool CreateShader(wstring srcFile, EngineShaderDirectX **shader);
 		bool CreatePipelineStateObject(EngineShaderDirectX *shader, ID3D12PipelineState **pipelineStateObject);
+		bool UpdatePosVertexBuffer(void * data, UINT byteWidth);
+		bool UpdatePropVertexBuffer(void * data, UINT byteWidth);
+		bool UpdateIndexBuffer(void * data, UINT byteWidth);
 
 		EngineWindowDirectX *mWindowInst;
 		EngineCoreDirectX *mCoreInst;

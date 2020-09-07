@@ -33,6 +33,14 @@ bool Engine::Core::EngineSceneManagerDirectX::CreateBoxObject(EngineObjectDirect
 		return false;
 	}
 
+	res = gManagerDirectX->UpdatePosVertexBuffer((*object)->mPosVertices.data(),
+		sizeof(EngineVertexPosDirectX) * (*object)->mVertexCount);
+
+	if (!res)
+	{
+		return false;
+	}
+
 	(*object)->mPropVertices.push_back({ (XMFLOAT4)White });
 	(*object)->mPropVertices.push_back({ (XMFLOAT4)Black });
 	(*object)->mPropVertices.push_back({ (XMFLOAT4)Red });
@@ -45,6 +53,14 @@ bool Engine::Core::EngineSceneManagerDirectX::CreateBoxObject(EngineObjectDirect
 	res = gManagerDirectX->CreateDefaultBuffer((*object)->mPropVertices.data(),
 		sizeof(EngineVertexPropDirectX) * (*object)->mVertexCount,
 		&(*object)->mPropVertexBufferGPU, &(*object)->mPropVertexBufferUploader);
+
+	if (!res)
+	{
+		return false;
+	}
+
+	res = gManagerDirectX->UpdatePropVertexBuffer((*object)->mPropVertices.data(),
+		sizeof(EngineVertexPropDirectX) * (*object)->mVertexCount);
 
 	if (!res)
 	{
@@ -91,12 +107,27 @@ bool Engine::Core::EngineSceneManagerDirectX::CreateBoxObject(EngineObjectDirect
 		return false;
 	}
 
+	res = gManagerDirectX->UpdateIndexBuffer((*object)->mIndices.data(), sizeof(UINT) * (*object)->mIndexCount);
+
+	if (!res)
+	{
+		return false;
+	}
+
 	XMMATRIX i = XMMatrixIdentity();
 	XMStoreFloat4x4(&(*object)->mWorldMatrix, i);
 
 	mSceneObjects.push_back(*object);
 
 	return true;
+}
+
+bool Engine::Core::EngineSceneManagerDirectX::CreatePyramidObject(EngineObjectDirectX ** object)
+{
+	*object = new EngineObjectDirectX;
+	(*object)->mVertexCount = 5;
+
+	return false;
 }
 
 bool Engine::Core::EngineSceneManagerDirectX::CreateCylinderObject(float topRadius, float bottomRadius, float height, EngineObjectDirectX ** object)

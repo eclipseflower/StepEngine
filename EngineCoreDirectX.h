@@ -29,6 +29,9 @@ namespace Engine
 			bool CreateDefaultBuffer(void *data, UINT byteWidth, ID3D12Resource **bufferGPU, ID3D12Resource **uploadBuffer);
 			bool CreateShader(wstring srcFile, ID3DBlob **vs, ID3DBlob **ps);
 			bool CreatePipelineStateObject(ID3DBlob *vs, ID3DBlob *ps, ID3D12PipelineState **pipelineStateObject);
+			bool UpdatePosVertexBuffer(void * data, UINT byteWidth);
+			bool UpdatePropVertexBuffer(void * data, UINT byteWidth);
+			bool UpdateIndexBuffer(void * data, UINT byteWidth);
 
 			void FlushCommandQueue();
 			void BeginDraw();
@@ -71,6 +74,20 @@ namespace Engine
 			ComPtr<ID3D12RootSignature> mRootSignature = nullptr;
 
 			vector<D3D12_INPUT_ELEMENT_DESC> mInputLayout;
+
+			UINT mVertexBufferSize = 1024;
+			ComPtr<ID3D12Resource> mPosVertexBufferGPU = nullptr;
+			void *mPosVertexBufferData = nullptr;
+			UINT mPosVertexBufferOffset = 0;
+
+			ComPtr<ID3D12Resource> mPropVertexBufferGPU = nullptr;
+			void *mPropVertexBufferData = nullptr;
+			UINT mPropVertexBufferOffset = 0;
+
+			UINT mIndexBufferSize = 1024;
+			UINT mIndexBufferOffset = 0;
+			ComPtr<ID3D12Resource> mIndexBufferGPU = nullptr;
+			void *mIndexBufferData = nullptr;
 
 			D3D12_VIEWPORT mViewport;
 			D3D12_RECT mScissorRect;
