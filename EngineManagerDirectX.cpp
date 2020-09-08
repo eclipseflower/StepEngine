@@ -194,7 +194,7 @@ bool Engine::EngineManagerDirectX::CreateBoxObject(EngineObjectDirectX **object)
 
 bool Engine::EngineManagerDirectX::CreatePyramidObject(EngineObjectDirectX ** object)
 {
-	return mSceneMgrInst.CreateCylinderObject(object);
+	return mSceneMgrInst.CreatePyramidObject(object);
 }
 
 bool Engine::EngineManagerDirectX::CreateCylinderObject(float topRadius, float bottomRadius, float height, EngineObjectDirectX ** object)
@@ -228,11 +228,11 @@ bool Engine::EngineManagerDirectX::CreatePipelineStateObject(EngineShaderDirectX
 	return false;
 }
 
-bool Engine::EngineManagerDirectX::UpdatePosVertexBuffer(void * data, UINT byteWidth)
+bool Engine::EngineManagerDirectX::UpdatePosVertexBuffer(void * data, UINT byteWidth, int *mBaseVertexLocation)
 {
 	if (mCoreInst)
 	{
-		if (mCoreInst->UpdatePosVertexBuffer(data, byteWidth))
+		if (mCoreInst->UpdatePosVertexBuffer(data, byteWidth, mBaseVertexLocation))
 		{
 			return true;
 		}
@@ -252,11 +252,11 @@ bool Engine::EngineManagerDirectX::UpdatePropVertexBuffer(void * data, UINT byte
 	return false;
 }
 
-bool Engine::EngineManagerDirectX::UpdateIndexBuffer(void * data, UINT byteWidth)
+bool Engine::EngineManagerDirectX::UpdateIndexBuffer(void * data, UINT byteWidth, UINT *mStartIndexLocation)
 {
 	if (mCoreInst)
 	{
-		if (mCoreInst->UpdateIndexBuffer(data, byteWidth))
+		if (mCoreInst->UpdateIndexBuffer(data, byteWidth, mStartIndexLocation))
 		{
 			return true;
 		}

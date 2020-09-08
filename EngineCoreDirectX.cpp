@@ -1,7 +1,7 @@
 #include "EngineCoreDirectX.h"
 #include "EngineManagerDirectX.h"
 
-Engine::Core::EngineCoreDirectX::EngineCoreDirectX(bool enableMsaa, UINT msaaCount)
+Engine::Core::EngineCoreDirectX::EngineCoreDirectX(bool enableMsaa, UINT msaaCount) : mVertexBufferViews(2)
 {
 	mEnableMsaa = enableMsaa;
 	mMsaaCount = msaaCount;
@@ -147,18 +147,30 @@ bool Engine::Core::EngineCoreDirectX::Init()
 		{"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0}
 	};
 
-	// 9. create vertex buffer and index buffer
+	// 9. create vertex buffer and index buffer and views
 	ThrowIfFailed(mDevice->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 		D3D12_HEAP_FLAG_NONE, &CD3DX12_RESOURCE_DESC::Buffer(mVertexBufferSize * sizeof(EngineVertexPosDirectX)), 
 		D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&mPosVertexBufferGPU)));
+
+	mVertexBufferViews[0].BufferLocation = mPosVertexBufferGPU->GetGPUVirtualAddress();
+	mVertexBufferViews[0].SizeInBytes = mVertexBufferSize * sizeof(EngineVertexPosDirectX);
+	mVertexBufferViews[0].StrideInBytes = sizeof(EngineVertexPosDirectX);
 
 	ThrowIfFailed(mDevice->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 		D3D12_HEAP_FLAG_NONE, &CD3DX12_RESOURCE_DESC::Buffer(mVertexBufferSize * sizeof(EngineVertexPropDirectX)),
 		D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&mPropVertexBufferGPU)));
 
+	mVertexBufferViews[1].BufferLocation = mPropVertexBufferGPU->GetGPUVirtualAddress();
+	mVertexBufferViews[1].SizeInBytes = mVertexBufferSize * sizeof(EngineVertexPropDirectX);
+	mVertexBufferViews[1].StrideInBytes = sizeof(EngineVertexPropDirectX);
+
 	ThrowIfFailed(mDevice->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 		D3D12_HEAP_FLAG_NONE, &CD3DX12_RESOURCE_DESC::Buffer(mIndexBufferSize * sizeof(UINT)),
 		D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&mIndexBufferGPU)));
+
+	mIndexBufferView.BufferLocation = mIndexBufferGPU->GetGPUVirtualAddress();
+	mIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
+	mIndexBufferView.SizeInBytes = mIndexBufferSize * sizeof(UINT);
 
 	ResizeBuffer();
 
@@ -355,11 +367,12 @@ bool Engine::Core::EngineCoreDirectX::CreatePipelineStateObject(ID3DBlob * vs, I
 	return true;
 }
 
-bool Engine::Core::EngineCoreDirectX::UpdatePosVertexBuffer(void * data, UINT byteWidth)
+bool Engine::Core::EngineCoreDirectX::UpdatePosVertexBuffer(void * data, UINT byteWidth, int *mBaseVertexLocation)
 {
 	ThrowIfFailed(mPosVertexBufferGPU->Map(0, nullptr, &mPosVertexBufferData));
 	memcpy((BYTE *)mPosVertexBufferData + mPosVertexBufferOffset, data, byteWidth);
 	mPosVertexBufferGPU->Unmap(0, nullptr);
+	*mBaseVertexLocation = mPosVertexBufferOffset / sizeof(EngineVertexPosDirectX);
 	mPosVertexBufferOffset += byteWidth;
 	return true;
 }
@@ -373,11 +386,12 @@ bool Engine::Core::EngineCoreDirectX::UpdatePropVertexBuffer(void * data, UINT b
 	return true;
 }
 
-bool Engine::Core::EngineCoreDirectX::UpdateIndexBuffer(void * data, UINT byteWidth)
+bool Engine::Core::EngineCoreDirectX::UpdateIndexBuffer(void * data, UINT byteWidth, UINT *mStartIndexLocation)
 {
 	ThrowIfFailed(mIndexBufferGPU->Map(0, nullptr, &mIndexBufferData));
 	memcpy((BYTE *)mIndexBufferData + mIndexBufferOffset, data, byteWidth);
 	mIndexBufferGPU->Unmap(0, nullptr);
+	*mStartIndexLocation = mIndexBufferOffset / sizeof(UINT);
 	mIndexBufferOffset += byteWidth;
 	return true;
 }
@@ -442,11 +456,12 @@ void Engine::Core::EngineCoreDirectX::DrawObject(EngineObjectDirectX * object, E
 
 	mCommandList->SetPipelineState(object->mPipelineState.Get());
 
-	mCommandList->IASetVertexBuffers(0, 2, object->mBatched ? object->VertexBufferViews() : vbv);
+	mCommandList->IASetVertexBuffers(0, 2, object->mBatched ? mVertexBufferViews.data() : object->VertexBufferViews());
 
-	mCommandList->IASetIndexBuffer(object->mBatched ? object->IndexBufferView() : ibv);
+	mCommandList->IASetIndexBuffer(object->mBatched ? &mIndexBufferView : object->IndexBufferView());
 
-	mCommandList->DrawIndexedInstanced(object->mIndexCount, 1, 0, 0, 0);
+	mCommandList->DrawIndexedInstanced(object->mIndexCount, 1, object->mStartIndexLocation, 
+		object->mBaseVertexLocation, 0);
 }
 
 void Engine::Core::EngineCoreDirectX::EndDraw()

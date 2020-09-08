@@ -29,9 +29,9 @@ namespace Engine
 			bool CreateDefaultBuffer(void *data, UINT byteWidth, ID3D12Resource **bufferGPU, ID3D12Resource **uploadBuffer);
 			bool CreateShader(wstring srcFile, ID3DBlob **vs, ID3DBlob **ps);
 			bool CreatePipelineStateObject(ID3DBlob *vs, ID3DBlob *ps, ID3D12PipelineState **pipelineStateObject);
-			bool UpdatePosVertexBuffer(void * data, UINT byteWidth);
+			bool UpdatePosVertexBuffer(void * data, UINT byteWidth, int *mBaseVertexLocation);
 			bool UpdatePropVertexBuffer(void * data, UINT byteWidth);
-			bool UpdateIndexBuffer(void * data, UINT byteWidth);
+			bool UpdateIndexBuffer(void * data, UINT byteWidth, UINT *mStartIndexLocation);
 
 			void FlushCommandQueue();
 			void BeginDraw();

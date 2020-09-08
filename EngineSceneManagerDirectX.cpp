@@ -36,7 +36,7 @@ bool Engine::Core::EngineSceneManagerDirectX::CreateBoxObject(EngineObjectDirect
 	}
 
 	res = gManagerDirectX->UpdatePosVertexBuffer((*object)->mPosVertices.data(),
-		sizeof(EngineVertexPosDirectX) * (*object)->mVertexCount);
+		sizeof(EngineVertexPosDirectX) * (*object)->mVertexCount, &(*object)->mBaseVertexLocation);
 
 	if (!res)
 	{
@@ -109,14 +109,16 @@ bool Engine::Core::EngineSceneManagerDirectX::CreateBoxObject(EngineObjectDirect
 		return false;
 	}
 
-	res = gManagerDirectX->UpdateIndexBuffer((*object)->mIndices.data(), sizeof(UINT) * (*object)->mIndexCount);
+	res = gManagerDirectX->UpdateIndexBuffer((*object)->mIndices.data(), sizeof(UINT) * (*object)->mIndexCount,
+		&(*object)->mStartIndexLocation);
 
 	if (!res)
 	{
 		return false;
 	}
 
-	XMMATRIX i = XMMatrixIdentity();
+	//XMMATRIX i = XMMatrixIdentity();
+	XMMATRIX i = XMMatrixTranslation(-1, 0, 0);
 	XMStoreFloat4x4(&(*object)->mWorldMatrix, i);
 
 	mSceneObjects.push_back(*object);
@@ -147,7 +149,7 @@ bool Engine::Core::EngineSceneManagerDirectX::CreatePyramidObject(EngineObjectDi
 	}
 
 	res = gManagerDirectX->UpdatePosVertexBuffer((*object)->mPosVertices.data(),
-		sizeof(EngineVertexPosDirectX) * (*object)->mVertexCount);
+		sizeof(EngineVertexPosDirectX) * (*object)->mVertexCount, &(*object)->mBaseVertexLocation);
 
 	if (!res)
 	{
@@ -205,14 +207,16 @@ bool Engine::Core::EngineSceneManagerDirectX::CreatePyramidObject(EngineObjectDi
 		return false;
 	}
 
-	res = gManagerDirectX->UpdateIndexBuffer((*object)->mIndices.data(), sizeof(UINT) * (*object)->mIndexCount);
+	res = gManagerDirectX->UpdateIndexBuffer((*object)->mIndices.data(), sizeof(UINT) * (*object)->mIndexCount,
+		&(*object)->mStartIndexLocation);
 
 	if (!res)
 	{
 		return false;
 	}
 
-	XMMATRIX i = XMMatrixIdentity();
+	//XMMATRIX i = XMMatrixIdentity();
+	XMMATRIX i = XMMatrixTranslation(1, 0, 0);
 	XMStoreFloat4x4(&(*object)->mWorldMatrix, i);
 
 	mSceneObjects.push_back(*object);
