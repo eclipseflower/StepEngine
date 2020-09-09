@@ -117,8 +117,7 @@ bool Engine::Core::EngineSceneManagerDirectX::CreateBoxObject(EngineObjectDirect
 		return false;
 	}
 
-	//XMMATRIX i = XMMatrixIdentity();
-	XMMATRIX i = XMMatrixTranslation(-1, 0, 0);
+	XMMATRIX i = XMMatrixIdentity();
 	XMStoreFloat4x4(&(*object)->mWorldMatrix, i);
 
 	mSceneObjects.push_back(*object);
@@ -215,8 +214,7 @@ bool Engine::Core::EngineSceneManagerDirectX::CreatePyramidObject(EngineObjectDi
 		return false;
 	}
 
-	//XMMATRIX i = XMMatrixIdentity();
-	XMMATRIX i = XMMatrixTranslation(1, 0, 0);
+	XMMATRIX i = XMMatrixIdentity();
 	XMStoreFloat4x4(&(*object)->mWorldMatrix, i);
 
 	mSceneObjects.push_back(*object);

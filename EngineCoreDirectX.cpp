@@ -355,7 +355,10 @@ bool Engine::Core::EngineCoreDirectX::CreatePipelineStateObject(ID3DBlob * vs, I
 	psoDesc.NumRenderTargets = 1;
 	psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 	psoDesc.pRootSignature = mRootSignature.Get();
-	psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+	CD3DX12_RASTERIZER_DESC rastDesc = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+	rastDesc.FillMode = mFillMode;
+	rastDesc.CullMode = mCullMode;
+	psoDesc.RasterizerState = rastDesc;
 	psoDesc.RTVFormats[0] = mBackBufferFormat;
 	psoDesc.SampleDesc.Count = mEnableMsaa ? mMsaaCount : 1;
 	psoDesc.SampleDesc.Quality = mEnableMsaa ? mMsaaQuality - 1 : 0;

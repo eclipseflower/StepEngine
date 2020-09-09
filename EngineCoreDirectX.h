@@ -94,6 +94,9 @@ namespace Engine
 
 			D3D12_VIEWPORT mViewport;
 			D3D12_RECT mScissorRect;
+
+			D3D12_FILL_MODE mFillMode = D3D12_FILL_MODE_WIREFRAME;
+			D3D12_CULL_MODE mCullMode = D3D12_CULL_MODE_NONE;
 		};
 	}
 }
