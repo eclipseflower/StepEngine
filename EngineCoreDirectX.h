@@ -69,8 +69,11 @@ namespace Engine
 			UINT mDsvHeapIncSize = 0;
 			UINT mCbvHeapIncSize = 0;
 
+			UINT mObjectConstBufferSize = 1024;
+			UINT mPassConstBufferSize = 1024;
+
 			ComPtr<ID3D12Resource> mConstBuffer = nullptr;
-			void *mConstBufferData = nullptr;
+			BYTE *mConstBufferData = nullptr;
 			ComPtr<ID3D12RootSignature> mRootSignature = nullptr;
 
 			vector<D3D12_INPUT_ELEMENT_DESC> mInputLayout;

@@ -18,6 +18,7 @@ namespace Engine
 			bool CreateCylinderObject(float topRadius, float bottomRadius, float height, EngineObjectDirectX **object);
 
 			vector<EngineObjectDirectX *> mSceneObjects;
+			UINT mCurSceneObjectIndex = 0;
 		};
 	}
 }

@@ -21,6 +21,8 @@ namespace Engine
 			vector<UINT> mIndices;
 			vector<D3D12_VERTEX_BUFFER_VIEW> mVertexBufferViews;
 			D3D12_INDEX_BUFFER_VIEW mIndexBufferView;
+
+			UINT mID = 0;
 			bool mBatched = false;
 			UINT mStartIndexLocation = 0;
 			int mBaseVertexLocation = 0;

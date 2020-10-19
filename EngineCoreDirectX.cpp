@@ -110,17 +110,22 @@ bool Engine::Core::EngineCoreDirectX::Init()
 	ThrowIfFailed(mDevice->CreateDescriptorHeap(&cbvHeapDesc, IID_PPV_ARGS(&mCbvHeap)));
 
 	// 6. create const buffer and view
-	UINT cbSize = CalcConstantBufferByteSize(sizeof(ObjectConstants));
+	UINT objCbSize = CalcConstantBufferByteSize(sizeof(ObjectConstants));
 	ThrowIfFailed(mDevice->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
-		D3D12_HEAP_FLAG_NONE, &CD3DX12_RESOURCE_DESC::Buffer(cbSize), D3D12_RESOURCE_STATE_GENERIC_READ,
+		D3D12_HEAP_FLAG_NONE, &CD3DX12_RESOURCE_DESC::Buffer(objCbSize), D3D12_RESOURCE_STATE_GENERIC_READ,
 		nullptr, IID_PPV_ARGS(&mConstBuffer)));
 
-	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
-	cbvDesc.BufferLocation = mConstBuffer->GetGPUVirtualAddress();
-	cbvDesc.SizeInBytes = cbSize;
-	CD3DX12_CPU_DESCRIPTOR_HANDLE handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-		mCbvHeap->GetCPUDescriptorHandleForHeapStart());
-	mDevice->CreateConstantBufferView(&cbvDesc, handle);
+	D3D12_GPU_VIRTUAL_ADDRESS objCbAddr = mConstBuffer->GetGPUVirtualAddress();
+	for (UINT i = 0; i < mObjectConstBufferSize; i++)
+	{
+		D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
+		cbvDesc.BufferLocation = objCbAddr + i * objCbSize;
+		cbvDesc.SizeInBytes = objCbSize;
+		CD3DX12_CPU_DESCRIPTOR_HANDLE handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
+			mCbvHeap->GetCPUDescriptorHandleForHeapStart());
+		handle.Offset(i, mCbvHeapIncSize);
+		mDevice->CreateConstantBufferView(&cbvDesc, handle);
+	}
 
 	// 7. create root signature
 	CD3DX12_DESCRIPTOR_RANGE cbvTable;
@@ -440,13 +445,13 @@ void Engine::Core::EngineCoreDirectX::BeginDraw()
 	ID3D12DescriptorHeap* descriptorHeaps[] = { mCbvHeap.Get() };
 	mCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 	mCommandList->SetGraphicsRootSignature(mRootSignature.Get());
-	mCommandList->SetGraphicsRootDescriptorTable(0, mCbvHeap->GetGPUDescriptorHandleForHeapStart());
+
 	mCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
 void Engine::Core::EngineCoreDirectX::DrawObject(EngineObjectDirectX * object, EngineCameraDirectX * camera)
 {
-	ThrowIfFailed(mConstBuffer->Map(0, nullptr, &mConstBufferData));
+	ThrowIfFailed(mConstBuffer->Map(0, nullptr, reinterpret_cast<void **>(&mConstBufferData)));
 	XMMATRIX world = XMLoadFloat4x4(&object->mWorldMatrix);
 	XMMATRIX view = XMLoadFloat4x4(&camera->mViewMatrix);
 	XMMATRIX proj = XMLoadFloat4x4(&camera->mProjMatrix);
@@ -454,8 +459,13 @@ void Engine::Core::EngineCoreDirectX::DrawObject(EngineObjectDirectX * object, E
 	ObjectConstants objConstants;
 	// https://blog.csdn.net/u014038143/article/details/78192194
 	XMStoreFloat4x4(&objConstants.WorldViewProj, XMMatrixTranspose(worldViewProj));
-	memcpy(mConstBufferData, &objConstants, sizeof(ObjectConstants));
+	memcpy(mConstBufferData + object->mID * sizeof(ObjectConstants), &objConstants, sizeof(ObjectConstants));
 	mConstBuffer->Unmap(0, nullptr);
+
+	CD3DX12_GPU_DESCRIPTOR_HANDLE cbvHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(
+		mCbvHeap->GetGPUDescriptorHandleForHeapStart());
+	cbvHandle.Offset(object->mID, mCbvHeapIncSize);
+	mCommandList->SetGraphicsRootDescriptorTable(0, cbvHandle);
 
 	mCommandList->SetPipelineState(object->mPipelineState.Get());
 
