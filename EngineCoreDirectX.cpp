@@ -104,7 +104,7 @@ bool Engine::Core::EngineCoreDirectX::Init()
 	mCbvHeapIncSize = mDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	D3D12_DESCRIPTOR_HEAP_DESC cbvHeapDesc;
 	cbvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-	cbvHeapDesc.NumDescriptors = 1;
+	cbvHeapDesc.NumDescriptors = mObjectConstBufferSize;
 	cbvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	cbvHeapDesc.NodeMask = 0;
 	ThrowIfFailed(mDevice->CreateDescriptorHeap(&cbvHeapDesc, IID_PPV_ARGS(&mCbvHeap)));
@@ -112,8 +112,8 @@ bool Engine::Core::EngineCoreDirectX::Init()
 	// 6. create const buffer and view
 	UINT objCbSize = CalcConstantBufferByteSize(sizeof(ObjectConstants));
 	ThrowIfFailed(mDevice->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
-		D3D12_HEAP_FLAG_NONE, &CD3DX12_RESOURCE_DESC::Buffer(objCbSize), D3D12_RESOURCE_STATE_GENERIC_READ,
-		nullptr, IID_PPV_ARGS(&mConstBuffer)));
+		D3D12_HEAP_FLAG_NONE, &CD3DX12_RESOURCE_DESC::Buffer(mObjectConstBufferSize * objCbSize), 
+		D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&mConstBuffer)));
 
 	D3D12_GPU_VIRTUAL_ADDRESS objCbAddr = mConstBuffer->GetGPUVirtualAddress();
 	for (UINT i = 0; i < mObjectConstBufferSize; i++)
@@ -459,7 +459,9 @@ void Engine::Core::EngineCoreDirectX::DrawObject(EngineObjectDirectX * object, E
 	ObjectConstants objConstants;
 	// https://blog.csdn.net/u014038143/article/details/78192194
 	XMStoreFloat4x4(&objConstants.WorldViewProj, XMMatrixTranspose(worldViewProj));
-	memcpy(mConstBufferData + object->mID * sizeof(ObjectConstants), &objConstants, sizeof(ObjectConstants));
+
+	UINT objCbSize = CalcConstantBufferByteSize(sizeof(ObjectConstants));
+	memcpy(mConstBufferData + object->mID * objCbSize, &objConstants, sizeof(ObjectConstants));
 	mConstBuffer->Unmap(0, nullptr);
 
 	CD3DX12_GPU_DESCRIPTOR_HANDLE cbvHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(

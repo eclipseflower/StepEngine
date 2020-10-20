@@ -216,6 +216,7 @@ bool Engine::Core::EngineSceneManagerDirectX::CreatePyramidObject(EngineObjectDi
 	}
 
 	XMMATRIX i = XMMatrixIdentity();
+	i = i * XMMatrixTranslation(0, 1, 0);
 	XMStoreFloat4x4(&(*object)->mWorldMatrix, i);
 
 	(*object)->mID = mCurSceneObjectIndex++;
