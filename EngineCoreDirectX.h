@@ -19,6 +19,17 @@ namespace Engine
 {
 	namespace Core
 	{
+		struct EngineCoreResource
+		{
+			ComPtr<ID3D12CommandAllocator> mCommandAlloc = nullptr;
+			ComPtr<ID3D12Resource> mConstBuffer = nullptr;
+			BYTE *mConstBufferData = nullptr;
+			UINT mObjectConstBufferSize = 1024;
+			UINT mPassConstBufferSize = 1024;
+
+			UINT mCurrentFence = 0;
+		};
+
 		class EngineCoreDirectX
 		{
 		public:
@@ -57,7 +68,6 @@ namespace Engine
 
 			ComPtr<ID3D12CommandQueue> mCommandQueue = nullptr;
 			ComPtr<ID3D12GraphicsCommandList> mCommandList = nullptr;
-			ComPtr<ID3D12CommandAllocator> mCommandAlloc = nullptr;
 			ComPtr<ID3D12Fence> mFence = nullptr;
 			UINT mCurrentFence = 0;
 
@@ -69,11 +79,8 @@ namespace Engine
 			UINT mDsvHeapIncSize = 0;
 			UINT mCbvHeapIncSize = 0;
 
-			UINT mObjectConstBufferSize = 1024;
-			UINT mPassConstBufferSize = 1024;
+			vector<EngineCoreResource> mCoreResource;
 
-			ComPtr<ID3D12Resource> mConstBuffer = nullptr;
-			BYTE *mConstBufferData = nullptr;
 			ComPtr<ID3D12RootSignature> mRootSignature = nullptr;
 
 			vector<D3D12_INPUT_ELEMENT_DESC> mInputLayout;
