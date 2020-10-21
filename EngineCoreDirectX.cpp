@@ -100,21 +100,30 @@ bool Engine::Core::EngineCoreDirectX::Init()
 	dsvHeapDesc.NodeMask = 0;
 	ThrowIfFailed(mDevice->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(&mDsvHeap)));
 
-	// 5. create cbv heap
+	// 5. create frame resources (command alloc and const buffer)
+	UINT objCbSize = CalcConstantBufferByteSize(sizeof(ObjectConstants));
+	UINT objCbCount = 0;
+	for (UINT i = 0; i < mCoreResourceCount; i++)
+	{
+		EngineCoreResource res;
+		ThrowIfFailed(mDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&res.mCommandAlloc)));
+		ThrowIfFailed(mDevice->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+			D3D12_HEAP_FLAG_NONE, &CD3DX12_RESOURCE_DESC::Buffer(res.mObjectConstBufferCount * objCbSize),
+			D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&res.mConstBuffer)));
+		mCoreResource.push_back(res);
+		objCbCount = objCbCount + res.mObjectConstBufferCount;
+	}
+
+	// 6. create cbv heap
 	mCbvHeapIncSize = mDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	D3D12_DESCRIPTOR_HEAP_DESC cbvHeapDesc;
 	cbvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-	cbvHeapDesc.NumDescriptors = mObjectConstBufferSize;
+	cbvHeapDesc.NumDescriptors = objCbCount * objCbSize;
 	cbvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	cbvHeapDesc.NodeMask = 0;
 	ThrowIfFailed(mDevice->CreateDescriptorHeap(&cbvHeapDesc, IID_PPV_ARGS(&mCbvHeap)));
 
-	// 6. create const buffer and view
-	UINT objCbSize = CalcConstantBufferByteSize(sizeof(ObjectConstants));
-	ThrowIfFailed(mDevice->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
-		D3D12_HEAP_FLAG_NONE, &CD3DX12_RESOURCE_DESC::Buffer(mObjectConstBufferSize * objCbSize), 
-		D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&mConstBuffer)));
-
+	// 7. create const buffer view
 	D3D12_GPU_VIRTUAL_ADDRESS objCbAddr = mConstBuffer->GetGPUVirtualAddress();
 	for (UINT i = 0; i < mObjectConstBufferSize; i++)
 	{
@@ -127,7 +136,7 @@ bool Engine::Core::EngineCoreDirectX::Init()
 		mDevice->CreateConstantBufferView(&cbvDesc, handle);
 	}
 
-	// 7. create root signature
+	// 8. create root signature
 	CD3DX12_DESCRIPTOR_RANGE cbvTable;
 	cbvTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0);
 	CD3DX12_ROOT_PARAMETER rootParams[1];
@@ -145,14 +154,14 @@ bool Engine::Core::EngineCoreDirectX::Init()
 	ThrowIfFailed(mDevice->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), 
 		IID_PPV_ARGS(&mRootSignature)));
 
-	// 8. create input layout
+	// 9. create input layout
 	mInputLayout =
 	{
 		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
 		{"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0}
 	};
 
-	// 9. create vertex buffer and index buffer and views
+	// 10. create vertex buffer and index buffer and views
 	ThrowIfFailed(mDevice->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 		D3D12_HEAP_FLAG_NONE, &CD3DX12_RESOURCE_DESC::Buffer(mVertexBufferSize * sizeof(EngineVertexPosDirectX)), 
 		D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&mPosVertexBufferGPU)));

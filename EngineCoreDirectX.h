@@ -24,7 +24,7 @@ namespace Engine
 			ComPtr<ID3D12CommandAllocator> mCommandAlloc = nullptr;
 			ComPtr<ID3D12Resource> mConstBuffer = nullptr;
 			BYTE *mConstBufferData = nullptr;
-			UINT mObjectConstBufferSize = 1024;
+			UINT mObjectConstBufferCount = 1024;
 			UINT mPassConstBufferSize = 1024;
 
 			UINT mCurrentFence = 0;
@@ -67,6 +67,7 @@ namespace Engine
 			DXGI_FORMAT mDepthStencilBufferFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
 
 			ComPtr<ID3D12CommandQueue> mCommandQueue = nullptr;
+			ComPtr<ID3D12CommandAllocator> mCommandAlloc = nullptr;
 			ComPtr<ID3D12GraphicsCommandList> mCommandList = nullptr;
 			ComPtr<ID3D12Fence> mFence = nullptr;
 			UINT mCurrentFence = 0;
