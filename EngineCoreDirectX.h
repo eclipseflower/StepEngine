@@ -80,6 +80,8 @@ namespace Engine
 			UINT mCbvHeapIncSize = 0;
 
 			vector<EngineCoreResource> mCoreResource;
+			UINT mCoreResourceCount = 3;
+			UINT mCurCoreResourceIndex = 0;
 
 			ComPtr<ID3D12RootSignature> mRootSignature = nullptr;
 
