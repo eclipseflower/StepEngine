@@ -124,16 +124,22 @@ bool Engine::Core::EngineCoreDirectX::Init()
 	ThrowIfFailed(mDevice->CreateDescriptorHeap(&cbvHeapDesc, IID_PPV_ARGS(&mCbvHeap)));
 
 	// 7. create const buffer view
-	D3D12_GPU_VIRTUAL_ADDRESS objCbAddr = mConstBuffer->GetGPUVirtualAddress();
-	for (UINT i = 0; i < mObjectConstBufferSize; i++)
+	UINT cbvHeapIndex = 0;
+	for (UINT i = 0; i < mCoreResourceCount; i++)
 	{
-		D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
-		cbvDesc.BufferLocation = objCbAddr + i * objCbSize;
-		cbvDesc.SizeInBytes = objCbSize;
-		CD3DX12_CPU_DESCRIPTOR_HANDLE handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-			mCbvHeap->GetCPUDescriptorHandleForHeapStart());
-		handle.Offset(i, mCbvHeapIncSize);
-		mDevice->CreateConstantBufferView(&cbvDesc, handle);
+		EngineCoreResource res = mCoreResource[i];
+		D3D12_GPU_VIRTUAL_ADDRESS objCbAddr = res.mConstBuffer->GetGPUVirtualAddress();
+		for (UINT j = 0; j < res.mObjectConstBufferCount; j++)
+		{
+			D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
+			cbvDesc.BufferLocation = objCbAddr + j * objCbSize;
+			cbvDesc.SizeInBytes = objCbSize;
+			CD3DX12_CPU_DESCRIPTOR_HANDLE handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
+				mCbvHeap->GetCPUDescriptorHandleForHeapStart());
+			handle.Offset(cbvHeapIndex, mCbvHeapIncSize);
+			mDevice->CreateConstantBufferView(&cbvDesc, handle);
+			cbvHeapIndex++;
+		}
 	}
 
 	// 8. create root signature
@@ -429,8 +435,17 @@ void Engine::Core::EngineCoreDirectX::FlushCommandQueue()
 
 void Engine::Core::EngineCoreDirectX::BeginDraw()
 {
-	ThrowIfFailed(mCommandAlloc->Reset());
-	ThrowIfFailed(mCommandList->Reset(mCommandAlloc.Get(), nullptr));
+	EngineCoreResource res = mCoreResource[mCurCoreResourceIndex];
+	if (res.mCurrentFence != 0 && mFence->GetCompletedValue() < res.mCurrentFence)
+	{
+		HANDLE handle = CreateEventEx(nullptr, false, false, EVENT_ALL_ACCESS);
+		ThrowIfFailed(mFence->SetEventOnCompletion(res.mCurrentFence, handle));
+		WaitForSingleObject(handle, INFINITE);
+		CloseHandle(handle);
+	}
+
+	ThrowIfFailed(res.mCommandAlloc->Reset());
+	ThrowIfFailed(mCommandList->Reset(res.mCommandAlloc.Get(), nullptr));
 
 	// D3D12_RESOURCE_STATE_COMMON = D3D12_RESOURCE_STATE_PRESENT = 0
 	/*
@@ -460,7 +475,8 @@ void Engine::Core::EngineCoreDirectX::BeginDraw()
 
 void Engine::Core::EngineCoreDirectX::DrawObject(EngineObjectDirectX * object, EngineCameraDirectX * camera)
 {
-	ThrowIfFailed(mConstBuffer->Map(0, nullptr, reinterpret_cast<void **>(&mConstBufferData)));
+	EngineCoreResource res = mCoreResource[mCurCoreResourceIndex];
+	ThrowIfFailed(res.mConstBuffer->Map(0, nullptr, reinterpret_cast<void **>(&res.mConstBufferData)));
 	XMMATRIX world = XMLoadFloat4x4(&object->mWorldMatrix);
 	XMMATRIX view = XMLoadFloat4x4(&camera->mViewMatrix);
 	XMMATRIX proj = XMLoadFloat4x4(&camera->mProjMatrix);
@@ -470,12 +486,18 @@ void Engine::Core::EngineCoreDirectX::DrawObject(EngineObjectDirectX * object, E
 	XMStoreFloat4x4(&objConstants.WorldViewProj, XMMatrixTranspose(worldViewProj));
 
 	UINT objCbSize = CalcConstantBufferByteSize(sizeof(ObjectConstants));
-	memcpy(mConstBufferData + object->mID * objCbSize, &objConstants, sizeof(ObjectConstants));
-	mConstBuffer->Unmap(0, nullptr);
+	memcpy(res.mConstBufferData + object->mID * objCbSize, &objConstants, sizeof(ObjectConstants));
+	res.mConstBuffer->Unmap(0, nullptr);
 
+	UINT cbvHeapIndex = 0;
+	for (UINT i = 0; i < mCurCoreResourceIndex; i++)
+	{
+		cbvHeapIndex += mCoreResource[i].mObjectConstBufferCount;
+	}
+	cbvHeapIndex = cbvHeapIndex + object->mID;
 	CD3DX12_GPU_DESCRIPTOR_HANDLE cbvHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(
 		mCbvHeap->GetGPUDescriptorHandleForHeapStart());
-	cbvHandle.Offset(object->mID, mCbvHeapIncSize);
+	cbvHandle.Offset(cbvHeapIndex, mCbvHeapIncSize);
 	mCommandList->SetGraphicsRootDescriptorTable(0, cbvHandle);
 
 	mCommandList->SetPipelineState(object->mPipelineState.Get());
@@ -509,5 +531,10 @@ void Engine::Core::EngineCoreDirectX::EndDraw()
 
 	ThrowIfFailed(mSwapChain->Present(0, 0));
 	mCurBackBuffer = (mCurBackBuffer + 1) % mBackBufferCount;
-	FlushCommandQueue();
+
+	mCurrentFence++;
+	ThrowIfFailed(mCommandQueue->Signal(mFence.Get(), mCurrentFence));
+	EngineCoreResource res = mCoreResource[mCurCoreResourceIndex];
+	res.mCurrentFence = mCurrentFence;
+	mCurCoreResourceIndex = (mCurCoreResourceIndex + 1) % mCoreResourceCount;
 }
