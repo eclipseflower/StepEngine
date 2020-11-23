@@ -308,3 +308,38 @@ bool Engine::Core::EngineSceneManagerDirectX::CreateCylinderObject(float topRadi
 	*/
 	return true;
 }
+
+bool Engine::Core::EngineSceneManagerDirectX::CreateObjectFromFile(string filename, EngineObjectDirectX ** object)
+{
+	*object = new EngineObjectDirectX;
+	ifstream fin(filename);
+	if (!fin)
+	{
+		return false;
+	}
+
+	string ignore;
+	fin >> ignore >> (*object)->mVertexCount;
+	fin >> ignore >> (*object)->mIndexCount;
+	fin >> ignore >> ignore >> ignore >> ignore;
+
+	float posx, posy, posz;
+	float normalx, normaly, normalz;
+	for (int i = 0; i < (*object)->mVertexCount; i++)
+	{
+		fin >> posx >> posy >> posz;
+		fin >> normalx >> normaly >> normalz;
+		(*object)->mPosVertices.push_back({ XMFLOAT3(posx, posy, posz) });
+		(*object)->mPropVertices.push_back({ XMFLOAT3(normalx, normaly, normalz) });
+	}
+
+	(*object)->mBatched = true;
+
+	XMMATRIX i = XMMatrixIdentity();
+	XMStoreFloat4x4(&(*object)->mWorldMatrix, i);
+
+	(*object)->mID = mCurSceneObjectIndex++;
+	mSceneObjects.push_back(*object);
+
+	return true;
+}

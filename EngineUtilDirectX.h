@@ -95,7 +95,13 @@ namespace Engine
 
 	struct EngineVertexPropDirectX
 	{
+		XMFLOAT3 normal;
 		XMFLOAT4 color;
+
+		EngineVertexPropDirectX(XMFLOAT3 normal)
+		{
+			this->normal = normal;
+		}
 
 		EngineVertexPropDirectX(XMFLOAT4 color)
 		{
