@@ -45,6 +45,7 @@ namespace Engine
 		bool CreateBoxObject(EngineObjectDirectX **object);
 		bool CreatePyramidObject(EngineObjectDirectX **object);
 		bool CreateCylinderObject(float topRadius, float bottomRadius, float height, EngineObjectDirectX **object);
+		bool CreateObjectFromFile(string filename, EngineObjectDirectX ** object);
 		bool CreateShader(wstring srcFile, EngineShaderDirectX **shader);
 		bool CreatePipelineStateObject(EngineShaderDirectX *shader, ID3D12PipelineState **pipelineStateObject);
 		bool UpdatePosVertexBuffer(void * data, UINT byteWidth, int *mBaseVertexLocation);

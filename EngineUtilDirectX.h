@@ -100,6 +100,7 @@ namespace Engine
 
 		EngineVertexPropDirectX(XMFLOAT3 normal)
 		{
+			this->color = (XMFLOAT4)Black;
 			this->normal = normal;
 		}
 

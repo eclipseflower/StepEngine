@@ -312,6 +312,8 @@ bool Engine::Core::EngineSceneManagerDirectX::CreateCylinderObject(float topRadi
 bool Engine::Core::EngineSceneManagerDirectX::CreateObjectFromFile(string filename, EngineObjectDirectX ** object)
 {
 	*object = new EngineObjectDirectX;
+	(*object)->mBatched = true;
+
 	ifstream fin(filename);
 	if (!fin)
 	{
@@ -321,6 +323,7 @@ bool Engine::Core::EngineSceneManagerDirectX::CreateObjectFromFile(string filena
 	string ignore;
 	fin >> ignore >> (*object)->mVertexCount;
 	fin >> ignore >> (*object)->mIndexCount;
+	(*object)->mIndexCount *= 3;
 	fin >> ignore >> ignore >> ignore >> ignore;
 
 	float posx, posy, posz;
@@ -333,7 +336,66 @@ bool Engine::Core::EngineSceneManagerDirectX::CreateObjectFromFile(string filena
 		(*object)->mPropVertices.push_back({ XMFLOAT3(normalx, normaly, normalz) });
 	}
 
-	(*object)->mBatched = true;
+	fin >> ignore >> ignore >> ignore;
+
+	int index;
+	for (int i = 0; i < (*object)->mIndexCount; i++)
+	{
+		fin >> index;
+		(*object)->mIndices.push_back(index);
+	}
+
+	fin.close();
+
+	bool res = gManagerDirectX->CreateDefaultBuffer((*object)->mPosVertices.data(),
+		sizeof(EngineVertexPosDirectX) * (*object)->mVertexCount,
+		&(*object)->mPosVertexBufferGPU, &(*object)->mPosVertexBufferUploader);
+
+	if (!res)
+	{
+		return false;
+	}
+
+	res = gManagerDirectX->UpdatePosVertexBuffer((*object)->mPosVertices.data(),
+		sizeof(EngineVertexPosDirectX) * (*object)->mVertexCount, &(*object)->mBaseVertexLocation);
+
+	if (!res)
+	{
+		return false;
+	}
+
+	res = gManagerDirectX->CreateDefaultBuffer((*object)->mPropVertices.data(),
+		sizeof(EngineVertexPropDirectX) * (*object)->mVertexCount,
+		&(*object)->mPropVertexBufferGPU, &(*object)->mPropVertexBufferUploader);
+
+	if (!res)
+	{
+		return false;
+	}
+
+	res = gManagerDirectX->UpdatePropVertexBuffer((*object)->mPropVertices.data(),
+		sizeof(EngineVertexPropDirectX) * (*object)->mVertexCount);
+
+	if (!res)
+	{
+		return false;
+	}
+
+	res = gManagerDirectX->CreateDefaultBuffer((*object)->mIndices.data(), sizeof(UINT) * (*object)->mIndexCount,
+		&(*object)->mIndexBufferGPU, &(*object)->mIndexBufferUploader);
+
+	if (!res)
+	{
+		return false;
+	}
+
+	res = gManagerDirectX->UpdateIndexBuffer((*object)->mIndices.data(), sizeof(UINT) * (*object)->mIndexCount,
+		&(*object)->mStartIndexLocation);
+
+	if (!res)
+	{
+		return false;
+	}
 
 	XMMATRIX i = XMMatrixIdentity();
 	XMStoreFloat4x4(&(*object)->mWorldMatrix, i);

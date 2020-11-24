@@ -31,7 +31,7 @@ int EngineBoxApp::Run(HINSTANCE hInstance)
 		return -1;
 	}
 
-
+	/*
 	EngineObjectDirectX *boxObject;
 	if (!manager.CreateBoxObject(&boxObject))
 	{
@@ -40,6 +40,7 @@ int EngineBoxApp::Run(HINSTANCE hInstance)
 
 	boxObject->SetShader(shader);
 
+	
 	EngineObjectDirectX *pyramidObject;
 	if (!manager.CreatePyramidObject(&pyramidObject))
 	{
@@ -47,6 +48,14 @@ int EngineBoxApp::Run(HINSTANCE hInstance)
 	}
 
 	pyramidObject->SetShader(shader);
+	*/
+
+	EngineObjectDirectX *fileObject;
+	if (!manager.CreateObjectFromFile("car.txt", &fileObject))
+	{
+		return -1;
+	}
+	fileObject->SetShader(shader);
 
 	manager.mUpdateFunc = bind(&EngineBoxApp::Update, this, _1);
 	manager.mMouseDownFunc = bind(&EngineBoxApp::OnMouseDown, this, _1, _2, _3);

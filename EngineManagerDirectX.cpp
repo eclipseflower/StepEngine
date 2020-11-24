@@ -202,6 +202,11 @@ bool Engine::EngineManagerDirectX::CreateCylinderObject(float topRadius, float b
 	return mSceneMgrInst.CreateCylinderObject(topRadius, bottomRadius, height, object);
 }
 
+bool Engine::EngineManagerDirectX::CreateObjectFromFile(string filename, EngineObjectDirectX ** object)
+{
+	return mSceneMgrInst.CreateObjectFromFile(filename, object);
+}
+
 bool Engine::EngineManagerDirectX::CreateShader(wstring srcFile, EngineShaderDirectX ** shader)
 {
 	if (mCoreInst)

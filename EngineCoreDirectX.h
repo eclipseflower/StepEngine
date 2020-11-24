@@ -88,7 +88,7 @@ namespace Engine
 
 			vector<D3D12_INPUT_ELEMENT_DESC> mInputLayout;
 
-			UINT mVertexBufferSize = 1024;
+			UINT mVertexBufferSize = 65536;
 			ComPtr<ID3D12Resource> mPosVertexBufferGPU = nullptr;
 			void *mPosVertexBufferData = nullptr;
 			UINT mPosVertexBufferOffset = 0;
@@ -97,7 +97,7 @@ namespace Engine
 			void *mPropVertexBufferData = nullptr;
 			UINT mPropVertexBufferOffset = 0;
 
-			UINT mIndexBufferSize = 1024;
+			UINT mIndexBufferSize = 65536;
 			UINT mIndexBufferOffset = 0;
 			ComPtr<ID3D12Resource> mIndexBufferGPU = nullptr;
 			void *mIndexBufferData = nullptr;
