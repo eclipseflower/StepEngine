@@ -22,8 +22,11 @@ namespace Engine
 		struct EngineCoreResource
 		{
 			ComPtr<ID3D12CommandAllocator> mCommandAlloc = nullptr;
-			ComPtr<ID3D12Resource> mConstBuffer = nullptr;
 			BYTE *mConstBufferData = nullptr;
+
+			ComPtr<ID3D12Resource> mObjectConstBuffer = nullptr;
+			ComPtr<ID3D12Resource> mPassConstBuffer = nullptr;
+
 			UINT mObjectConstBufferCount = 1024;
 			UINT mPassConstBufferSize = 1024;
 

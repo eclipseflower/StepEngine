@@ -126,6 +126,11 @@ namespace Engine
 		XMFLOAT4X4 WorldViewProj = Identity4x4();
 	};
 
+	struct PassConstants
+	{
+		Light lights[16];
+	};
+
 	static UINT CalcConstantBufferByteSize(UINT byteSize)
 	{
 		// Constant buffers must be a multiple of the minimum hardware
@@ -141,6 +146,24 @@ namespace Engine
 		// 512
 		return (byteSize + 255) & ~255;
 	}
+
+	enum LightType
+	{
+		Directional = 0,
+		Point = 1,
+		Spot = 2,
+	};
+
+	struct Light
+	{
+		int type;
+		XMFLOAT3 color;
+		float falloffStart;
+		XMFLOAT3 direction;
+		float falloffEnd;
+		XMFLOAT3 position;
+		float spotPower;
+	};
 }
 /*
 

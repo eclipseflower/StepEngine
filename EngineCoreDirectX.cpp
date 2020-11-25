@@ -109,7 +109,7 @@ bool Engine::Core::EngineCoreDirectX::Init()
 		ThrowIfFailed(mDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&res.mCommandAlloc)));
 		ThrowIfFailed(mDevice->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 			D3D12_HEAP_FLAG_NONE, &CD3DX12_RESOURCE_DESC::Buffer(res.mObjectConstBufferCount * objCbSize),
-			D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&res.mConstBuffer)));
+			D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&res.mObjectConstBuffer)));
 		mCoreResource.push_back(res);
 		objCbCount = objCbCount + res.mObjectConstBufferCount;
 	}
@@ -128,7 +128,7 @@ bool Engine::Core::EngineCoreDirectX::Init()
 	for (UINT i = 0; i < mCoreResourceCount; i++)
 	{
 		EngineCoreResource res = mCoreResource[i];
-		D3D12_GPU_VIRTUAL_ADDRESS objCbAddr = res.mConstBuffer->GetGPUVirtualAddress();
+		D3D12_GPU_VIRTUAL_ADDRESS objCbAddr = res.mObjectConstBuffer->GetGPUVirtualAddress();
 		for (UINT j = 0; j < res.mObjectConstBufferCount; j++)
 		{
 			D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
@@ -476,7 +476,7 @@ void Engine::Core::EngineCoreDirectX::BeginDraw()
 void Engine::Core::EngineCoreDirectX::DrawObject(EngineObjectDirectX * object, EngineCameraDirectX * camera)
 {
 	EngineCoreResource res = mCoreResource[mCurCoreResourceIndex];
-	ThrowIfFailed(res.mConstBuffer->Map(0, nullptr, reinterpret_cast<void **>(&res.mConstBufferData)));
+	ThrowIfFailed(res.mObjectConstBuffer->Map(0, nullptr, reinterpret_cast<void **>(&res.mConstBufferData)));
 	XMMATRIX world = XMLoadFloat4x4(&object->mWorldMatrix);
 	XMMATRIX view = XMLoadFloat4x4(&camera->mViewMatrix);
 	XMMATRIX proj = XMLoadFloat4x4(&camera->mProjMatrix);
@@ -487,7 +487,7 @@ void Engine::Core::EngineCoreDirectX::DrawObject(EngineObjectDirectX * object, E
 
 	UINT objCbSize = CalcConstantBufferByteSize(sizeof(ObjectConstants));
 	memcpy(res.mConstBufferData + object->mID * objCbSize, &objConstants, sizeof(ObjectConstants));
-	res.mConstBuffer->Unmap(0, nullptr);
+	res.mObjectConstBuffer->Unmap(0, nullptr);
 
 	UINT cbvHeapIndex = 0;
 	for (UINT i = 0; i < mCurCoreResourceIndex; i++)
