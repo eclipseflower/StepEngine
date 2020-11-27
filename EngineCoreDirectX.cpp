@@ -102,7 +102,9 @@ bool Engine::Core::EngineCoreDirectX::Init()
 
 	// 5. create frame resources (command alloc and const buffer)
 	UINT objCbSize = CalcConstantBufferByteSize(sizeof(ObjectConstants));
+	UINT passCbSize = CalcConstantBufferByteSize(sizeof(PassConstants));
 	UINT objCbCount = 0;
+	UINT passCbCount = 0;
 	for (UINT i = 0; i < mCoreResourceCount; i++)
 	{
 		EngineCoreResource res;
@@ -110,15 +112,19 @@ bool Engine::Core::EngineCoreDirectX::Init()
 		ThrowIfFailed(mDevice->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 			D3D12_HEAP_FLAG_NONE, &CD3DX12_RESOURCE_DESC::Buffer(res.mObjectConstBufferCount * objCbSize),
 			D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&res.mObjectConstBuffer)));
+		ThrowIfFailed(mDevice->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+			D3D12_HEAP_FLAG_NONE, &CD3DX12_RESOURCE_DESC::Buffer(res.mPassConstBufferCount * passCbSize),
+			D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&res.mPassConstBuffer)));
 		mCoreResource.push_back(res);
 		objCbCount = objCbCount + res.mObjectConstBufferCount;
+		passCbCount = passCbCount + res.mPassConstBufferCount;
 	}
 
 	// 6. create cbv heap
 	mCbvHeapIncSize = mDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	D3D12_DESCRIPTOR_HEAP_DESC cbvHeapDesc;
 	cbvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-	cbvHeapDesc.NumDescriptors = objCbCount * objCbSize;
+	cbvHeapDesc.NumDescriptors = objCbCount + passCbCount;
 	cbvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	cbvHeapDesc.NodeMask = 0;
 	ThrowIfFailed(mDevice->CreateDescriptorHeap(&cbvHeapDesc, IID_PPV_ARGS(&mCbvHeap)));
@@ -140,10 +146,23 @@ bool Engine::Core::EngineCoreDirectX::Init()
 			mDevice->CreateConstantBufferView(&cbvDesc, handle);
 			cbvHeapIndex++;
 		}
+
+		D3D12_GPU_VIRTUAL_ADDRESS passCbAddr = res.mPassConstBuffer->GetGPUVirtualAddress();
+		for (UINT j = 0; j < res.mPassConstBufferCount; j++)
+		{
+			D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
+			cbvDesc.BufferLocation = passCbAddr + j * passCbSize;
+			cbvDesc.SizeInBytes = passCbSize;
+			CD3DX12_CPU_DESCRIPTOR_HANDLE handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
+				mCbvHeap->GetCPUDescriptorHandleForHeapStart());
+			handle.Offset(cbvHeapIndex, mCbvHeapIncSize);
+			mDevice->CreateConstantBufferView(&cbvDesc, handle);
+			cbvHeapIndex++;
+		}
 	}
 
 	// 8. create root signature
-	CD3DX12_DESCRIPTOR_RANGE cbvTable;
+	CD3DX12_DESCRIPTOR_RANGE cbvTable[2];
 	cbvTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0);
 	CD3DX12_ROOT_PARAMETER rootParams[1];
 	rootParams[0].InitAsDescriptorTable(1, &cbvTable);
@@ -163,8 +182,9 @@ bool Engine::Core::EngineCoreDirectX::Init()
 	// 9. create input layout
 	mInputLayout =
 	{
-		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
-		{"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0}
+		{"POSITION",	0,	DXGI_FORMAT_R32G32B32_FLOAT,	0,	D3D12_APPEND_ALIGNED_ELEMENT,	D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,	0},
+		{"NORMAL",		0,	DXGI_FORMAT_R32G32B32_FLOAT,	1,	D3D12_APPEND_ALIGNED_ELEMENT,	D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,	0},
+		{"COLOR",		0,	DXGI_FORMAT_R32G32B32A32_FLOAT,	1,	D3D12_APPEND_ALIGNED_ELEMENT,	D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,	0}
 	};
 
 	// 10. create vertex buffer and index buffer and views

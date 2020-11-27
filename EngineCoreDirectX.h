@@ -28,7 +28,7 @@ namespace Engine
 			ComPtr<ID3D12Resource> mPassConstBuffer = nullptr;
 
 			UINT mObjectConstBufferCount = 1024;
-			UINT mPassConstBufferSize = 1024;
+			UINT mPassConstBufferCount = 1;
 
 			UINT mCurrentFence = 0;
 		};
