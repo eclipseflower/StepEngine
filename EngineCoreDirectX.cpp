@@ -103,21 +103,19 @@ bool Engine::Core::EngineCoreDirectX::Init()
 	// 5. create frame resources (command alloc and const buffer)
 	UINT objCbSize = CalcConstantBufferByteSize(sizeof(ObjectConstants));
 	UINT passCbSize = CalcConstantBufferByteSize(sizeof(PassConstants));
-	UINT objCbCount = 0;
-	UINT passCbCount = 0;
+	UINT objCbCount = mCoreResourceCount * mObjectConstBufferCount;
+	UINT passCbCount = passCbCount * mPassConstBufferCount;
 	for (UINT i = 0; i < mCoreResourceCount; i++)
 	{
 		EngineCoreResource res;
 		ThrowIfFailed(mDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&res.mCommandAlloc)));
 		ThrowIfFailed(mDevice->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
-			D3D12_HEAP_FLAG_NONE, &CD3DX12_RESOURCE_DESC::Buffer(res.mObjectConstBufferCount * objCbSize),
+			D3D12_HEAP_FLAG_NONE, &CD3DX12_RESOURCE_DESC::Buffer(mObjectConstBufferCount * objCbSize),
 			D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&res.mObjectConstBuffer)));
 		ThrowIfFailed(mDevice->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
-			D3D12_HEAP_FLAG_NONE, &CD3DX12_RESOURCE_DESC::Buffer(res.mPassConstBufferCount * passCbSize),
+			D3D12_HEAP_FLAG_NONE, &CD3DX12_RESOURCE_DESC::Buffer(mPassConstBufferCount * passCbSize),
 			D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&res.mPassConstBuffer)));
 		mCoreResource.push_back(res);
-		objCbCount = objCbCount + res.mObjectConstBufferCount;
-		passCbCount = passCbCount + res.mPassConstBufferCount;
 	}
 
 	// 6. create cbv heap
@@ -135,7 +133,7 @@ bool Engine::Core::EngineCoreDirectX::Init()
 	{
 		EngineCoreResource res = mCoreResource[i];
 		D3D12_GPU_VIRTUAL_ADDRESS objCbAddr = res.mObjectConstBuffer->GetGPUVirtualAddress();
-		for (UINT j = 0; j < res.mObjectConstBufferCount; j++)
+		for (UINT j = 0; j < mObjectConstBufferCount; j++)
 		{
 			D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
 			cbvDesc.BufferLocation = objCbAddr + j * objCbSize;
@@ -148,7 +146,7 @@ bool Engine::Core::EngineCoreDirectX::Init()
 		}
 
 		D3D12_GPU_VIRTUAL_ADDRESS passCbAddr = res.mPassConstBuffer->GetGPUVirtualAddress();
-		for (UINT j = 0; j < res.mPassConstBufferCount; j++)
+		for (UINT j = 0; j < mPassConstBufferCount; j++)
 		{
 			D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
 			cbvDesc.BufferLocation = passCbAddr + j * passCbSize;
@@ -163,10 +161,13 @@ bool Engine::Core::EngineCoreDirectX::Init()
 
 	// 8. create root signature
 	CD3DX12_DESCRIPTOR_RANGE cbvTable[2];
-	cbvTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0);
-	CD3DX12_ROOT_PARAMETER rootParams[1];
-	rootParams[0].InitAsDescriptorTable(1, &cbvTable);
-	CD3DX12_ROOT_SIGNATURE_DESC sigDesc(1, rootParams, 0, nullptr, 
+	cbvTable[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0);
+	cbvTable[1].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 1);
+
+	CD3DX12_ROOT_PARAMETER rootParams[2];
+	rootParams[0].InitAsDescriptorTable(1, &cbvTable[0]);
+	rootParams[1].InitAsDescriptorTable(1, &cbvTable[1]);
+	CD3DX12_ROOT_SIGNATURE_DESC sigDesc(2, rootParams, 0, nullptr, 
 		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 	ComPtr<ID3DBlob> signature = nullptr;
 	ComPtr<ID3DBlob> error = nullptr;
@@ -491,10 +492,31 @@ void Engine::Core::EngineCoreDirectX::BeginDraw()
 	mCommandList->SetGraphicsRootSignature(mRootSignature.Get());
 
 	mCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	// copy pass const buffer to GPU
+	ThrowIfFailed(res.mPassConstBuffer->Map(0, nullptr, reinterpret_cast<void **>(&res.mConstBufferData)));
+	UINT passCbSize = CalcConstantBufferByteSize(sizeof(PassConstants));
+	PassConstants passConstants;
+	passConstants.lights[0].direction = { 0.57735f, -0.57735f, 0.57735f };
+	passConstants.lights[0].color = { 0.6f, 0.6f, 0.6f };
+	passConstants.lights[1].direction = { -0.57735f, -0.57735f, 0.57735f };
+	passConstants.lights[1].color = { 0.3f, 0.3f, 0.3f };
+	passConstants.lights[2].direction = { 0.0f, -0.707f, -0.707f };
+	passConstants.lights[2].color = { 0.15f, 0.15f, 0.15f };
+	memcpy(res.mConstBufferData + 0 * passCbSize, &passConstants, sizeof(PassConstants));
+	res.mObjectConstBuffer->Unmap(0, nullptr);
+
+	UINT cbvHeapIndex = mCurCoreResourceIndex * (mObjectConstBufferCount + mPassConstBufferCount);
+	cbvHeapIndex += mObjectConstBufferCount;
+	CD3DX12_GPU_DESCRIPTOR_HANDLE cbvHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(
+		mCbvHeap->GetGPUDescriptorHandleForHeapStart());
+	cbvHandle.Offset(cbvHeapIndex, mCbvHeapIncSize);
+	mCommandList->SetGraphicsRootDescriptorTable(1, cbvHandle);
 }
 
 void Engine::Core::EngineCoreDirectX::DrawObject(EngineObjectDirectX * object, EngineCameraDirectX * camera)
 {
+	// copy object const buffer to GPU
 	EngineCoreResource res = mCoreResource[mCurCoreResourceIndex];
 	ThrowIfFailed(res.mObjectConstBuffer->Map(0, nullptr, reinterpret_cast<void **>(&res.mConstBufferData)));
 	XMMATRIX world = XMLoadFloat4x4(&object->mWorldMatrix);
@@ -509,11 +531,7 @@ void Engine::Core::EngineCoreDirectX::DrawObject(EngineObjectDirectX * object, E
 	memcpy(res.mConstBufferData + object->mID * objCbSize, &objConstants, sizeof(ObjectConstants));
 	res.mObjectConstBuffer->Unmap(0, nullptr);
 
-	UINT cbvHeapIndex = 0;
-	for (UINT i = 0; i < mCurCoreResourceIndex; i++)
-	{
-		cbvHeapIndex += mCoreResource[i].mObjectConstBufferCount;
-	}
+	UINT cbvHeapIndex = mCurCoreResourceIndex * (mObjectConstBufferCount + mPassConstBufferCount);
 	cbvHeapIndex = cbvHeapIndex + object->mID;
 	CD3DX12_GPU_DESCRIPTOR_HANDLE cbvHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(
 		mCbvHeap->GetGPUDescriptorHandleForHeapStart());

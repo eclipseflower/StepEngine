@@ -27,9 +27,6 @@ namespace Engine
 			ComPtr<ID3D12Resource> mObjectConstBuffer = nullptr;
 			ComPtr<ID3D12Resource> mPassConstBuffer = nullptr;
 
-			UINT mObjectConstBufferCount = 1024;
-			UINT mPassConstBufferCount = 1;
-
 			UINT mCurrentFence = 0;
 		};
 
@@ -84,6 +81,8 @@ namespace Engine
 			UINT mCbvHeapIncSize = 0;
 
 			vector<EngineCoreResource> mCoreResource;
+			UINT mObjectConstBufferCount = 1024;
+			UINT mPassConstBufferCount = 1;
 			UINT mCoreResourceCount = 3;
 			UINT mCurCoreResourceIndex = 0;
 
