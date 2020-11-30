@@ -131,6 +131,13 @@ namespace Engine
 		Light lights[16];
 	};
 
+	struct MaterialConstants
+	{
+		XMFLOAT4 diffuseAlbedo;
+		XMFLOAT3 fresnelR0;
+		float shininess;
+	};
+
 	static UINT CalcConstantBufferByteSize(UINT byteSize)
 	{
 		// Constant buffers must be a multiple of the minimum hardware
