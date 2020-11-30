@@ -529,7 +529,7 @@ void Engine::Core::EngineCoreDirectX::BeginDraw()
 	memcpy(res.mConstBufferData + 0 * passCbSize, &passConstants, sizeof(PassConstants));
 	res.mPassConstBuffer->Unmap(0, nullptr);
 
-	UINT cbvHeapIndex = mCurCoreResourceIndex * (mObjectConstBufferCount + mPassConstBufferCount);
+	UINT cbvHeapIndex = mCurCoreResourceIndex * (mObjectConstBufferCount + mPassConstBufferCount + mMaterialConstBufferCount);
 	cbvHeapIndex += mObjectConstBufferCount;
 	CD3DX12_GPU_DESCRIPTOR_HANDLE cbvHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(
 		mCbvHeap->GetGPUDescriptorHandleForHeapStart());
@@ -543,12 +543,19 @@ void Engine::Core::EngineCoreDirectX::DrawObject(EngineObjectDirectX * object, E
 
 	// copy material const buffer to GPU
 	ThrowIfFailed(res.mMaterialConstBuffer->Map(0, nullptr, reinterpret_cast<void **>(&res.mConstBufferData)));
+	UINT matCbSize = CalcConstantBufferByteSize(sizeof(MaterialConstants));
 	MaterialConstants matConstants;
-	matConstants.diffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	matConstants.fresnelR0 = XMFLOAT3(0.05f, 0.05f, 0.05);
-	matConstants.shininess = 0.3f;
+	matConstants.diffuseAlbedo = object->mMaterial->diffuseAlbedo;
+	matConstants.fresnelR0 = object->mMaterial->fresnelR0;
+	matConstants.shininess = object->mMaterial->shininess;
+	memcpy(res.mConstBufferData + object->mMaterial->mID * matCbSize, &matConstants, sizeof(MaterialConstants));
 	res.mMaterialConstBuffer->Unmap(0, nullptr);
-
+	UINT cbvHeapIndex = mCurCoreResourceIndex * (mObjectConstBufferCount + mPassConstBufferCount + mMaterialConstBufferCount);
+	cbvHeapIndex += mObjectConstBufferCount + mPassConstBufferCount + object->mMaterial->mID;
+	CD3DX12_GPU_DESCRIPTOR_HANDLE cbvHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(
+		mCbvHeap->GetGPUDescriptorHandleForHeapStart());
+	cbvHandle.Offset(cbvHeapIndex, mCbvHeapIncSize);
+	mCommandList->SetGraphicsRootDescriptorTable(2, cbvHandle);
 
 	// copy object const buffer to GPU
 	ThrowIfFailed(res.mObjectConstBuffer->Map(0, nullptr, reinterpret_cast<void **>(&res.mConstBufferData)));
@@ -564,10 +571,9 @@ void Engine::Core::EngineCoreDirectX::DrawObject(EngineObjectDirectX * object, E
 	memcpy(res.mConstBufferData + object->mID * objCbSize, &objConstants, sizeof(ObjectConstants));
 	res.mObjectConstBuffer->Unmap(0, nullptr);
 
-	UINT cbvHeapIndex = mCurCoreResourceIndex * (mObjectConstBufferCount + mPassConstBufferCount);
+	cbvHeapIndex = mCurCoreResourceIndex * (mObjectConstBufferCount + mPassConstBufferCount + mMaterialConstBufferCount);
 	cbvHeapIndex = cbvHeapIndex + object->mID;
-	CD3DX12_GPU_DESCRIPTOR_HANDLE cbvHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(
-		mCbvHeap->GetGPUDescriptorHandleForHeapStart());
+	cbvHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(mCbvHeap->GetGPUDescriptorHandleForHeapStart());
 	cbvHandle.Offset(cbvHeapIndex, mCbvHeapIncSize);
 	mCommandList->SetGraphicsRootDescriptorTable(0, cbvHandle);
 
