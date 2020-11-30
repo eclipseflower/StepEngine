@@ -38,6 +38,7 @@ namespace Engine
 			XMFLOAT4X4 mWorldMatrix;
 
 			EngineShaderDirectX *mShader;
+			EngineMaterialDirectX *mMaterial;
 
 			EngineObjectDirectX();
 			~EngineObjectDirectX();
@@ -46,6 +47,7 @@ namespace Engine
 			const D3D12_INDEX_BUFFER_VIEW *IndexBufferView();
 
 			void SetShader(EngineShaderDirectX *shader);
+			void SetMaterial(EngineMaterialDirectX *material);
 		};
 	}
 }

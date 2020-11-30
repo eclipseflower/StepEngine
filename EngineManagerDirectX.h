@@ -7,12 +7,14 @@
 #include "EngineSceneManagerDirectX.h"
 #include "EngineShaderDirectX.h"
 #include "EngineCameraDirectX.h"
+#include "EngineMaterialDirectX.h"
 
 using Engine::Window::EngineWindowDirectX;
 using Engine::Core::EngineCoreDirectX;
 using Engine::Core::EngineSceneManagerDirectX;
 using Engine::Shader::EngineShaderDirectX;
 using Engine::Camera::EngineCameraDirectX;
+using Engine::Shader::EngineMaterialDirectX;
 using std::ostringstream;
 using std::function;
 
@@ -47,6 +49,7 @@ namespace Engine
 		bool CreateCylinderObject(float topRadius, float bottomRadius, float height, EngineObjectDirectX **object);
 		bool CreateObjectFromFile(string filename, EngineObjectDirectX ** object);
 		bool CreateShader(wstring srcFile, EngineShaderDirectX **shader);
+		bool CreateMaterial(EngineMaterialDirectX **material);
 		bool CreatePipelineStateObject(EngineShaderDirectX *shader, ID3D12PipelineState **pipelineStateObject);
 		bool UpdatePosVertexBuffer(void * data, UINT byteWidth, int *mBaseVertexLocation);
 		bool UpdatePropVertexBuffer(void * data, UINT byteWidth);
@@ -62,6 +65,8 @@ namespace Engine
 		function <void(WPARAM, int, int)> mMouseDownFunc;
 		function <void(WPARAM, int, int)> mMouseUpFunc;
 		function <void(WPARAM, int, int)> mMouseMoveFunc;
+
+		UINT mCurSceneMaterialIndex = 0;
 	};
 
 	extern EngineManagerDirectX * gManagerDirectX;

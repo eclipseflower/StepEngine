@@ -37,3 +37,8 @@ void Engine::Object::EngineObjectDirectX::SetShader(EngineShaderDirectX * shader
 	mShader = shader;
 	gManagerDirectX->CreatePipelineStateObject(shader, &mPipelineState);
 }
+
+void Engine::Object::EngineObjectDirectX::SetMaterial(EngineMaterialDirectX * material)
+{
+	mMaterial = material;
+}

@@ -221,6 +221,13 @@ bool Engine::EngineManagerDirectX::CreateShader(wstring srcFile, EngineShaderDir
 	return false;
 }
 
+bool Engine::EngineManagerDirectX::CreateMaterial(EngineMaterialDirectX ** material)
+{
+	*material = new EngineMaterialDirectX;
+	(*material)->mID = mCurSceneMaterialIndex++;
+	return true;
+}
+
 bool Engine::EngineManagerDirectX::CreatePipelineStateObject(EngineShaderDirectX * shader, ID3D12PipelineState **pipelineStateObject)
 {
 	if (mCoreInst)
