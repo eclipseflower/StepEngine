@@ -87,8 +87,7 @@ float4 PS(VertexOut pin) : SV_Target
 	mat.shininess = shininess;
 	float3 toEyeW = normalize(gEyePosW - pin.PosW);
 
-	float4 directLight = ComputeLighting(gLights, mat, pin.PosW,
-		pin.NormalW, toEyeW);
+	float4 directLight = ComputeLighting(gLights, gLightCount£¬mat, pin.PosW, pin.NormalW, toEyeW);
 	float4 litColor = ambient + directLight;
     return float4(litColor.rgb, diffuseAlbedo.a);
 }
