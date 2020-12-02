@@ -95,7 +95,7 @@ void Engine::EngineManagerDirectX::EngineDraw()
 {
 	if (mCoreInst)
 	{
-		mCoreInst->BeginDraw();
+		mCoreInst->BeginDraw(&mCameraInst);
 		for (UINT i = 0; i < mSceneMgrInst.mSceneObjects.size(); ++i)
 		{
 			EngineObjectDirectX *object = mSceneMgrInst.mSceneObjects[i];

@@ -1,6 +1,18 @@
+float3 SchlickFresnel(float r0, float3 normal, float3 lightVec)
+{
+	float nDotL = max(0, dot(normal, lightVec));
+	float3 reflectPercent = r0 + (1 - r0) * pow(1 - nDotL, 5);
+
+	return reflectPercent;
+}
+
 float3 BlinnPhong(float3 lightStrength, float3 lightVec, float3 normal, float3 toEye, Material mat)
 {
-
+	float3 halfVec = normalize(lightVec + toEye);
+	float roughness = (mat.shininess + 8) * pow(max(0, dot(halfVec, normal)), mat.shininess) / 8.0f;
+	float3 fresnel = SchlickFresnel(mat.FresnelR0, halfVec, lightVec);
+	float specularAlbedo = fresnel * roughness;
+	return (mat.diffuseAlbedo.rgb + specularAlbedo) * lightStrength;
 }
 
 float3 ComputeDirectionalLight(Light light, Material mat, float3 normal, float3 toEye)

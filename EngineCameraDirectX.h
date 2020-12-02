@@ -18,6 +18,7 @@ namespace Engine
 
 			XMFLOAT4X4 mViewMatrix;
 			XMFLOAT4X4 mProjMatrix;
+			XMFLOAT3 mViewPos;
 		};
 	}
 }

@@ -47,6 +47,7 @@ using DirectX::XMMatrixLookAtLH;
 using DirectX::XMMatrixPerspectiveFovLH;
 using DirectX::XMConvertToRadians;
 using DirectX::XMMatrixTranslation;
+using DirectX::XMStoreFloat3;
 using DirectX::XM_PI;
 using DirectX::XM_PIDIV4;
 using DirectX::XM_2PI;
@@ -123,11 +124,16 @@ namespace Engine
 
 	struct ObjectConstants
 	{
+		XMFLOAT4X4 World = Identity4x4();
+		XMFLOAT4X4 InvWorld = Identity4x4();
 		XMFLOAT4X4 WorldViewProj = Identity4x4();
 	};
 
 	struct PassConstants
 	{
+		XMFLOAT3 eyePosW;
+		int lightCount;
+		XMFLOAT4 ambientLight;
 		Light lights[16];
 	};
 

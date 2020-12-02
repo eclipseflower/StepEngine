@@ -103,7 +103,7 @@ bool Engine::Core::EngineCoreDirectX::Init()
 	// 5. create frame resources (command alloc and const buffer)
 	UINT objCbSize = CalcConstantBufferByteSize(sizeof(ObjectConstants));
 	UINT passCbSize = CalcConstantBufferByteSize(sizeof(PassConstants));
-	UINT matCbSize = CalcConstantBufferByteSize(sizeof(matCbSize));
+	UINT matCbSize = CalcConstantBufferByteSize(sizeof(MaterialConstants));
 
 	UINT objCbCount = mCoreResourceCount * mObjectConstBufferCount;
 	UINT passCbCount = mCoreResourceCount * mPassConstBufferCount;
@@ -477,7 +477,7 @@ void Engine::Core::EngineCoreDirectX::FlushCommandQueue()
 	}
 }
 
-void Engine::Core::EngineCoreDirectX::BeginDraw()
+void Engine::Core::EngineCoreDirectX::BeginDraw(EngineCameraDirectX * camera)
 {
 	EngineCoreResource res = mCoreResource[mCurCoreResourceIndex];
 	if (res.mCurrentFence != 0 && mFence->GetCompletedValue() < res.mCurrentFence)
@@ -520,6 +520,9 @@ void Engine::Core::EngineCoreDirectX::BeginDraw()
 	ThrowIfFailed(res.mPassConstBuffer->Map(0, nullptr, reinterpret_cast<void **>(&res.mConstBufferData)));
 	UINT passCbSize = CalcConstantBufferByteSize(sizeof(PassConstants));
 	PassConstants passConstants;
+	passConstants.eyePosW = camera->mViewPos;
+	passConstants.ambientLight = { 0.25f, 0.25f, 0.35f, 1.0f };
+	passConstants.lightCount = 3;
 	passConstants.lights[0].direction = { 0.57735f, -0.57735f, 0.57735f };
 	passConstants.lights[0].color = { 0.6f, 0.6f, 0.6f };
 	passConstants.lights[1].direction = { -0.57735f, -0.57735f, 0.57735f };
@@ -560,11 +563,14 @@ void Engine::Core::EngineCoreDirectX::DrawObject(EngineObjectDirectX * object, E
 	// copy object const buffer to GPU
 	ThrowIfFailed(res.mObjectConstBuffer->Map(0, nullptr, reinterpret_cast<void **>(&res.mConstBufferData)));
 	XMMATRIX world = XMLoadFloat4x4(&object->mWorldMatrix);
+	XMMATRIX invWorld = XMMatrixInverse(&XMMatrixDeterminant(world), world);
 	XMMATRIX view = XMLoadFloat4x4(&camera->mViewMatrix);
 	XMMATRIX proj = XMLoadFloat4x4(&camera->mProjMatrix);
 	XMMATRIX worldViewProj = world * view * proj;
 	ObjectConstants objConstants;
 	// https://blog.csdn.net/u014038143/article/details/78192194
+	XMStoreFloat4x4(&objConstants.World, XMMatrixTranspose(world));
+	XMStoreFloat4x4(&objConstants.InvWorld, XMMatrixTranspose(invWorld));
 	XMStoreFloat4x4(&objConstants.WorldViewProj, XMMatrixTranspose(worldViewProj));
 
 	UINT objCbSize = CalcConstantBufferByteSize(sizeof(ObjectConstants));

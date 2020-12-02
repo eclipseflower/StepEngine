@@ -46,7 +46,7 @@ namespace Engine
 			bool UpdateIndexBuffer(void * data, UINT byteWidth, UINT *mStartIndexLocation);
 
 			void FlushCommandQueue();
-			void BeginDraw();
+			void BeginDraw(EngineCameraDirectX * camera);
 			void DrawObject(EngineObjectDirectX * object, EngineCameraDirectX * camera);
 			void EndDraw();
 
