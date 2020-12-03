@@ -10,11 +10,15 @@ Engine::Core::EngineSceneManagerDirectX::~EngineSceneManagerDirectX()
 
 }
 
-bool Engine::Core::EngineSceneManagerDirectX::CreateBoxObject(EngineObjectDirectX ** object)
+bool Engine::Core::EngineSceneManagerDirectX::CreateBoxObject(EngineObjectDirectX ** object, float width, float height, float depth)
 {
+	float w2 = 0.5f * width;
+	float h2 = 0.5f * height;
+	float d2 = 0.5f * depth;
+
 	*object = new EngineObjectDirectX;
 
-	(*object)->mVertexCount = 8;
+	(*object)->mVertexCount = 24;
 	(*object)->mBatched = true;
 
 	(*object)->mPosVertices.push_back({ XMFLOAT3(-1.0f, -1.0f, -1.0f) });
@@ -25,6 +29,42 @@ bool Engine::Core::EngineSceneManagerDirectX::CreateBoxObject(EngineObjectDirect
 	(*object)->mPosVertices.push_back({ XMFLOAT3(-1.0f, +1.0f, +1.0f) });
 	(*object)->mPosVertices.push_back({ XMFLOAT3(+1.0f, +1.0f, +1.0f) });
 	(*object)->mPosVertices.push_back({ XMFLOAT3(+1.0f, -1.0f, +1.0f) });
+
+	// Fill in the front face vertex data.
+	(*object)->mPosVertices.push_back({ XMFLOAT3(-w2, -h2, -d2) });
+	(*object)->mPosVertices.push_back({ XMFLOAT3(-w2, +h2, -d2) });
+	(*object)->mPosVertices.push_back({ XMFLOAT3(+w2, +h2, -d2) });
+	(*object)->mPosVertices.push_back({ XMFLOAT3(+w2, -h2, -d2) });
+
+	// Fill in the back face vertex data.
+	(*object)->mPosVertices.push_back({ XMFLOAT3(-w2, -h2, +d2) });
+	(*object)->mPosVertices.push_back({ XMFLOAT3(+w2, -h2, +d2) });
+	(*object)->mPosVertices.push_back({ XMFLOAT3(+w2, +h2, +d2) });
+	(*object)->mPosVertices.push_back({ XMFLOAT3(-w2, +h2, +d2) });
+
+	// Fill in the top face vertex data.
+	(*object)->mPosVertices.push_back({ XMFLOAT3(-w2, +h2, -d2) });
+	(*object)->mPosVertices.push_back({ XMFLOAT3(-w2, +h2, +d2) });
+	(*object)->mPosVertices.push_back({ XMFLOAT3(+w2, +h2, +d2) });
+	(*object)->mPosVertices.push_back({ XMFLOAT3(+w2, +h2, -d2) });
+
+	// Fill in the bottom face vertex data.
+	(*object)->mPosVertices.push_back({ XMFLOAT3(-w2, -h2, -d2) });
+	(*object)->mPosVertices.push_back({ XMFLOAT3(+w2, -h2, -d2) });
+	(*object)->mPosVertices.push_back({ XMFLOAT3(+w2, -h2, +d2) });
+	(*object)->mPosVertices.push_back({ XMFLOAT3(-w2, -h2, +d2) });
+
+	// Fill in the left face vertex data.
+	(*object)->mPosVertices.push_back({ XMFLOAT3(-w2, -h2, +d2) });
+	(*object)->mPosVertices.push_back({ XMFLOAT3(-w2, +h2, +d2) });
+	(*object)->mPosVertices.push_back({ XMFLOAT3(-w2, +h2, -d2) });
+	(*object)->mPosVertices.push_back({ XMFLOAT3(-w2, -h2, -d2) });
+
+	// Fill in the right face vertex data.
+	(*object)->mPosVertices.push_back({ XMFLOAT3(+w2, -h2, -d2) });
+	(*object)->mPosVertices.push_back({ XMFLOAT3(+w2, +h2, -d2) });
+	(*object)->mPosVertices.push_back({ XMFLOAT3(+w2, +h2, +d2) });
+	(*object)->mPosVertices.push_back({ XMFLOAT3(+w2, -h2, +d2) });
 
 	bool res = gManagerDirectX->CreateDefaultBuffer((*object)->mPosVertices.data(),
 		sizeof(EngineVertexPosDirectX) * (*object)->mVertexCount,
@@ -43,14 +83,41 @@ bool Engine::Core::EngineSceneManagerDirectX::CreateBoxObject(EngineObjectDirect
 		return false;
 	}
 
-	(*object)->mPropVertices.push_back({ (XMFLOAT4)White });
-	(*object)->mPropVertices.push_back({ (XMFLOAT4)Black });
-	(*object)->mPropVertices.push_back({ (XMFLOAT4)Red });
-	(*object)->mPropVertices.push_back({ (XMFLOAT4)Green });
-	(*object)->mPropVertices.push_back({ (XMFLOAT4)Blue });
-	(*object)->mPropVertices.push_back({ (XMFLOAT4)Yellow });
-	(*object)->mPropVertices.push_back({ (XMFLOAT4)Cyan });
-	(*object)->mPropVertices.push_back({ (XMFLOAT4)Magenta });
+	// Fill in the front face vertex data.
+	(*object)->mPropVertices.push_back({ XMFLOAT3(0.0f, 0.0f, -1.0f) });
+	(*object)->mPropVertices.push_back({ XMFLOAT3(0.0f, 0.0f, -1.0f) });
+	(*object)->mPropVertices.push_back({ XMFLOAT3(0.0f, 0.0f, -1.0f) });
+	(*object)->mPropVertices.push_back({ XMFLOAT3(0.0f, 0.0f, -1.0f) });
+
+	// Fill in the back face vertex data.
+	(*object)->mPropVertices.push_back({ XMFLOAT3(0.0f, 0.0f, 1.0f) });
+	(*object)->mPropVertices.push_back({ XMFLOAT3(0.0f, 0.0f, 1.0f) });
+	(*object)->mPropVertices.push_back({ XMFLOAT3(0.0f, 0.0f, 1.0f) });
+	(*object)->mPropVertices.push_back({ XMFLOAT3(0.0f, 0.0f, 1.0f) });
+
+	// Fill in the top face vertex data.
+	(*object)->mPropVertices.push_back({ XMFLOAT3(0.0f, 1.0f, 0.0f) });
+	(*object)->mPropVertices.push_back({ XMFLOAT3(0.0f, 1.0f, 0.0f) });
+	(*object)->mPropVertices.push_back({ XMFLOAT3(0.0f, 1.0f, 0.0f) });
+	(*object)->mPropVertices.push_back({ XMFLOAT3(0.0f, 1.0f, 0.0f) });
+
+	// Fill in the bottom face vertex data.
+	(*object)->mPropVertices.push_back({ XMFLOAT3(0.0f, -1.0f, 0.0f) });
+	(*object)->mPropVertices.push_back({ XMFLOAT3(0.0f, -1.0f, 0.0f) });
+	(*object)->mPropVertices.push_back({ XMFLOAT3(0.0f, -1.0f, 0.0f) });
+	(*object)->mPropVertices.push_back({ XMFLOAT3(0.0f, -1.0f, 0.0f) });
+
+	// Fill in the left face vertex data.
+	(*object)->mPropVertices.push_back({ XMFLOAT3(-1.0f, 0.0f, 0.0f) });
+	(*object)->mPropVertices.push_back({ XMFLOAT3(-1.0f, 0.0f, 0.0f) });
+	(*object)->mPropVertices.push_back({ XMFLOAT3(-1.0f, 0.0f, 0.0f) });
+	(*object)->mPropVertices.push_back({ XMFLOAT3(-1.0f, 0.0f, 0.0f) });
+
+	// Fill in the right face vertex data.
+	(*object)->mPropVertices.push_back({ XMFLOAT3(1.0f, 0.0f, 0.0f) });
+	(*object)->mPropVertices.push_back({ XMFLOAT3(1.0f, 0.0f, 0.0f) });
+	(*object)->mPropVertices.push_back({ XMFLOAT3(1.0f, 0.0f, 0.0f) });
+	(*object)->mPropVertices.push_back({ XMFLOAT3(1.0f, 0.0f, 0.0f) });
 
 	res = gManagerDirectX->CreateDefaultBuffer((*object)->mPropVertices.data(),
 		sizeof(EngineVertexPropDirectX) * (*object)->mVertexCount,
@@ -71,29 +138,29 @@ bool Engine::Core::EngineSceneManagerDirectX::CreateBoxObject(EngineObjectDirect
 
 	(*object)->mIndexCount = 36;
 	UINT indices[] = {
-		// front face
+		// Fill in the front face index data
 		0, 1, 2,
 		0, 2, 3,
 
-		// back face
-		4, 6, 5,
-		4, 7, 6,
+		// Fill in the back face index data
+		4, 5, 6,
+		4, 6, 7,
 
-		// left face
-		4, 5, 1,
-		4, 1, 0,
+		// Fill in the top face index data
+		8, 9, 10,
+		8, 10, 11,
 
-		// right face
-		3, 2, 6,
-		3, 6, 7,
+		// Fill in the bottom face index data
+		12, 13, 14,
+		12, 14, 15,
 
-		// top face
-		1, 5, 6,
-		1, 6, 2,
+		// Fill in the left face index data
+		16, 17, 18,
+		16, 18, 19,
 
-		// bottom face
-		4, 0, 3,
-		4, 3, 7
+		// Fill in the right face index data
+		20, 21, 22,
+		20, 22, 23,
 	};
 
 	for (int i = 0; i < (*object)->mIndexCount; ++i)

@@ -133,17 +133,26 @@ void Engine::EngineManagerDirectX::OnResize()
 
 void Engine::EngineManagerDirectX::OnMouseDown(WPARAM btnState, int x, int y)
 {
-	mMouseDownFunc(btnState, x, y);
+	if (mMouseDownFunc != nullptr)
+	{
+		mMouseDownFunc(btnState, x, y);
+	}
 }
 
 void Engine::EngineManagerDirectX::OnMouseUp(WPARAM btnState, int x, int y)
 {
-	mMouseUpFunc(btnState, x, y);
+	if (mMouseUpFunc != nullptr)
+	{
+		mMouseUpFunc(btnState, x, y);
+	}
 }
 
 void Engine::EngineManagerDirectX::OnMouseMove(WPARAM btnState, int x, int y)
 {
-	mMouseMoveFunc(btnState, x, y);
+	if (mMouseMoveFunc != nullptr)
+	{
+		mMouseMoveFunc(btnState, x, y);
+	}
 }
 
 void Engine::EngineManagerDirectX::CameraLookAt(const XMVECTOR & pos, const XMVECTOR & target, const XMVECTOR & up)

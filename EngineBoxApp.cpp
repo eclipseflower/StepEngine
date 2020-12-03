@@ -38,10 +38,10 @@ int EngineBoxApp::Run(HINSTANCE hInstance)
 	}
 
 	material->diffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	material->fresnelR0 = XMFLOAT3(0.05f, 0.05f, 0.05);
+	material->fresnelR0 = XMFLOAT3(0.05f, 0.05f, 0.05f);
 	material->shininess = 0.3f;
 
-	/*
+
 	EngineObjectDirectX *boxObject;
 	if (!manager.CreateBoxObject(&boxObject))
 	{
@@ -49,8 +49,9 @@ int EngineBoxApp::Run(HINSTANCE hInstance)
 	}
 
 	boxObject->SetShader(shader);
+	boxObject->SetMaterial(material);
 
-	
+	/*
 	EngineObjectDirectX *pyramidObject;
 	if (!manager.CreatePyramidObject(&pyramidObject))
 	{
@@ -60,6 +61,7 @@ int EngineBoxApp::Run(HINSTANCE hInstance)
 	pyramidObject->SetShader(shader);
 	*/
 
+	/*
 	EngineObjectDirectX *fileObject;
 	if (!manager.CreateObjectFromFile("car.txt", &fileObject))
 	{
@@ -67,6 +69,7 @@ int EngineBoxApp::Run(HINSTANCE hInstance)
 	}
 	fileObject->SetShader(shader);
 	fileObject->SetMaterial(material);
+	*/
 
 	manager.mUpdateFunc = bind(&EngineBoxApp::Update, this, _1);
 	manager.mMouseDownFunc = bind(&EngineBoxApp::OnMouseDown, this, _1, _2, _3);

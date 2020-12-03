@@ -15,7 +15,7 @@ namespace Engine
 		public:
 			EngineSceneManagerDirectX();
 			~EngineSceneManagerDirectX();
-			bool CreateBoxObject(EngineObjectDirectX **object);
+			bool CreateBoxObject(EngineObjectDirectX ** object, float width, float height, float depth);
 			bool CreatePyramidObject(EngineObjectDirectX **object);
 			bool CreateCylinderObject(float topRadius, float bottomRadius, float height, EngineObjectDirectX **object);
 			bool CreateObjectFromFile(string filename, EngineObjectDirectX **object);

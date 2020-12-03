@@ -6,24 +6,6 @@
 
 #include "Lighting.hlsl"
 
-struct Light
-{
-	int type;
-	float3 color;
-	float falloffStart;
-	float3 direction;
-	float falloffEnd;
-	float3 position;
-	float spotPower;
-};
-
-struct Material
-{
-	float4 diffuseAlbedo;
-	float3 fresnelR0;
-	float shininess;
-};
-
 cbuffer cbPerObject : register(b0)
 {
 	float4x4 gWorld;
@@ -69,7 +51,7 @@ VertexOut VS(VertexIn vin)
 	vout.PosH = mul(float4(vin.PosL, 1.0f), gWorldViewProj);
 	float4 posW = mul(float4(vin.PosL, 1.0f), gWorld);
 	vout.PosW = posW.xyz;
-	vout.NormalW = mul(vin.NormalL, transpose(gInvWorld));
+	vout.NormalW = mul(vin.NormalL, (float3x3)transpose(gInvWorld));
 	// Just pass vertex color into the pixel shader.
     vout.Color = vin.Color;
     
@@ -87,7 +69,7 @@ float4 PS(VertexOut pin) : SV_Target
 	mat.shininess = shininess;
 	float3 toEyeW = normalize(gEyePosW - pin.PosW);
 
-	float4 directLight = ComputeLighting(gLights, gLightCount£¬mat, pin.PosW, pin.NormalW, toEyeW);
+	float4 directLight = ComputeLighting(gLights, gLightCount, mat, pin.PosW, pin.NormalW, toEyeW);
 	float4 litColor = ambient + directLight;
     return float4(litColor.rgb, diffuseAlbedo.a);
 }

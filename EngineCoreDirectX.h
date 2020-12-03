@@ -84,7 +84,7 @@ namespace Engine
 			vector<EngineCoreResource> mCoreResource;
 			UINT mObjectConstBufferCount = 1024;
 			UINT mPassConstBufferCount = 1;
-			UINT mMaterialConstBufferCount = 1024;
+			UINT mMaterialConstBufferCount = 256;
 			UINT mCoreResourceCount = 3;
 			UINT mCurCoreResourceIndex = 0;
 
@@ -112,7 +112,7 @@ namespace Engine
 			D3D12_VIEWPORT mViewport;
 			D3D12_RECT mScissorRect;
 
-			D3D12_FILL_MODE mFillMode = D3D12_FILL_MODE_WIREFRAME;
+			D3D12_FILL_MODE mFillMode = D3D12_FILL_MODE_SOLID;
 			D3D12_CULL_MODE mCullMode = D3D12_CULL_MODE_NONE;
 		};
 	}

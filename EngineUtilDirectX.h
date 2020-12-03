@@ -122,6 +122,24 @@ namespace Engine
 		return I;
 	}
 
+	enum LightType
+	{
+		Directional = 0,
+		Point = 1,
+		Spot = 2,
+	};
+
+	struct Light
+	{
+		int type;
+		XMFLOAT3 color;
+		float falloffStart;
+		XMFLOAT3 direction;
+		float falloffEnd;
+		XMFLOAT3 position;
+		float spotPower;
+	};
+
 	struct ObjectConstants
 	{
 		XMFLOAT4X4 World = Identity4x4();
@@ -159,24 +177,6 @@ namespace Engine
 		// 512
 		return (byteSize + 255) & ~255;
 	}
-
-	enum LightType
-	{
-		Directional = 0,
-		Point = 1,
-		Spot = 2,
-	};
-
-	struct Light
-	{
-		int type;
-		XMFLOAT3 color;
-		float falloffStart;
-		XMFLOAT3 direction;
-		float falloffEnd;
-		XMFLOAT3 position;
-		float spotPower;
-	};
 }
 /*
 

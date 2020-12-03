@@ -3,8 +3,10 @@
 
 #include "EngineUtilDirectX.h"
 #include "EngineShaderDirectX.h"
+#include "EngineMaterialDirectX.h"
 
 using Engine::Shader::EngineShaderDirectX;
+using Engine::Shader::EngineMaterialDirectX;
 using std::vector;
 
 namespace Engine

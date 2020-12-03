@@ -165,7 +165,7 @@ bool Engine::Core::EngineCoreDirectX::Init()
 			cbvHeapIndex++;
 		}
 
-		D3D12_GPU_VIRTUAL_ADDRESS matCbAddr = res.mPassConstBuffer->GetGPUVirtualAddress();
+		D3D12_GPU_VIRTUAL_ADDRESS matCbAddr = res.mMaterialConstBuffer->GetGPUVirtualAddress();
 		for (UINT j = 0; j < mMaterialConstBufferCount; j++)
 		{
 			D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
