@@ -39,11 +39,11 @@ int EngineBoxApp::Run(HINSTANCE hInstance)
 
 	material->diffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	material->fresnelR0 = XMFLOAT3(0.05f, 0.05f, 0.05f);
-	material->shininess = 0.3f;
+	material->shininess = 179.2f;
 
 
 	EngineObjectDirectX *boxObject;
-	if (!manager.CreateBoxObject(&boxObject))
+	if (!manager.CreateBoxObject(&boxObject, 1, 1, 1))
 	{
 		return -1;
 	}

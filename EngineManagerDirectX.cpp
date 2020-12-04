@@ -196,9 +196,9 @@ bool Engine::EngineManagerDirectX::CreateDefaultBuffer(void *data, UINT byteWidt
 	return false;
 }
 
-bool Engine::EngineManagerDirectX::CreateBoxObject(EngineObjectDirectX **object)
+bool Engine::EngineManagerDirectX::CreateBoxObject(EngineObjectDirectX **object, float width, float height, float depth)
 {
-	return mSceneMgrInst.CreateBoxObject(object);
+	return mSceneMgrInst.CreateBoxObject(object, width, height, depth);
 }
 
 bool Engine::EngineManagerDirectX::CreatePyramidObject(EngineObjectDirectX ** object)

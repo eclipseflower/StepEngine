@@ -44,7 +44,7 @@ namespace Engine
 		HWND GetHwnd();
 
 		bool CreateDefaultBuffer(void *data, UINT byteWidth, ID3D12Resource **bufferGPU, ID3D12Resource **uploadBuffer);
-		bool CreateBoxObject(EngineObjectDirectX **object);
+		bool CreateBoxObject(EngineObjectDirectX **object, float width, float height, float depth);
 		bool CreatePyramidObject(EngineObjectDirectX **object);
 		bool CreateCylinderObject(float topRadius, float bottomRadius, float height, EngineObjectDirectX **object);
 		bool CreateObjectFromFile(string filename, EngineObjectDirectX ** object);

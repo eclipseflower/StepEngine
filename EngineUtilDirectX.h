@@ -138,6 +138,7 @@ namespace Engine
 		float falloffEnd;
 		XMFLOAT3 position;
 		float spotPower;
+		XMFLOAT3 preserved;
 	};
 
 	struct ObjectConstants

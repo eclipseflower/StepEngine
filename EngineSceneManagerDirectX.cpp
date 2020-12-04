@@ -21,15 +21,6 @@ bool Engine::Core::EngineSceneManagerDirectX::CreateBoxObject(EngineObjectDirect
 	(*object)->mVertexCount = 24;
 	(*object)->mBatched = true;
 
-	(*object)->mPosVertices.push_back({ XMFLOAT3(-1.0f, -1.0f, -1.0f) });
-	(*object)->mPosVertices.push_back({ XMFLOAT3(-1.0f, +1.0f, -1.0f) });
-	(*object)->mPosVertices.push_back({ XMFLOAT3(+1.0f, +1.0f, -1.0f) });
-	(*object)->mPosVertices.push_back({ XMFLOAT3(+1.0f, -1.0f, -1.0f) });
-	(*object)->mPosVertices.push_back({ XMFLOAT3(-1.0f, -1.0f, +1.0f) });
-	(*object)->mPosVertices.push_back({ XMFLOAT3(-1.0f, +1.0f, +1.0f) });
-	(*object)->mPosVertices.push_back({ XMFLOAT3(+1.0f, +1.0f, +1.0f) });
-	(*object)->mPosVertices.push_back({ XMFLOAT3(+1.0f, -1.0f, +1.0f) });
-
 	// Fill in the front face vertex data.
 	(*object)->mPosVertices.push_back({ XMFLOAT3(-w2, -h2, -d2) });
 	(*object)->mPosVertices.push_back({ XMFLOAT3(-w2, +h2, -d2) });
