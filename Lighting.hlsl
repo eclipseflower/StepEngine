@@ -42,61 +42,75 @@ float3 ComputeDirectionalLight(Light light, Material mat, float3 normal, float3 
 	return BlinnPhong(lightStrength, dir, normal, toEye, mat);
 }
 
+// https://stackoverflow.com/questions/54781030/why-warning-x4000-use-of-potentially-uninitialized-variable-shows-for-more-th
+
 float3 ComputePointLight(Light light, Material mat, float3 pos, float3 normal, float3 toEye)
 {
+	float3 result = 0.0f;
 	float3 dir = light.position - pos;
 	float dist = length(dir);
 	if (dist >= light.falloffEnd)
 	{
-		return 0.0f;
+		result = 0.0f;
 	}
+	else
+	{
+		dir /= dist;
 
-	dir /= dist;
+		float nDotL = max(0, dot(dir, normal));
+		float falloff = saturate((light.falloffEnd - dist) / (light.falloffEnd - light.falloffStart));
+		float3 lightStrength = light.color * nDotL * falloff;
 
-	float nDotL = max(0, dot(dir, normal));
-	float falloff = saturate((light.falloffEnd - dist) / (light.falloffEnd - light.falloffStart));
-	float3 lightStrength = light.color * nDotL * falloff;
-
-	return BlinnPhong(lightStrength, dir, normal, toEye, mat);
+		result = BlinnPhong(lightStrength, dir, normal, toEye, mat);
+	}
+	return result;
 }
 
 float3 ComputeSpotLight(Light light, Material mat, float3 pos, float3 normal, float3 toEye)
 {
+	float3 result = 0.0f;
 	float3 dir = light.position - pos;
 	float dist = length(dir);
 	if (dist >= light.falloffEnd)
 	{
-		return 0.0f;
+		result = 0.0f;
 	}
+	else
+	{
+		dir /= dist;
+		float nDotL = max(0, dot(dir, normal));
+		float falloff = saturate((light.falloffEnd - dist) / (light.falloffEnd - light.falloffStart));
+		float spotFactor = pow(max(0, dot(-dir, light.direction)), light.spotPower);
+		float3 lightStrength = light.color * nDotL * falloff * spotFactor;
 
-	dir /= dist;
-	float nDotL = max(0, dot(dir, normal));
-	float falloff = saturate((light.falloffEnd - dist) / (light.falloffEnd - light.falloffStart));
-	float spotFactor = pow(max(0, dot(-dir, light.direction)), light.spotPower);
-	float3 lightStrength = light.color * nDotL * falloff * spotFactor;
-
-	return BlinnPhong(lightStrength, dir, normal, toEye, mat);
+		result = BlinnPhong(lightStrength, dir, normal, toEye, mat);
+	}
+	return result;
 }
 
 float4 ComputeLighting(Light gLights[16], int gLightCount, Material mat, float3 pos, float3 normal, float3 toEye)
 {
 	float3 result = 0.0f;
-	for (int i = 0; i < gLightCount; i++)
+
+	for (int i = 0; i < 16; i++)
 	{
-		// directional
-		if (gLights[i].type == 0)
+		if (i < gLightCount)
 		{
-			result += ComputeDirectionalLight(gLights[i], mat, normal, toEye);
-		}
-		// point
-		else if (gLights[i].type == 1)
-		{
-			result += ComputePointLight(gLights[i], mat, pos, normal, toEye);
-		}
-		// spot
-		else if (gLights[i].type == 2)
-		{
-			result += ComputeSpotLight(gLights[i], mat, pos, normal, toEye);
+			// directional
+			if (gLights[i].type == 0)
+			{
+				result += ComputeDirectionalLight(gLights[i], mat, normal, toEye);
+			}
+			// point
+			else if (gLights[i].type == 1)
+			{
+				result += ComputePointLight(gLights[i], mat, pos, normal, toEye);
+			}
+			// spot
+			else if (gLights[i].type == 2)
+			{
+				result += ComputeSpotLight(gLights[i], mat, pos, normal, toEye);
+			}
 		}
 	}
 

@@ -522,7 +522,7 @@ void Engine::Core::EngineCoreDirectX::BeginDraw(EngineCameraDirectX * camera)
 	PassConstants passConstants;
 	passConstants.eyePosW = camera->mViewPos;
 	passConstants.ambientLight = { 0.25f, 0.25f, 0.35f, 1.0f };
-	passConstants.lightCount = 3;
+	passConstants.lightCount = 1;
 	passConstants.lights[0].type = LightType::Directional;
 	passConstants.lights[0].direction = { 0.57735f, -0.57735f, 0.57735f };
 	passConstants.lights[0].color = { 0.6f, 0.6f, 0.6f };
@@ -534,6 +534,7 @@ void Engine::Core::EngineCoreDirectX::BeginDraw(EngineCameraDirectX * camera)
 	passConstants.lights[2].type = LightType::Directional;
 	passConstants.lights[2].direction = { 0.0f, -0.707f, -0.707f };
 	passConstants.lights[2].color = { 0.15f, 0.15f, 0.15f };
+
 	memcpy(res.mConstBufferData + 0 * passCbSize, &passConstants, sizeof(PassConstants));
 	res.mPassConstBuffer->Unmap(0, nullptr);
 
