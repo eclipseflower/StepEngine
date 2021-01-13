@@ -88,6 +88,8 @@ namespace Engine
 			UINT mCoreResourceCount = 3;
 			UINT mCurCoreResourceIndex = 0;
 
+			UINT mShaderResourceCount = 16;
+
 			ComPtr<ID3D12RootSignature> mRootSignature = nullptr;
 
 			vector<D3D12_INPUT_ELEMENT_DESC> mInputLayout;

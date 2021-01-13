@@ -105,10 +105,6 @@ bool Engine::Core::EngineCoreDirectX::Init()
 	UINT passCbSize = CalcConstantBufferByteSize(sizeof(PassConstants));
 	UINT matCbSize = CalcConstantBufferByteSize(sizeof(MaterialConstants));
 
-	UINT objCbCount = mCoreResourceCount * mObjectConstBufferCount;
-	UINT passCbCount = mCoreResourceCount * mPassConstBufferCount;
-	UINT matCbCount = mCoreResourceCount * mMaterialConstBufferCount;
-
 	for (UINT i = 0; i < mCoreResourceCount; i++)
 	{
 		EngineCoreResource res;
@@ -125,11 +121,16 @@ bool Engine::Core::EngineCoreDirectX::Init()
 		mCoreResource.push_back(res);
 	}
 
-	// 6. create cbv heap
+	// 6. create cbv&srv heap
+	UINT objCbCount = mCoreResourceCount * mObjectConstBufferCount;
+	UINT passCbCount = mCoreResourceCount * mPassConstBufferCount;
+	UINT matCbCount = mCoreResourceCount * mMaterialConstBufferCount;
+	UINT shaderResCount = mShaderResourceCount;
+
 	mCbvHeapIncSize = mDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	D3D12_DESCRIPTOR_HEAP_DESC cbvHeapDesc;
 	cbvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-	cbvHeapDesc.NumDescriptors = objCbCount + passCbCount + matCbCount;
+	cbvHeapDesc.NumDescriptors = objCbCount + passCbCount + matCbCount + shaderResCount;
 	cbvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	cbvHeapDesc.NodeMask = 0;
 	ThrowIfFailed(mDevice->CreateDescriptorHeap(&cbvHeapDesc, IID_PPV_ARGS(&mCbvHeap)));
@@ -510,6 +511,8 @@ void Engine::Core::EngineCoreDirectX::BeginDraw(EngineCameraDirectX * camera)
 	mCommandList->ClearRenderTargetView(rtv, LightSteelBlue, 0, nullptr);
 	mCommandList->OMSetRenderTargets(1, &rtv, true, &dsv);
 
+	// only set descriptor heap once
+	// https://stackoverflow.com/questions/55440621/how-should-setdescriptorheaps-be-used
 	ID3D12DescriptorHeap* descriptorHeaps[] = { mCbvHeap.Get() };
 	mCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 	mCommandList->SetGraphicsRootSignature(mRootSignature.Get());
@@ -522,7 +525,7 @@ void Engine::Core::EngineCoreDirectX::BeginDraw(EngineCameraDirectX * camera)
 	PassConstants passConstants;
 	passConstants.eyePosW = camera->mViewPos;
 	passConstants.ambientLight = { 0.25f, 0.25f, 0.35f, 1.0f };
-	passConstants.lightCount = 1;
+	passConstants.lightCount = 3;
 	passConstants.lights[0].type = LightType::Directional;
 	passConstants.lights[0].direction = { 0.57735f, -0.57735f, 0.57735f };
 	passConstants.lights[0].color = { 0.6f, 0.6f, 0.6f };
