@@ -41,6 +41,12 @@ int EngineBoxApp::Run(HINSTANCE hInstance)
 	material->fresnelR0 = XMFLOAT3(0.05f, 0.05f, 0.05f);
 	material->shininess = 179.2f;
 
+	EngineTextureDirectX *texture;
+	if (!manager.CreateTexture(L"WoodCrate01.dds", &texture))
+	{
+		return -1;
+	}
+
 	/*
 	EngineObjectDirectX *boxObject;
 	if (!manager.CreateBoxObject(&boxObject, 1, 1, 1))

@@ -237,6 +237,20 @@ bool Engine::EngineManagerDirectX::CreateMaterial(EngineMaterialDirectX ** mater
 	return true;
 }
 
+bool Engine::EngineManagerDirectX::CreateTexture(wstring srcFile, EngineTextureDirectX ** texture)
+{
+	if (mCoreInst)
+	{
+		*texture = new EngineTextureDirectX;
+		if (mCoreInst->CreateTexture(srcFile, &(*texture)->mRescource, &(*texture)->mUploadHeap))
+		{
+			return true;
+		}
+		return false;
+	}
+	return false;
+}
+
 bool Engine::EngineManagerDirectX::CreatePipelineStateObject(EngineShaderDirectX * shader, ID3D12PipelineState **pipelineStateObject)
 {
 	if (mCoreInst)

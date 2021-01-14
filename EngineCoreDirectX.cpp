@@ -127,13 +127,13 @@ bool Engine::Core::EngineCoreDirectX::Init()
 	UINT matCbCount = mCoreResourceCount * mMaterialConstBufferCount;
 	UINT shaderResCount = mShaderResourceCount;
 
-	mCbvHeapIncSize = mDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-	D3D12_DESCRIPTOR_HEAP_DESC cbvHeapDesc;
-	cbvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-	cbvHeapDesc.NumDescriptors = objCbCount + passCbCount + matCbCount + shaderResCount;
-	cbvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-	cbvHeapDesc.NodeMask = 0;
-	ThrowIfFailed(mDevice->CreateDescriptorHeap(&cbvHeapDesc, IID_PPV_ARGS(&mCbvHeap)));
+	mCbvSrvHeapIncSize = mDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	D3D12_DESCRIPTOR_HEAP_DESC cbvSrvHeapDesc;
+	cbvSrvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+	cbvSrvHeapDesc.NumDescriptors = objCbCount + passCbCount + matCbCount + shaderResCount;
+	cbvSrvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+	cbvSrvHeapDesc.NodeMask = 0;
+	ThrowIfFailed(mDevice->CreateDescriptorHeap(&cbvSrvHeapDesc, IID_PPV_ARGS(&mCbvSrvHeap)));
 
 	// 7. create const buffer view
 	UINT cbvHeapIndex = 0;
@@ -147,8 +147,8 @@ bool Engine::Core::EngineCoreDirectX::Init()
 			cbvDesc.BufferLocation = objCbAddr + j * objCbSize;
 			cbvDesc.SizeInBytes = objCbSize;
 			CD3DX12_CPU_DESCRIPTOR_HANDLE handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-				mCbvHeap->GetCPUDescriptorHandleForHeapStart());
-			handle.Offset(cbvHeapIndex, mCbvHeapIncSize);
+				mCbvSrvHeap->GetCPUDescriptorHandleForHeapStart());
+			handle.Offset(cbvHeapIndex, mCbvSrvHeapIncSize);
 			mDevice->CreateConstantBufferView(&cbvDesc, handle);
 			cbvHeapIndex++;
 		}
@@ -160,8 +160,8 @@ bool Engine::Core::EngineCoreDirectX::Init()
 			cbvDesc.BufferLocation = passCbAddr + j * passCbSize;
 			cbvDesc.SizeInBytes = passCbSize;
 			CD3DX12_CPU_DESCRIPTOR_HANDLE handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-				mCbvHeap->GetCPUDescriptorHandleForHeapStart());
-			handle.Offset(cbvHeapIndex, mCbvHeapIncSize);
+				mCbvSrvHeap->GetCPUDescriptorHandleForHeapStart());
+			handle.Offset(cbvHeapIndex, mCbvSrvHeapIncSize);
 			mDevice->CreateConstantBufferView(&cbvDesc, handle);
 			cbvHeapIndex++;
 		}
@@ -173,25 +173,27 @@ bool Engine::Core::EngineCoreDirectX::Init()
 			cbvDesc.BufferLocation = matCbAddr + j * matCbSize;
 			cbvDesc.SizeInBytes = matCbSize;
 			CD3DX12_CPU_DESCRIPTOR_HANDLE handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-				mCbvHeap->GetCPUDescriptorHandleForHeapStart());
-			handle.Offset(cbvHeapIndex, mCbvHeapIncSize);
+				mCbvSrvHeap->GetCPUDescriptorHandleForHeapStart());
+			handle.Offset(cbvHeapIndex, mCbvSrvHeapIncSize);
 			mDevice->CreateConstantBufferView(&cbvDesc, handle);
 			cbvHeapIndex++;
 		}
 	}
 
 	// 8. create root signature
-	CD3DX12_DESCRIPTOR_RANGE cbvTable[3];
-	cbvTable[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0);
-	cbvTable[1].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 1);
-	cbvTable[2].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 2);
+	CD3DX12_DESCRIPTOR_RANGE cbvSrvTable[4];
+	cbvSrvTable[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0);
+	cbvSrvTable[1].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 1);
+	cbvSrvTable[2].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 2);
+	cbvSrvTable[3].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);
 
-	CD3DX12_ROOT_PARAMETER rootParams[3];
-	rootParams[0].InitAsDescriptorTable(1, &cbvTable[0]);
-	rootParams[1].InitAsDescriptorTable(1, &cbvTable[1]);
-	rootParams[2].InitAsDescriptorTable(1, &cbvTable[2]);
+	CD3DX12_ROOT_PARAMETER rootParams[4];
+	rootParams[0].InitAsDescriptorTable(1, &cbvSrvTable[0]);
+	rootParams[1].InitAsDescriptorTable(1, &cbvSrvTable[1]);
+	rootParams[2].InitAsDescriptorTable(1, &cbvSrvTable[2]);
+	rootParams[3].InitAsDescriptorTable(1, &cbvSrvTable[3]);
 
-	CD3DX12_ROOT_SIGNATURE_DESC sigDesc(3, rootParams, 0, nullptr, 
+	CD3DX12_ROOT_SIGNATURE_DESC sigDesc(4, rootParams, 0, nullptr, 
 		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 	ComPtr<ID3DBlob> signature = nullptr;
 	ComPtr<ID3DBlob> error = nullptr;
@@ -209,7 +211,8 @@ bool Engine::Core::EngineCoreDirectX::Init()
 	{
 		{"POSITION",	0,	DXGI_FORMAT_R32G32B32_FLOAT,	0,	D3D12_APPEND_ALIGNED_ELEMENT,	D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,	0},
 		{"NORMAL",		0,	DXGI_FORMAT_R32G32B32_FLOAT,	1,	D3D12_APPEND_ALIGNED_ELEMENT,	D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,	0},
-		{"COLOR",		0,	DXGI_FORMAT_R32G32B32A32_FLOAT,	1,	D3D12_APPEND_ALIGNED_ELEMENT,	D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,	0}
+		{"COLOR",		0,	DXGI_FORMAT_R32G32B32A32_FLOAT,	1,	D3D12_APPEND_ALIGNED_ELEMENT,	D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,	0},
+		{"TEXCOORD",	0,	DXGI_FORMAT_R32G32_FLOAT,		1,	D3D12_APPEND_ALIGNED_ELEMENT,	D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,	0}
 	};
 
 	// 10. create vertex buffer and index buffer and views
@@ -405,6 +408,11 @@ bool Engine::Core::EngineCoreDirectX::CreateShader(wstring srcFile, ID3DBlob **v
 	return true;
 }
 
+bool Engine::Core::EngineCoreDirectX::CreateTexture(wstring srcFile, ID3D12Resource ** res, ID3D12Resource ** uploadHeap)
+{
+	return false;
+}
+
 bool Engine::Core::EngineCoreDirectX::CreatePipelineStateObject(ID3DBlob * vs, ID3DBlob * ps, ID3D12PipelineState **pipelineStateObject)
 {
 	// create pipeline state object
@@ -513,7 +521,7 @@ void Engine::Core::EngineCoreDirectX::BeginDraw(EngineCameraDirectX * camera)
 
 	// only set descriptor heap once
 	// https://stackoverflow.com/questions/55440621/how-should-setdescriptorheaps-be-used
-	ID3D12DescriptorHeap* descriptorHeaps[] = { mCbvHeap.Get() };
+	ID3D12DescriptorHeap* descriptorHeaps[] = { mCbvSrvHeap.Get() };
 	mCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 	mCommandList->SetGraphicsRootSignature(mRootSignature.Get());
 
@@ -544,8 +552,8 @@ void Engine::Core::EngineCoreDirectX::BeginDraw(EngineCameraDirectX * camera)
 	UINT cbvHeapIndex = mCurCoreResourceIndex * (mObjectConstBufferCount + mPassConstBufferCount + mMaterialConstBufferCount);
 	cbvHeapIndex += mObjectConstBufferCount;
 	CD3DX12_GPU_DESCRIPTOR_HANDLE cbvHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(
-		mCbvHeap->GetGPUDescriptorHandleForHeapStart());
-	cbvHandle.Offset(cbvHeapIndex, mCbvHeapIncSize);
+		mCbvSrvHeap->GetGPUDescriptorHandleForHeapStart());
+	cbvHandle.Offset(cbvHeapIndex, mCbvSrvHeapIncSize);
 	mCommandList->SetGraphicsRootDescriptorTable(1, cbvHandle);
 }
 
@@ -565,8 +573,8 @@ void Engine::Core::EngineCoreDirectX::DrawObject(EngineObjectDirectX * object, E
 	UINT cbvHeapIndex = mCurCoreResourceIndex * (mObjectConstBufferCount + mPassConstBufferCount + mMaterialConstBufferCount);
 	cbvHeapIndex += mObjectConstBufferCount + mPassConstBufferCount + object->mMaterial->mID;
 	CD3DX12_GPU_DESCRIPTOR_HANDLE cbvHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(
-		mCbvHeap->GetGPUDescriptorHandleForHeapStart());
-	cbvHandle.Offset(cbvHeapIndex, mCbvHeapIncSize);
+		mCbvSrvHeap->GetGPUDescriptorHandleForHeapStart());
+	cbvHandle.Offset(cbvHeapIndex, mCbvSrvHeapIncSize);
 	mCommandList->SetGraphicsRootDescriptorTable(2, cbvHandle);
 
 	// copy object const buffer to GPU
@@ -588,8 +596,8 @@ void Engine::Core::EngineCoreDirectX::DrawObject(EngineObjectDirectX * object, E
 
 	cbvHeapIndex = mCurCoreResourceIndex * (mObjectConstBufferCount + mPassConstBufferCount + mMaterialConstBufferCount);
 	cbvHeapIndex = cbvHeapIndex + object->mID;
-	cbvHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(mCbvHeap->GetGPUDescriptorHandleForHeapStart());
-	cbvHandle.Offset(cbvHeapIndex, mCbvHeapIncSize);
+	cbvHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(mCbvSrvHeap->GetGPUDescriptorHandleForHeapStart());
+	cbvHandle.Offset(cbvHeapIndex, mCbvSrvHeapIncSize);
 	mCommandList->SetGraphicsRootDescriptorTable(0, cbvHandle);
 
 	mCommandList->SetPipelineState(object->mPipelineState.Get());

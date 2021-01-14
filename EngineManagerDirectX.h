@@ -8,6 +8,7 @@
 #include "EngineShaderDirectX.h"
 #include "EngineCameraDirectX.h"
 #include "EngineMaterialDirectX.h"
+#include "EngineTextureDirectX.h"
 
 using Engine::Window::EngineWindowDirectX;
 using Engine::Core::EngineCoreDirectX;
@@ -15,6 +16,7 @@ using Engine::Core::EngineSceneManagerDirectX;
 using Engine::Shader::EngineShaderDirectX;
 using Engine::Camera::EngineCameraDirectX;
 using Engine::Shader::EngineMaterialDirectX;
+using Engine::Shader::EngineTextureDirectX;
 using std::ostringstream;
 using std::function;
 
@@ -50,6 +52,7 @@ namespace Engine
 		bool CreateObjectFromFile(string filename, EngineObjectDirectX ** object);
 		bool CreateShader(wstring srcFile, EngineShaderDirectX **shader);
 		bool CreateMaterial(EngineMaterialDirectX **material);
+		bool CreateTexture(wstring srcFile, EngineTextureDirectX **texture);
 		bool CreatePipelineStateObject(EngineShaderDirectX *shader, ID3D12PipelineState **pipelineStateObject);
 		bool UpdatePosVertexBuffer(void * data, UINT byteWidth, int *mBaseVertexLocation);
 		bool UpdatePropVertexBuffer(void * data, UINT byteWidth);

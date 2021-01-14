@@ -40,6 +40,7 @@ namespace Engine
 			bool ResizeBuffer();
 			bool CreateDefaultBuffer(void *data, UINT byteWidth, ID3D12Resource **bufferGPU, ID3D12Resource **uploadBuffer);
 			bool CreateShader(wstring srcFile, ID3DBlob **vs, ID3DBlob **ps);
+			bool CreateTexture(wstring srcFile, ID3D12Resource **res, ID3D12Resource **uploadHeap);
 			bool CreatePipelineStateObject(ID3DBlob *vs, ID3DBlob *ps, ID3D12PipelineState **pipelineStateObject);
 			bool UpdatePosVertexBuffer(void * data, UINT byteWidth, int *mBaseVertexLocation);
 			bool UpdatePropVertexBuffer(void * data, UINT byteWidth);
@@ -75,11 +76,11 @@ namespace Engine
 
 			ComPtr<ID3D12DescriptorHeap> mRtvHeap = nullptr;
 			ComPtr<ID3D12DescriptorHeap> mDsvHeap = nullptr;
-			ComPtr<ID3D12DescriptorHeap> mCbvHeap = nullptr;
+			ComPtr<ID3D12DescriptorHeap> mCbvSrvHeap = nullptr;
 
 			UINT mRtvHeapIncSize = 0;
 			UINT mDsvHeapIncSize = 0;
-			UINT mCbvHeapIncSize = 0;
+			UINT mCbvSrvHeapIncSize = 0;
 
 			vector<EngineCoreResource> mCoreResource;
 			UINT mObjectConstBufferCount = 1024;
