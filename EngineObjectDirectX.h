@@ -4,9 +4,11 @@
 #include "EngineUtilDirectX.h"
 #include "EngineShaderDirectX.h"
 #include "EngineMaterialDirectX.h"
+#include "EngineTextureDirectX.h"
 
 using Engine::Shader::EngineShaderDirectX;
 using Engine::Shader::EngineMaterialDirectX;
+using Engine::Shader::EngineTextureDirectX;
 using std::vector;
 
 namespace Engine
@@ -41,6 +43,7 @@ namespace Engine
 
 			EngineShaderDirectX *mShader;
 			EngineMaterialDirectX *mMaterial;
+			EngineTextureDirectX *mTexture;
 
 			EngineObjectDirectX();
 			~EngineObjectDirectX();
@@ -50,6 +53,7 @@ namespace Engine
 
 			void SetShader(EngineShaderDirectX *shader);
 			void SetMaterial(EngineMaterialDirectX *material);
+			void SetTexture(EngineTextureDirectX *texture);
 		};
 	}
 }

@@ -12,6 +12,8 @@ namespace Engine
 		public:
 			ComPtr<ID3D12Resource> mRescource = nullptr;
 			ComPtr<ID3D12Resource> mUploadHeap = nullptr;
+
+			UINT mID = 0;
 		};
 	}
 }

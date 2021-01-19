@@ -92,9 +92,9 @@ float4 ComputeLighting(Light gLights[16], int gLightCount, Material mat, float3 
 {
 	float3 result = 0.0f;
 
-	for (int i = 0; i < 16; i++)
+	for (int i = 0; i < 3; i++)
 	{
-		if (i < gLightCount)
+		//if (i < gLightCount)
 		{
 			// directional
 			if (gLights[i].type == 0)

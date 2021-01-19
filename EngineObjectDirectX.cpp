@@ -42,3 +42,8 @@ void Engine::Object::EngineObjectDirectX::SetMaterial(EngineMaterialDirectX * ma
 {
 	mMaterial = material;
 }
+
+void Engine::Object::EngineObjectDirectX::SetTexture(EngineTextureDirectX * texture)
+{
+	mTexture = texture;
+}

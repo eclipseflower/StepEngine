@@ -242,7 +242,8 @@ bool Engine::EngineManagerDirectX::CreateTexture(wstring srcFile, EngineTextureD
 	if (mCoreInst)
 	{
 		*texture = new EngineTextureDirectX;
-		if (mCoreInst->CreateTexture(srcFile, &(*texture)->mRescource, &(*texture)->mUploadHeap))
+		(*texture)->mID = mCurSceneTextureIndex++;
+		if (mCoreInst->CreateTexture(srcFile, (*texture)->mID, (*texture)->mRescource, (*texture)->mUploadHeap))
 		{
 			return true;
 		}

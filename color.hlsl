@@ -6,6 +6,9 @@
 
 #include "Lighting.hlsl"
 
+Texture2D gDiffuseMap : register(t0);
+SamplerState gSampler : register(s0);
+
 cbuffer cbPerObject : register(b0)
 {
 	float4x4 gWorld;
@@ -33,6 +36,7 @@ struct VertexIn
 	float3 PosL    : POSITION;
 	float3 NormalL : NORMAL;
     float4 Color   : COLOR;
+	float2 UV	   : TEXCOORD0;
 };
 
 struct VertexOut
@@ -41,6 +45,7 @@ struct VertexOut
 	float3 PosW    : POSITION;
 	float3 NormalW : NORMAL;
     float4 Color   : COLOR;
+	float2 UV	   : TEXCOORD0;
 };
 
 VertexOut VS(VertexIn vin)
@@ -54,24 +59,26 @@ VertexOut VS(VertexIn vin)
 	vout.NormalW = mul(vin.NormalL, (float3x3)transpose(gInvWorld));
 	// Just pass vertex color into the pixel shader.
     vout.Color = vin.Color;
+	vout.UV = vin.UV;
     
     return vout;
 }
 
 float4 PS(VertexOut pin) : SV_Target
 {
-	float4 ambient = gAmbientLight * diffuseAlbedo;
+	float4 diffuse = gDiffuseMap.Sample(gSampler, pin.UV)* diffuseAlbedo;
+	float4 ambient = gAmbientLight * diffuse;
 
 	pin.NormalW = normalize(pin.NormalW);
 	Material mat;
-	mat.diffuseAlbedo = diffuseAlbedo;
+	mat.diffuseAlbedo = diffuse;
 	mat.fresnelR0 = fresnelR0;
 	mat.shininess = shininess;
 	float3 toEyeW = normalize(gEyePosW - pin.PosW);
 
 	float4 directLight = ComputeLighting(gLights, gLightCount, mat, pin.PosW, pin.NormalW, toEyeW);
 	float4 litColor = ambient + directLight;
-    return float4(litColor.rgb, diffuseAlbedo.a);
+    return float4(litColor.rgb, diffuse.a);
 }
 
 

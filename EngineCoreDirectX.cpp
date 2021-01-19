@@ -180,7 +180,22 @@ bool Engine::Core::EngineCoreDirectX::Init()
 		}
 	}
 
-	// 8. create root signature
+	// 8. create static samplers
+	mStaticSamplers.push_back(CD3DX12_STATIC_SAMPLER_DESC(0, D3D12_FILTER_MIN_MAG_MIP_POINT, 
+		D3D12_TEXTURE_ADDRESS_MODE_WRAP, D3D12_TEXTURE_ADDRESS_MODE_WRAP));
+	mStaticSamplers.push_back(CD3DX12_STATIC_SAMPLER_DESC(1, D3D12_FILTER_MIN_MAG_MIP_POINT,
+		D3D12_TEXTURE_ADDRESS_MODE_CLAMP, D3D12_TEXTURE_ADDRESS_MODE_CLAMP));
+	mStaticSamplers.push_back(CD3DX12_STATIC_SAMPLER_DESC(2, D3D12_FILTER_MIN_MAG_MIP_LINEAR,
+		D3D12_TEXTURE_ADDRESS_MODE_WRAP, D3D12_TEXTURE_ADDRESS_MODE_WRAP));
+	mStaticSamplers.push_back(CD3DX12_STATIC_SAMPLER_DESC(3, D3D12_FILTER_MIN_MAG_MIP_LINEAR,
+		D3D12_TEXTURE_ADDRESS_MODE_CLAMP, D3D12_TEXTURE_ADDRESS_MODE_CLAMP));
+	mStaticSamplers.push_back(CD3DX12_STATIC_SAMPLER_DESC(4, D3D12_FILTER_ANISOTROPIC,
+		D3D12_TEXTURE_ADDRESS_MODE_WRAP, D3D12_TEXTURE_ADDRESS_MODE_WRAP));
+	mStaticSamplers.push_back(CD3DX12_STATIC_SAMPLER_DESC(5, D3D12_FILTER_ANISOTROPIC,
+		D3D12_TEXTURE_ADDRESS_MODE_CLAMP, D3D12_TEXTURE_ADDRESS_MODE_CLAMP));
+
+
+	// 9. create root signature
 	CD3DX12_DESCRIPTOR_RANGE cbvSrvTable[4];
 	cbvSrvTable[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0);
 	cbvSrvTable[1].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 1);
@@ -193,7 +208,7 @@ bool Engine::Core::EngineCoreDirectX::Init()
 	rootParams[2].InitAsDescriptorTable(1, &cbvSrvTable[2]);
 	rootParams[3].InitAsDescriptorTable(1, &cbvSrvTable[3]);
 
-	CD3DX12_ROOT_SIGNATURE_DESC sigDesc(4, rootParams, 0, nullptr, 
+	CD3DX12_ROOT_SIGNATURE_DESC sigDesc(4, rootParams, mStaticSamplers.size(), mStaticSamplers.data(),
 		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 	ComPtr<ID3DBlob> signature = nullptr;
 	ComPtr<ID3DBlob> error = nullptr;
@@ -206,7 +221,7 @@ bool Engine::Core::EngineCoreDirectX::Init()
 	ThrowIfFailed(mDevice->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), 
 		IID_PPV_ARGS(&mRootSignature)));
 
-	// 9. create input layout
+	// 10. create input layout
 	mInputLayout =
 	{
 		{"POSITION",	0,	DXGI_FORMAT_R32G32B32_FLOAT,	0,	D3D12_APPEND_ALIGNED_ELEMENT,	D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,	0},
@@ -215,7 +230,7 @@ bool Engine::Core::EngineCoreDirectX::Init()
 		{"TEXCOORD",	0,	DXGI_FORMAT_R32G32_FLOAT,		1,	D3D12_APPEND_ALIGNED_ELEMENT,	D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,	0}
 	};
 
-	// 10. create vertex buffer and index buffer and views
+	// 11. create vertex buffer and index buffer and views
 	ThrowIfFailed(mDevice->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 		D3D12_HEAP_FLAG_NONE, &CD3DX12_RESOURCE_DESC::Buffer(mVertexBufferSize * sizeof(EngineVertexPosDirectX)), 
 		D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&mPosVertexBufferGPU)));
@@ -408,9 +423,29 @@ bool Engine::Core::EngineCoreDirectX::CreateShader(wstring srcFile, ID3DBlob **v
 	return true;
 }
 
-bool Engine::Core::EngineCoreDirectX::CreateTexture(wstring srcFile, ID3D12Resource ** res, ID3D12Resource ** uploadHeap)
+bool Engine::Core::EngineCoreDirectX::CreateTexture(wstring srcFile, UINT texId, ComPtr<ID3D12Resource> &res, ComPtr<ID3D12Resource> &uploadHeap)
 {
-	return false;
+	ThrowIfFailed(DirectX::CreateDDSTextureFromFile12(mDevice.Get(), mCommandList.Get(), srcFile.c_str(), res, uploadHeap));
+	
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc;
+	srvDesc.Format = res->GetDesc().Format;
+	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDesc.Texture2D.MipLevels = res->GetDesc().MipLevels;
+	srvDesc.Texture2D.MostDetailedMip = 0;
+	srvDesc.Texture2D.PlaneSlice = 0;
+	srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
+	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+
+	CD3DX12_CPU_DESCRIPTOR_HANDLE handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
+		mCbvSrvHeap->GetCPUDescriptorHandleForHeapStart());
+	UINT objCbCount = mCoreResourceCount * mObjectConstBufferCount;
+	UINT passCbCount = mCoreResourceCount * mPassConstBufferCount;
+	UINT matCbCount = mCoreResourceCount * mMaterialConstBufferCount;
+	UINT srvHeapIndex = objCbCount + passCbCount + matCbCount + texId;
+
+	handle.Offset(srvHeapIndex, mCbvSrvHeapIncSize);
+	mDevice->CreateShaderResourceView(res.Get(), &srvDesc, handle);
+	return true;
 }
 
 bool Engine::Core::EngineCoreDirectX::CreatePipelineStateObject(ID3DBlob * vs, ID3DBlob * ps, ID3D12PipelineState **pipelineStateObject)
@@ -599,6 +634,16 @@ void Engine::Core::EngineCoreDirectX::DrawObject(EngineObjectDirectX * object, E
 	cbvHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(mCbvSrvHeap->GetGPUDescriptorHandleForHeapStart());
 	cbvHandle.Offset(cbvHeapIndex, mCbvSrvHeapIncSize);
 	mCommandList->SetGraphicsRootDescriptorTable(0, cbvHandle);
+
+	// set texture descriptor
+	UINT objCbCount = mCoreResourceCount * mObjectConstBufferCount;
+	UINT passCbCount = mCoreResourceCount * mPassConstBufferCount;
+	UINT matCbCount = mCoreResourceCount * mMaterialConstBufferCount;
+	UINT srvHeapIndex = objCbCount + passCbCount + matCbCount + object->mTexture->mID;
+	CD3DX12_GPU_DESCRIPTOR_HANDLE srvHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(
+		mCbvSrvHeap->GetGPUDescriptorHandleForHeapStart());
+	srvHandle.Offset(srvHeapIndex, mCbvSrvHeapIncSize);
+	mCommandList->SetGraphicsRootDescriptorTable(3, srvHandle);
 
 	mCommandList->SetPipelineState(object->mPipelineState.Get());
 

@@ -70,6 +70,7 @@ namespace Engine
 		function <void(WPARAM, int, int)> mMouseMoveFunc;
 
 		UINT mCurSceneMaterialIndex = 0;
+		UINT mCurSceneTextureIndex = 0;
 	};
 
 	extern EngineManagerDirectX * gManagerDirectX;

@@ -17,6 +17,7 @@
 #include <d3dcompiler.h>
 #include <DirectXColors.h>
 #include "d3dx12.h"
+#include "DDSTextureLoader.h"
 
 using std::string;
 using std::wstring;
