@@ -37,6 +37,7 @@ using DirectX::Colors::LightSteelBlue;
 using DirectX::XMVECTORF32;
 using DirectX::XMVECTOR;
 using DirectX::XMVECTORF32;
+using DirectX::XMFLOAT2;
 using DirectX::XMFLOAT3;
 using DirectX::XMFLOAT4;
 using DirectX::XMFLOAT4X4;
@@ -99,11 +100,13 @@ namespace Engine
 	{
 		XMFLOAT3 normal;
 		XMFLOAT4 color;
+		XMFLOAT2 uv;
 
-		EngineVertexPropDirectX(XMFLOAT3 normal)
+		EngineVertexPropDirectX(XMFLOAT3 normal, XMFLOAT2 uv)
 		{
 			this->color = (XMFLOAT4)Black;
 			this->normal = normal;
+			this->uv = uv;
 		}
 
 		EngineVertexPropDirectX(XMFLOAT4 color)

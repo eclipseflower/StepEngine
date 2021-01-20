@@ -75,40 +75,40 @@ bool Engine::Core::EngineSceneManagerDirectX::CreateBoxObject(EngineObjectDirect
 	}
 
 	// Fill in the front face vertex data.
-	(*object)->mPropVertices.push_back({ XMFLOAT3(0.0f, 0.0f, -1.0f) });
-	(*object)->mPropVertices.push_back({ XMFLOAT3(0.0f, 0.0f, -1.0f) });
-	(*object)->mPropVertices.push_back({ XMFLOAT3(0.0f, 0.0f, -1.0f) });
-	(*object)->mPropVertices.push_back({ XMFLOAT3(0.0f, 0.0f, -1.0f) });
+	(*object)->mPropVertices.push_back({ XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT2(0.0f, 1.0f) });
+	(*object)->mPropVertices.push_back({ XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) });
+	(*object)->mPropVertices.push_back({ XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT2(1.0f, 0.0f) });
+	(*object)->mPropVertices.push_back({ XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT2(1.0f, 1.0f) });
 
 	// Fill in the back face vertex data.
-	(*object)->mPropVertices.push_back({ XMFLOAT3(0.0f, 0.0f, 1.0f) });
-	(*object)->mPropVertices.push_back({ XMFLOAT3(0.0f, 0.0f, 1.0f) });
-	(*object)->mPropVertices.push_back({ XMFLOAT3(0.0f, 0.0f, 1.0f) });
-	(*object)->mPropVertices.push_back({ XMFLOAT3(0.0f, 0.0f, 1.0f) });
+	(*object)->mPropVertices.push_back({ XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT2(1.0f, 1.0f) });
+	(*object)->mPropVertices.push_back({ XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT2(0.0f, 1.0f) });
+	(*object)->mPropVertices.push_back({ XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT2(0.0f, 0.0f) });
+	(*object)->mPropVertices.push_back({ XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT2(1.0f, 0.0f) });
 
 	// Fill in the top face vertex data.
-	(*object)->mPropVertices.push_back({ XMFLOAT3(0.0f, 1.0f, 0.0f) });
-	(*object)->mPropVertices.push_back({ XMFLOAT3(0.0f, 1.0f, 0.0f) });
-	(*object)->mPropVertices.push_back({ XMFLOAT3(0.0f, 1.0f, 0.0f) });
-	(*object)->mPropVertices.push_back({ XMFLOAT3(0.0f, 1.0f, 0.0f) });
+	(*object)->mPropVertices.push_back({ XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT2(0.0f, 1.0f) });
+	(*object)->mPropVertices.push_back({ XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT2(0.0f, 0.0f) });
+	(*object)->mPropVertices.push_back({ XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT2(1.0f, 0.0f) });
+	(*object)->mPropVertices.push_back({ XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT2(1.0f, 1.0f) });
 
 	// Fill in the bottom face vertex data.
-	(*object)->mPropVertices.push_back({ XMFLOAT3(0.0f, -1.0f, 0.0f) });
-	(*object)->mPropVertices.push_back({ XMFLOAT3(0.0f, -1.0f, 0.0f) });
-	(*object)->mPropVertices.push_back({ XMFLOAT3(0.0f, -1.0f, 0.0f) });
-	(*object)->mPropVertices.push_back({ XMFLOAT3(0.0f, -1.0f, 0.0f) });
+	(*object)->mPropVertices.push_back({ XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT2(1.0f, 1.0f) });
+	(*object)->mPropVertices.push_back({ XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT2(0.0f, 1.0f) });
+	(*object)->mPropVertices.push_back({ XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT2(0.0f, 0.0f) });
+	(*object)->mPropVertices.push_back({ XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT2(1.0f, 0.0f) });
 
 	// Fill in the left face vertex data.
-	(*object)->mPropVertices.push_back({ XMFLOAT3(-1.0f, 0.0f, 0.0f) });
-	(*object)->mPropVertices.push_back({ XMFLOAT3(-1.0f, 0.0f, 0.0f) });
-	(*object)->mPropVertices.push_back({ XMFLOAT3(-1.0f, 0.0f, 0.0f) });
-	(*object)->mPropVertices.push_back({ XMFLOAT3(-1.0f, 0.0f, 0.0f) });
+	(*object)->mPropVertices.push_back({ XMFLOAT3(-1.0f, 0.0f, 0.0f), XMFLOAT2(0.0f, 1.0f) });
+	(*object)->mPropVertices.push_back({ XMFLOAT3(-1.0f, 0.0f, 0.0f), XMFLOAT2(0.0f, 0.0f) });
+	(*object)->mPropVertices.push_back({ XMFLOAT3(-1.0f, 0.0f, 0.0f), XMFLOAT2(1.0f, 0.0f) });
+	(*object)->mPropVertices.push_back({ XMFLOAT3(-1.0f, 0.0f, 0.0f), XMFLOAT2(1.0f, 1.0f) });
 
 	// Fill in the right face vertex data.
-	(*object)->mPropVertices.push_back({ XMFLOAT3(1.0f, 0.0f, 0.0f) });
-	(*object)->mPropVertices.push_back({ XMFLOAT3(1.0f, 0.0f, 0.0f) });
-	(*object)->mPropVertices.push_back({ XMFLOAT3(1.0f, 0.0f, 0.0f) });
-	(*object)->mPropVertices.push_back({ XMFLOAT3(1.0f, 0.0f, 0.0f) });
+	(*object)->mPropVertices.push_back({ XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(0.0f, 1.0f) });
+	(*object)->mPropVertices.push_back({ XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(0.0f, 0.0f) });
+	(*object)->mPropVertices.push_back({ XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(1.0f, 0.0f) });
+	(*object)->mPropVertices.push_back({ XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(1.0f, 1.0f) });
 
 	res = gManagerDirectX->CreateDefaultBuffer((*object)->mPropVertices.data(),
 		sizeof(EngineVertexPropDirectX) * (*object)->mVertexCount,
@@ -391,7 +391,7 @@ bool Engine::Core::EngineSceneManagerDirectX::CreateObjectFromFile(string filena
 		fin >> posx >> posy >> posz;
 		fin >> normalx >> normaly >> normalz;
 		(*object)->mPosVertices.push_back({ XMFLOAT3(posx, posy, posz) });
-		(*object)->mPropVertices.push_back({ XMFLOAT3(normalx, normaly, normalz) });
+		(*object)->mPropVertices.push_back({ XMFLOAT3(normalx, normaly, normalz), XMFLOAT2(0, 0) });
 	}
 
 	fin >> ignore >> ignore >> ignore;
