@@ -425,16 +425,21 @@ bool Engine::Core::EngineCoreDirectX::CreateShader(wstring srcFile, ID3DBlob **v
 
 bool Engine::Core::EngineCoreDirectX::CreateTexture(wstring srcFile, UINT texId, ComPtr<ID3D12Resource> &res, ComPtr<ID3D12Resource> &uploadHeap)
 {
+	ThrowIfFailed(mCommandAlloc->Reset());
+	ThrowIfFailed(mCommandList->Reset(mCommandAlloc.Get(), nullptr));
 	ThrowIfFailed(DirectX::CreateDDSTextureFromFile12(mDevice.Get(), mCommandList.Get(), srcFile.c_str(), res, uploadHeap));
-	
-	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc;
-	srvDesc.Format = res->GetDesc().Format;
+	ThrowIfFailed(mCommandList->Close());
+	ID3D12CommandList *cmdList[] = { mCommandList.Get() };
+	mCommandQueue->ExecuteCommandLists(_countof(cmdList), cmdList);
+	FlushCommandQueue();
+
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc.Texture2D.MipLevels = res->GetDesc().MipLevels;
-	srvDesc.Texture2D.MostDetailedMip = 0;
-	srvDesc.Texture2D.PlaneSlice = 0;
-	srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
+	srvDesc.Format = res->GetDesc().Format;
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MostDetailedMip = 0;
+	srvDesc.Texture2D.MipLevels = res->GetDesc().MipLevels;
+	srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
 
 	CD3DX12_CPU_DESCRIPTOR_HANDLE handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
 		mCbvSrvHeap->GetCPUDescriptorHandleForHeapStart());
