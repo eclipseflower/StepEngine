@@ -10,7 +10,7 @@ Engine::Core::EngineSceneManagerDirectX::~EngineSceneManagerDirectX()
 
 }
 
-bool Engine::Core::EngineSceneManagerDirectX::CreateBoxObject(EngineObjectDirectX ** object, float width, float height, float depth)
+bool Engine::Core::EngineSceneManagerDirectX::CreateBoxObject(EngineObjectDirectX ** object, float width, float height, float depth, float posx, float posy, float posz)
 {
 	float w2 = 0.5f * width;
 	float h2 = 0.5f * height;

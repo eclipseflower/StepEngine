@@ -51,7 +51,7 @@ namespace Engine
 			const D3D12_VERTEX_BUFFER_VIEW *VertexBufferViews();
 			const D3D12_INDEX_BUFFER_VIEW *IndexBufferView();
 
-			void SetShader(EngineShaderDirectX *shader);
+			void SetShader(RenderType renderType, EngineShaderDirectX *shader);
 			void SetMaterial(EngineMaterialDirectX *material);
 			void SetTexture(EngineTextureDirectX *texture);
 		};

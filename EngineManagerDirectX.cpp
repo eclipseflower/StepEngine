@@ -196,9 +196,9 @@ bool Engine::EngineManagerDirectX::CreateDefaultBuffer(void *data, UINT byteWidt
 	return false;
 }
 
-bool Engine::EngineManagerDirectX::CreateBoxObject(EngineObjectDirectX **object, float width, float height, float depth)
+bool Engine::EngineManagerDirectX::CreateBoxObject(EngineObjectDirectX **object, float width, float height, float depth, float posx, float posy, float posz)
 {
-	return mSceneMgrInst.CreateBoxObject(object, width, height, depth);
+	return mSceneMgrInst.CreateBoxObject(object, width, height, depth, posx, posy, posz);
 }
 
 bool Engine::EngineManagerDirectX::CreatePyramidObject(EngineObjectDirectX ** object)
@@ -252,11 +252,11 @@ bool Engine::EngineManagerDirectX::CreateTexture(wstring srcFile, EngineTextureD
 	return false;
 }
 
-bool Engine::EngineManagerDirectX::CreatePipelineStateObject(EngineShaderDirectX * shader, ID3D12PipelineState **pipelineStateObject)
+bool Engine::EngineManagerDirectX::CreatePipelineStateObject(RenderType renderType, EngineShaderDirectX * shader, ID3D12PipelineState **pipelineStateObject)
 {
 	if (mCoreInst)
 	{
-		if (mCoreInst->CreatePipelineStateObject(shader->mVSByteCode.Get(), shader->mPSByteCode.Get(), pipelineStateObject))
+		if (mCoreInst->CreatePipelineStateObject(renderType, shader->mVSByteCode.Get(), shader->mPSByteCode.Get(), pipelineStateObject))
 		{
 			return true;
 		}

@@ -46,14 +46,14 @@ namespace Engine
 		HWND GetHwnd();
 
 		bool CreateDefaultBuffer(void *data, UINT byteWidth, ID3D12Resource **bufferGPU, ID3D12Resource **uploadBuffer);
-		bool CreateBoxObject(EngineObjectDirectX **object, float width, float height, float depth);
+		bool CreateBoxObject(EngineObjectDirectX **object, float width, float height, float depth, float posx, float posy, float posz);
 		bool CreatePyramidObject(EngineObjectDirectX **object);
 		bool CreateCylinderObject(float topRadius, float bottomRadius, float height, EngineObjectDirectX **object);
 		bool CreateObjectFromFile(string filename, EngineObjectDirectX ** object);
 		bool CreateShader(wstring srcFile, EngineShaderDirectX **shader);
 		bool CreateMaterial(EngineMaterialDirectX **material);
 		bool CreateTexture(wstring srcFile, EngineTextureDirectX **texture);
-		bool CreatePipelineStateObject(EngineShaderDirectX *shader, ID3D12PipelineState **pipelineStateObject);
+		bool CreatePipelineStateObject(RenderType renderType, EngineShaderDirectX *shader, ID3D12PipelineState **pipelineStateObject);
 		bool UpdatePosVertexBuffer(void * data, UINT byteWidth, int *mBaseVertexLocation);
 		bool UpdatePropVertexBuffer(void * data, UINT byteWidth);
 		bool UpdateIndexBuffer(void * data, UINT byteWidth, UINT *mStartIndexLocation);

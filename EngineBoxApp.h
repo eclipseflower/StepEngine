@@ -6,6 +6,7 @@
 using std::bind;
 using namespace std::placeholders;
 using Engine::EngineManagerDirectX;
+using Engine::RenderType;
 
 extern EngineManagerDirectX manager;
 

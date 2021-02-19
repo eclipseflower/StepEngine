@@ -182,6 +182,12 @@ namespace Engine
 		// 512
 		return (byteSize + 255) & ~255;
 	}
+
+	enum RenderType
+	{
+		Opaque = 1,
+		Transparent = 2,
+	};
 }
 /*
 

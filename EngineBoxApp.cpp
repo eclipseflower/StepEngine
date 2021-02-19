@@ -53,19 +53,19 @@ int EngineBoxApp::Run(HINSTANCE hInstance)
 		return -1;
 	}
 
-	boxObject->SetShader(shader);
+	boxObject->SetShader(RenderType::Opaque, shader);
 	boxObject->SetMaterial(material);
 	boxObject->SetTexture(texture);
 
-	/*
 	EngineObjectDirectX *pyramidObject;
 	if (!manager.CreatePyramidObject(&pyramidObject))
 	{
 		return -1;
 	}
 
-	pyramidObject->SetShader(shader);
-	*/
+	pyramidObject->SetShader(RenderType::Transparent, shader);
+	pyramidObject->SetMaterial(material);
+	pyramidObject->SetTexture(texture);
 
 	/*
 	EngineObjectDirectX *fileObject;

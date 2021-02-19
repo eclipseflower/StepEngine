@@ -208,8 +208,8 @@ bool Engine::Core::EngineCoreDirectX::Init()
 	rootParams[2].InitAsDescriptorTable(1, &cbvSrvTable[2]);
 	rootParams[3].InitAsDescriptorTable(1, &cbvSrvTable[3]);
 
-	CD3DX12_ROOT_SIGNATURE_DESC sigDesc(4, rootParams, mStaticSamplers.size(), mStaticSamplers.data(),
-		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+	CD3DX12_ROOT_SIGNATURE_DESC sigDesc(_countof(rootParams), rootParams, mStaticSamplers.size(), 
+		mStaticSamplers.data(), D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 	ComPtr<ID3DBlob> signature = nullptr;
 	ComPtr<ID3DBlob> error = nullptr;
 	HRESULT hr = D3D12SerializeRootSignature(&sigDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, &error);
@@ -453,7 +453,7 @@ bool Engine::Core::EngineCoreDirectX::CreateTexture(wstring srcFile, UINT texId,
 	return true;
 }
 
-bool Engine::Core::EngineCoreDirectX::CreatePipelineStateObject(ID3DBlob * vs, ID3DBlob * ps, ID3D12PipelineState **pipelineStateObject)
+bool Engine::Core::EngineCoreDirectX::CreatePipelineStateObject(RenderType renderType, ID3DBlob * vs, ID3DBlob * ps, ID3D12PipelineState **pipelineStateObject)
 {
 	// create pipeline state object
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc;
@@ -478,6 +478,24 @@ bool Engine::Core::EngineCoreDirectX::CreatePipelineStateObject(ID3DBlob * vs, I
 	psoDesc.SampleMask = UINT_MAX;
 	psoDesc.PS = { ps->GetBufferPointer(), ps->GetBufferSize() };
 	psoDesc.VS = { vs->GetBufferPointer(), vs->GetBufferSize() };
+
+	switch (renderType)
+	{
+	case Transparent:
+		D3D12_RENDER_TARGET_BLEND_DESC blendDesc;
+		blendDesc.BlendEnable = true;
+		blendDesc.BlendOp = D3D12_BLEND_OP_ADD;
+		blendDesc.BlendOpAlpha = D3D12_BLEND_OP_ADD;
+		blendDesc.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+		blendDesc.DestBlendAlpha = D3D12_BLEND_ZERO;
+		blendDesc.LogicOp = D3D12_LOGIC_OP_NOOP;
+		blendDesc.LogicOpEnable = false;
+		blendDesc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+		blendDesc.SrcBlend = D3D12_BLEND_SRC_ALPHA;
+		blendDesc.SrcBlendAlpha = D3D12_BLEND_ONE;
+		psoDesc.BlendState.RenderTarget[0] = blendDesc;
+		break;
+	}
 
 	ThrowIfFailed(mDevice->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(pipelineStateObject)));
 	return true;

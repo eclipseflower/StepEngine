@@ -32,10 +32,10 @@ const D3D12_INDEX_BUFFER_VIEW * Engine::Object::EngineObjectDirectX::IndexBuffer
 	return &mIndexBufferView;
 }
 
-void Engine::Object::EngineObjectDirectX::SetShader(EngineShaderDirectX * shader)
+void Engine::Object::EngineObjectDirectX::SetShader(RenderType renderType, EngineShaderDirectX * shader)
 {
 	mShader = shader;
-	gManagerDirectX->CreatePipelineStateObject(shader, &mPipelineState);
+	gManagerDirectX->CreatePipelineStateObject(renderType, shader, &mPipelineState);
 }
 
 void Engine::Object::EngineObjectDirectX::SetMaterial(EngineMaterialDirectX * material)
