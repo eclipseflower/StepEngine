@@ -41,6 +41,7 @@ namespace Engine
 
 			XMFLOAT4X4 mWorldMatrix;
 
+			RenderType mRenderType;
 			EngineShaderDirectX *mShader;
 			EngineMaterialDirectX *mMaterial;
 			EngineTextureDirectX *mTexture;

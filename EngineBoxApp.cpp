@@ -48,7 +48,7 @@ int EngineBoxApp::Run(HINSTANCE hInstance)
 	}
 
 	EngineObjectDirectX *boxObject;
-	if (!manager.CreateBoxObject(&boxObject, 1, 1, 1))
+	if (!manager.CreateBoxObject(&boxObject, 1, 1, 1, 0, 0, 0))
 	{
 		return -1;
 	}
@@ -57,15 +57,22 @@ int EngineBoxApp::Run(HINSTANCE hInstance)
 	boxObject->SetMaterial(material);
 	boxObject->SetTexture(texture);
 
-	EngineObjectDirectX *pyramidObject;
-	if (!manager.CreatePyramidObject(&pyramidObject))
+
+	EngineTextureDirectX *texture2;
+	if (!manager.CreateTexture(L"water1.dds", &texture2))
 	{
 		return -1;
 	}
 
-	pyramidObject->SetShader(RenderType::Transparent, shader);
-	pyramidObject->SetMaterial(material);
-	pyramidObject->SetTexture(texture);
+	EngineObjectDirectX *box2Object;
+	if (!manager.CreateBoxObject(&box2Object, 1, 1, 1, -0.5, 0, -0.5))
+	{
+		return -1;
+	}
+
+	box2Object->SetShader(RenderType::Transparent, shader);
+	box2Object->SetMaterial(material);
+	box2Object->SetTexture(texture2);
 
 	/*
 	EngineObjectDirectX *fileObject;

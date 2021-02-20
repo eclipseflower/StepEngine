@@ -34,6 +34,7 @@ const D3D12_INDEX_BUFFER_VIEW * Engine::Object::EngineObjectDirectX::IndexBuffer
 
 void Engine::Object::EngineObjectDirectX::SetShader(RenderType renderType, EngineShaderDirectX * shader)
 {
+	mRenderType = renderType;
 	mShader = shader;
 	gManagerDirectX->CreatePipelineStateObject(renderType, shader, &mPipelineState);
 }

@@ -22,40 +22,41 @@ bool Engine::Core::EngineSceneManagerDirectX::CreateBoxObject(EngineObjectDirect
 	(*object)->mBatched = true;
 
 	// Fill in the front face vertex data.
-	(*object)->mPosVertices.push_back({ XMFLOAT3(-w2, -h2, -d2) });
-	(*object)->mPosVertices.push_back({ XMFLOAT3(-w2, +h2, -d2) });
-	(*object)->mPosVertices.push_back({ XMFLOAT3(+w2, +h2, -d2) });
-	(*object)->mPosVertices.push_back({ XMFLOAT3(+w2, -h2, -d2) });
+	
+	(*object)->mPosVertices.push_back({ XMFLOAT3(posx - w2, posy - h2, posz - d2) });
+	(*object)->mPosVertices.push_back({ XMFLOAT3(posx - w2, posy + h2, posz - d2) });
+	(*object)->mPosVertices.push_back({ XMFLOAT3(posx + w2, posy + h2, posz - d2) });
+	(*object)->mPosVertices.push_back({ XMFLOAT3(posx + w2, posy - h2, posz - d2) });
 
 	// Fill in the back face vertex data.
-	(*object)->mPosVertices.push_back({ XMFLOAT3(-w2, -h2, +d2) });
-	(*object)->mPosVertices.push_back({ XMFLOAT3(+w2, -h2, +d2) });
-	(*object)->mPosVertices.push_back({ XMFLOAT3(+w2, +h2, +d2) });
-	(*object)->mPosVertices.push_back({ XMFLOAT3(-w2, +h2, +d2) });
+	(*object)->mPosVertices.push_back({ XMFLOAT3(posx - w2, posy - h2, posz + d2) });
+	(*object)->mPosVertices.push_back({ XMFLOAT3(posx + w2, posy - h2, posz + d2) });
+	(*object)->mPosVertices.push_back({ XMFLOAT3(posx + w2, posy + h2, posz + d2) });
+	(*object)->mPosVertices.push_back({ XMFLOAT3(posx - w2, posy + h2, posz + d2) });
 
 	// Fill in the top face vertex data.
-	(*object)->mPosVertices.push_back({ XMFLOAT3(-w2, +h2, -d2) });
-	(*object)->mPosVertices.push_back({ XMFLOAT3(-w2, +h2, +d2) });
-	(*object)->mPosVertices.push_back({ XMFLOAT3(+w2, +h2, +d2) });
-	(*object)->mPosVertices.push_back({ XMFLOAT3(+w2, +h2, -d2) });
+	(*object)->mPosVertices.push_back({ XMFLOAT3(posx - w2, posy + h2, posz -d2) });
+	(*object)->mPosVertices.push_back({ XMFLOAT3(posx - w2, posy + h2, posz +d2) });
+	(*object)->mPosVertices.push_back({ XMFLOAT3(posx + w2, posy + h2, posz +d2) });
+	(*object)->mPosVertices.push_back({ XMFLOAT3(posx + w2, posy + h2, posz -d2) });
 
 	// Fill in the bottom face vertex data.
-	(*object)->mPosVertices.push_back({ XMFLOAT3(-w2, -h2, -d2) });
-	(*object)->mPosVertices.push_back({ XMFLOAT3(+w2, -h2, -d2) });
-	(*object)->mPosVertices.push_back({ XMFLOAT3(+w2, -h2, +d2) });
-	(*object)->mPosVertices.push_back({ XMFLOAT3(-w2, -h2, +d2) });
+	(*object)->mPosVertices.push_back({ XMFLOAT3(posx - w2, posy - h2, posz - d2) });
+	(*object)->mPosVertices.push_back({ XMFLOAT3(posx + w2, posy - h2, posz - d2) });
+	(*object)->mPosVertices.push_back({ XMFLOAT3(posx + w2, posy - h2, posz + d2) });
+	(*object)->mPosVertices.push_back({ XMFLOAT3(posx - w2, posy - h2, posz + d2) });
 
 	// Fill in the left face vertex data.
-	(*object)->mPosVertices.push_back({ XMFLOAT3(-w2, -h2, +d2) });
-	(*object)->mPosVertices.push_back({ XMFLOAT3(-w2, +h2, +d2) });
-	(*object)->mPosVertices.push_back({ XMFLOAT3(-w2, +h2, -d2) });
-	(*object)->mPosVertices.push_back({ XMFLOAT3(-w2, -h2, -d2) });
+	(*object)->mPosVertices.push_back({ XMFLOAT3(posx - w2, posy - h2, posz + d2) });
+	(*object)->mPosVertices.push_back({ XMFLOAT3(posx - w2, posy + h2, posz + d2) });
+	(*object)->mPosVertices.push_back({ XMFLOAT3(posx - w2, posy + h2, posz - d2) });
+	(*object)->mPosVertices.push_back({ XMFLOAT3(posx - w2, posy - h2, posz - d2) });
 
 	// Fill in the right face vertex data.
-	(*object)->mPosVertices.push_back({ XMFLOAT3(+w2, -h2, -d2) });
-	(*object)->mPosVertices.push_back({ XMFLOAT3(+w2, +h2, -d2) });
-	(*object)->mPosVertices.push_back({ XMFLOAT3(+w2, +h2, +d2) });
-	(*object)->mPosVertices.push_back({ XMFLOAT3(+w2, -h2, +d2) });
+	(*object)->mPosVertices.push_back({ XMFLOAT3(posx + w2, posy - h2, posz - d2) });
+	(*object)->mPosVertices.push_back({ XMFLOAT3(posx + w2, posy + h2, posz - d2) });
+	(*object)->mPosVertices.push_back({ XMFLOAT3(posx + w2, posy + h2, posz + d2) });
+	(*object)->mPosVertices.push_back({ XMFLOAT3(posx + w2, posy - h2, posz + d2) });
 
 	bool res = gManagerDirectX->CreateDefaultBuffer((*object)->mPosVertices.data(),
 		sizeof(EngineVertexPosDirectX) * (*object)->mVertexCount,
