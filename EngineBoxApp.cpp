@@ -37,7 +37,7 @@ int EngineBoxApp::Run(HINSTANCE hInstance)
 		return -1;
 	}
 
-	material->diffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	material->diffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 0.5f);
 	material->fresnelR0 = XMFLOAT3(0.05f, 0.05f, 0.05f);
 	material->shininess = 179.2f;
 
