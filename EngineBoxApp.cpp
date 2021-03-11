@@ -74,6 +74,30 @@ int EngineBoxApp::Run(HINSTANCE hInstance)
 	box2Object->SetMaterial(material);
 	box2Object->SetTexture(texture2);
 
+	EngineObjectDirectX *box3Object;
+	if (!manager.CreateBoxObject(&box3Object, 1, 1, 1, 0, 0, 0))
+	{
+		return -1;
+	}
+
+	EngineMaterialDirectX *material2;
+	if (!manager.CreateMaterial(&material2))
+	{
+		return -1;
+	}
+
+	material2->diffuseAlbedo = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.5f);
+	material2->fresnelR0 = XMFLOAT3(0.001f, 0.001f, 0.001f);
+	material2->shininess = 0.0f;
+
+	XMMATRIX world = XMLoadFloat4x4(&box3Object->mWorldMatrix);
+	XMVECTOR shadowPlane = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f); // xz plane
+
+
+	box3Object->SetShader(RenderType::Stencil, shader);
+	box3Object->SetMaterial(material2);
+	box3Object->SetTexture(texture);
+
 	/*
 	EngineObjectDirectX *fileObject;
 	if (!manager.CreateObjectFromFile("car.txt", &fileObject))

@@ -495,6 +495,25 @@ bool Engine::Core::EngineCoreDirectX::CreatePipelineStateObject(RenderType rende
 		blendDesc.SrcBlendAlpha = D3D12_BLEND_ONE;
 		psoDesc.BlendState.RenderTarget[0] = blendDesc;
 		break;
+
+	case Stencil:
+		D3D12_DEPTH_STENCIL_DESC stencilDesc;
+		stencilDesc.BackFace.StencilDepthFailOp = D3D12_STENCIL_OP_KEEP;
+		stencilDesc.BackFace.StencilFailOp = D3D12_STENCIL_OP_KEEP;
+		stencilDesc.BackFace.StencilFunc = D3D12_COMPARISON_FUNC_EQUAL;
+		stencilDesc.BackFace.StencilPassOp = D3D12_STENCIL_OP_INCR;
+		stencilDesc.DepthEnable = true;
+		stencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
+		stencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+		stencilDesc.FrontFace.StencilDepthFailOp = D3D12_STENCIL_OP_KEEP;
+		stencilDesc.FrontFace.StencilFailOp = D3D12_STENCIL_OP_KEEP;
+		stencilDesc.FrontFace.StencilFunc = D3D12_COMPARISON_FUNC_EQUAL;
+		stencilDesc.FrontFace.StencilPassOp = D3D12_STENCIL_OP_INCR;
+		stencilDesc.StencilEnable = true;
+		stencilDesc.StencilReadMask = 0xff;
+		stencilDesc.StencilWriteMask = 0xff;
+		psoDesc.DepthStencilState = stencilDesc;
+		break;
 	}
 
 	ThrowIfFailed(mDevice->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(pipelineStateObject)));
