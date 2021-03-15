@@ -481,21 +481,6 @@ bool Engine::Core::EngineCoreDirectX::CreatePipelineStateObject(RenderType rende
 
 	switch (renderType)
 	{
-	case Transparent:
-		D3D12_RENDER_TARGET_BLEND_DESC blendDesc;
-		blendDesc.BlendEnable = true;
-		blendDesc.BlendOp = D3D12_BLEND_OP_ADD;
-		blendDesc.BlendOpAlpha = D3D12_BLEND_OP_ADD;
-		blendDesc.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
-		blendDesc.DestBlendAlpha = D3D12_BLEND_ZERO;
-		blendDesc.LogicOp = D3D12_LOGIC_OP_NOOP;
-		blendDesc.LogicOpEnable = false;
-		blendDesc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
-		blendDesc.SrcBlend = D3D12_BLEND_SRC_ALPHA;
-		blendDesc.SrcBlendAlpha = D3D12_BLEND_ONE;
-		psoDesc.BlendState.RenderTarget[0] = blendDesc;
-		break;
-
 	case Stencil:
 		D3D12_DEPTH_STENCIL_DESC stencilDesc;
 		stencilDesc.BackFace.StencilDepthFailOp = D3D12_STENCIL_OP_KEEP;
@@ -513,6 +498,20 @@ bool Engine::Core::EngineCoreDirectX::CreatePipelineStateObject(RenderType rende
 		stencilDesc.StencilReadMask = 0xff;
 		stencilDesc.StencilWriteMask = 0xff;
 		psoDesc.DepthStencilState = stencilDesc;
+
+	case Transparent:
+		D3D12_RENDER_TARGET_BLEND_DESC blendDesc;
+		blendDesc.BlendEnable = true;
+		blendDesc.BlendOp = D3D12_BLEND_OP_ADD;
+		blendDesc.BlendOpAlpha = D3D12_BLEND_OP_ADD;
+		blendDesc.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+		blendDesc.DestBlendAlpha = D3D12_BLEND_ZERO;
+		blendDesc.LogicOp = D3D12_LOGIC_OP_NOOP;
+		blendDesc.LogicOpEnable = false;
+		blendDesc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+		blendDesc.SrcBlend = D3D12_BLEND_SRC_ALPHA;
+		blendDesc.SrcBlendAlpha = D3D12_BLEND_ONE;
+		psoDesc.BlendState.RenderTarget[0] = blendDesc;
 		break;
 	}
 

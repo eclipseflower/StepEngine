@@ -50,6 +50,7 @@ using DirectX::XMMatrixPerspectiveFovLH;
 using DirectX::XMConvertToRadians;
 using DirectX::XMMatrixTranslation;
 using DirectX::XMStoreFloat3;
+using DirectX::XMMatrixShadow;
 using DirectX::XM_PI;
 using DirectX::XM_PIDIV4;
 using DirectX::XM_2PI;

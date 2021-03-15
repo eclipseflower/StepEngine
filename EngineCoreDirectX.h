@@ -105,7 +105,7 @@ namespace Engine
 			void *mPropVertexBufferData = nullptr;
 			UINT mPropVertexBufferOffset = 0;
 
-			UINT mIndexBufferSize = 65536;
+			UINT mIndexBufferSize = 262144;
 			UINT mIndexBufferOffset = 0;
 			ComPtr<ID3D12Resource> mIndexBufferGPU = nullptr;
 			void *mIndexBufferData = nullptr;

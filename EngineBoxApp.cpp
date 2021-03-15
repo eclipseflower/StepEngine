@@ -48,7 +48,7 @@ int EngineBoxApp::Run(HINSTANCE hInstance)
 	}
 
 	EngineObjectDirectX *boxObject;
-	if (!manager.CreateBoxObject(&boxObject, 1, 1, 1, 0, 0, 0))
+	if (!manager.CreateBoxObject(&boxObject, 1, 1, 1, 0, 0.5, 0))
 	{
 		return -1;
 	}
@@ -64,6 +64,7 @@ int EngineBoxApp::Run(HINSTANCE hInstance)
 		return -1;
 	}
 
+	/*
 	EngineObjectDirectX *box2Object;
 	if (!manager.CreateBoxObject(&box2Object, 1, 1, 1, -0.5, 0, -0.5))
 	{
@@ -73,9 +74,10 @@ int EngineBoxApp::Run(HINSTANCE hInstance)
 	box2Object->SetShader(RenderType::Transparent, shader);
 	box2Object->SetMaterial(material);
 	box2Object->SetTexture(texture2);
+	*/
 
 	EngineObjectDirectX *box3Object;
-	if (!manager.CreateBoxObject(&box3Object, 1, 1, 1, 0, 0, 0))
+	if (!manager.CreateBoxObject(&box3Object, 1, 1, 1, 0, 0.5, 0))
 	{
 		return -1;
 	}
@@ -92,7 +94,10 @@ int EngineBoxApp::Run(HINSTANCE hInstance)
 
 	XMMATRIX world = XMLoadFloat4x4(&box3Object->mWorldMatrix);
 	XMVECTOR shadowPlane = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f); // xz plane
-
+	XMVECTOR toMainLight = XMVectorSet(-0.57735f, 0.57735f, -0.57735f, 0.0f);
+	XMMATRIX shadow = XMMatrixShadow(shadowPlane, toMainLight);
+	XMMATRIX shadowOffsetY = XMMatrixTranslation(0.0f, 0.001f, 0.0f);
+	XMStoreFloat4x4(&box3Object->mWorldMatrix, world * shadow * shadowOffsetY);
 
 	box3Object->SetShader(RenderType::Stencil, shader);
 	box3Object->SetMaterial(material2);
@@ -100,11 +105,11 @@ int EngineBoxApp::Run(HINSTANCE hInstance)
 
 	/*
 	EngineObjectDirectX *fileObject;
-	if (!manager.CreateObjectFromFile("car.txt", &fileObject))
+	if (!manager.CreateObjectFromFile("skull.txt", &fileObject))
 	{
 		return -1;
 	}
-	fileObject->SetShader(shader);
+	fileObject->SetShader(RenderType::Opaque, shader);
 	fileObject->SetMaterial(material);
 	fileObject->SetTexture(texture);
 	*/
