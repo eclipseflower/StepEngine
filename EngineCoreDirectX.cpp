@@ -418,7 +418,7 @@ bool Engine::Core::EngineCoreDirectX::CreateDefaultBuffer(void *data, UINT byteW
 	return true;
 }
 
-bool Engine::Core::EngineCoreDirectX::CreateShader(wstring srcFile, ID3DBlob **vs, ID3DBlob **ps)
+bool Engine::Core::EngineCoreDirectX::CreateShader(wstring srcFile, ID3DBlob **vs, ID3DBlob **ps, ID3DBlob **gs)
 {
 	UINT compileFlags = 0;
 #if defined(DEBUG) || defined(_DEBUG)  
@@ -442,10 +442,23 @@ bool Engine::Core::EngineCoreDirectX::CreateShader(wstring srcFile, ID3DBlob **v
 		EngineLog::LogErrorMessageBox((char *)error->GetBufferPointer());
 	}
 	ThrowIfFailed(hr);
+
+	if (gs != nullptr)
+	{
+		error = nullptr;
+		hr = D3DCompileFromFile(srcFile.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, "GS", "gs_5_0",
+			compileFlags, 0, gs, &error);
+		if (error != nullptr)
+		{
+			EngineLog::LogErrorMessageBox((char *)error->GetBufferPointer());
+		}
+		ThrowIfFailed(hr);
+	}
+
 	return true;
 }
 
-bool Engine::Core::EngineCoreDirectX::CreateTexture(wstring srcFile, UINT texId, ComPtr<ID3D12Resource> &res, ComPtr<ID3D12Resource> &uploadHeap)
+bool Engine::Core::EngineCoreDirectX::CreateTexture(wstring srcFile, UINT texId, TextureType textureType, ComPtr<ID3D12Resource> &res, ComPtr<ID3D12Resource> &uploadHeap)
 {
 	ThrowIfFailed(mCommandAlloc->Reset());
 	ThrowIfFailed(mCommandList->Reset(mCommandAlloc.Get(), nullptr));
@@ -458,10 +471,27 @@ bool Engine::Core::EngineCoreDirectX::CreateTexture(wstring srcFile, UINT texId,
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	srvDesc.Format = res->GetDesc().Format;
-	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	srvDesc.Texture2D.MostDetailedMip = 0;
-	srvDesc.Texture2D.MipLevels = res->GetDesc().MipLevels;
-	srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
+
+	switch (textureType)
+	{
+	case T2D:
+		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+		srvDesc.Texture2D.MostDetailedMip = 0;
+		srvDesc.Texture2D.MipLevels = -1;
+		srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
+		break;
+	case T2DArray:
+		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DARRAY;
+		srvDesc.Texture2DArray.ArraySize = res->GetDesc().DepthOrArraySize;
+		srvDesc.Texture2DArray.FirstArraySlice = 0;
+		srvDesc.Texture2DArray.MipLevels = -1;
+		srvDesc.Texture2DArray.MostDetailedMip = 0;
+		srvDesc.Texture2DArray.PlaneSlice = 0;
+		srvDesc.Texture2DArray.ResourceMinLODClamp = 0.0f;
+		break;
+	default:
+		break;
+	}
 
 	CD3DX12_CPU_DESCRIPTOR_HANDLE handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
 		mCbvSrvHeap->GetCPUDescriptorHandleForHeapStart());

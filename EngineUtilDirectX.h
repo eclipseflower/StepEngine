@@ -202,6 +202,12 @@ namespace Engine
 		Transparent = 2,
 		Stencil = 3,
 	};
+
+	enum TextureType
+	{
+		T2D = 1,
+		T2DArray = 2
+	};
 }
 /*
 
