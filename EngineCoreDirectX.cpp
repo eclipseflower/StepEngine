@@ -230,6 +230,12 @@ bool Engine::Core::EngineCoreDirectX::Init()
 		{"TEXCOORD",	0,	DXGI_FORMAT_R32G32_FLOAT,		1,	D3D12_APPEND_ALIGNED_ELEMENT,	D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,	0}
 	};
 
+	mPointInputLayout =
+	{
+		{"POSITION",	0,	DXGI_FORMAT_R32G32B32_FLOAT,	0,	D3D12_APPEND_ALIGNED_ELEMENT,	D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,	0},
+		{"SIZE",		0,	DXGI_FORMAT_R32G32_FLOAT,		0,	D3D12_APPEND_ALIGNED_ELEMENT,	D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,	0}
+	};
+
 	// 11. create vertex buffer and index buffer and views
 	ThrowIfFailed(mDevice->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 		D3D12_HEAP_FLAG_NONE, &CD3DX12_RESOURCE_DESC::Buffer(mVertexBufferSize * sizeof(EngineVertexPosDirectX)), 
@@ -254,6 +260,22 @@ bool Engine::Core::EngineCoreDirectX::Init()
 	mIndexBufferView.BufferLocation = mIndexBufferGPU->GetGPUVirtualAddress();
 	mIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
 	mIndexBufferView.SizeInBytes = mIndexBufferSize * sizeof(UINT);
+
+	ThrowIfFailed(mDevice->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+		D3D12_HEAP_FLAG_NONE, &CD3DX12_RESOURCE_DESC::Buffer(mVertexBufferSize * sizeof(EngineVertexPointDirectX)),
+		D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&mPointVertexBufferGPU)));
+	
+	mPointVertexBufferView.BufferLocation = mPointVertexBufferGPU->GetGPUVirtualAddress();
+	mPointVertexBufferView.SizeInBytes = mVertexBufferSize * sizeof(EngineVertexPointDirectX);
+	mPointVertexBufferView.StrideInBytes = sizeof(EngineVertexPointDirectX);
+
+	ThrowIfFailed(mDevice->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+		D3D12_HEAP_FLAG_NONE, &CD3DX12_RESOURCE_DESC::Buffer(mIndexBufferSize * sizeof(UINT)),
+		D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&mPointIndexBufferGPU)));
+	
+	mPointIndexBufferView.BufferLocation = mPointIndexBufferGPU->GetGPUVirtualAddress();
+	mPointIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
+	mPointIndexBufferView.SizeInBytes = mIndexBufferSize * sizeof(UINT);
 
 	ResizeBuffer();
 

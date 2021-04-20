@@ -95,6 +95,7 @@ namespace Engine
 			ComPtr<ID3D12RootSignature> mRootSignature = nullptr;
 
 			vector<D3D12_INPUT_ELEMENT_DESC> mInputLayout;
+			vector<D3D12_INPUT_ELEMENT_DESC> mPointInputLayout;
 
 			UINT mVertexBufferSize = 65536;
 			ComPtr<ID3D12Resource> mPosVertexBufferGPU = nullptr;
@@ -105,13 +106,20 @@ namespace Engine
 			void *mPropVertexBufferData = nullptr;
 			UINT mPropVertexBufferOffset = 0;
 
+			ComPtr<ID3D12Resource> mPointVertexBufferGPU = nullptr;
+
 			UINT mIndexBufferSize = 262144;
 			UINT mIndexBufferOffset = 0;
 			ComPtr<ID3D12Resource> mIndexBufferGPU = nullptr;
 			void *mIndexBufferData = nullptr;
 
+			ComPtr<ID3D12Resource> mPointIndexBufferGPU = nullptr;
+
 			vector<D3D12_VERTEX_BUFFER_VIEW> mVertexBufferViews;
 			D3D12_INDEX_BUFFER_VIEW mIndexBufferView;
+
+			D3D12_VERTEX_BUFFER_VIEW mPointVertexBufferView;
+			D3D12_INDEX_BUFFER_VIEW mPointIndexBufferView;
 
 			D3D12_VIEWPORT mViewport;
 			D3D12_RECT mScissorRect;

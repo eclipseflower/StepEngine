@@ -116,6 +116,18 @@ namespace Engine
 		}
 	};
 
+	struct EngineVertexPointDirectX
+	{
+		XMFLOAT3 position;
+		XMFLOAT2 size;
+
+		EngineVertexPointDirectX(XMFLOAT3 position, XMFLOAT2 size)
+		{
+			this->position = position;
+			this->size = size;
+		}
+	};
+
 	static XMFLOAT4X4 Identity4x4()
 	{
 		static XMFLOAT4X4 I(
