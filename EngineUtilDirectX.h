@@ -201,6 +201,7 @@ namespace Engine
 		Opaque = 1,
 		Transparent = 2,
 		Stencil = 3,
+		Point = 4
 	};
 
 	enum TextureType

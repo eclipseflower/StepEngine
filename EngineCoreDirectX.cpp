@@ -505,7 +505,7 @@ bool Engine::Core::EngineCoreDirectX::CreateTexture(wstring srcFile, UINT texId,
 	return true;
 }
 
-bool Engine::Core::EngineCoreDirectX::CreatePipelineStateObject(RenderType renderType, ID3DBlob * vs, ID3DBlob * ps, ID3D12PipelineState **pipelineStateObject)
+bool Engine::Core::EngineCoreDirectX::CreatePipelineStateObject(RenderType renderType, ID3DBlob * vs, ID3DBlob * ps, ID3DBlob * gs, ID3D12PipelineState **pipelineStateObject)
 {
 	// create pipeline state object
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc;
@@ -515,10 +515,8 @@ bool Engine::Core::EngineCoreDirectX::CreatePipelineStateObject(RenderType rende
 	psoDesc.DSVFormat = mDepthStencilBufferFormat;
 	psoDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 	psoDesc.IBStripCutValue = D3D12_INDEX_BUFFER_STRIP_CUT_VALUE_DISABLED;
-	psoDesc.InputLayout = { mInputLayout.data(), mInputLayout.size() };
 	psoDesc.NodeMask = 0;
 	psoDesc.NumRenderTargets = 1;
-	psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 	psoDesc.pRootSignature = mRootSignature.Get();
 	CD3DX12_RASTERIZER_DESC rastDesc = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
 	rastDesc.FillMode = mFillMode;
@@ -530,6 +528,10 @@ bool Engine::Core::EngineCoreDirectX::CreatePipelineStateObject(RenderType rende
 	psoDesc.SampleMask = UINT_MAX;
 	psoDesc.PS = { ps->GetBufferPointer(), ps->GetBufferSize() };
 	psoDesc.VS = { vs->GetBufferPointer(), vs->GetBufferSize() };
+	if (gs != nullptr)
+	{
+		psoDesc.GS = { gs->GetBufferPointer(), gs->GetBufferSize() };
+	}
 
 	switch (renderType)
 	{
@@ -549,6 +551,7 @@ bool Engine::Core::EngineCoreDirectX::CreatePipelineStateObject(RenderType rende
 		stencilDesc.StencilEnable = true;
 		stencilDesc.StencilReadMask = 0xff;
 		stencilDesc.StencilWriteMask = 0xff;
+
 		psoDesc.DepthStencilState = stencilDesc;
 
 	case Transparent:
@@ -563,7 +566,15 @@ bool Engine::Core::EngineCoreDirectX::CreatePipelineStateObject(RenderType rende
 		blendDesc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
 		blendDesc.SrcBlend = D3D12_BLEND_SRC_ALPHA;
 		blendDesc.SrcBlendAlpha = D3D12_BLEND_ONE;
+
 		psoDesc.BlendState.RenderTarget[0] = blendDesc;
+		psoDesc.InputLayout = { mInputLayout.data(), mInputLayout.size() };
+		psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+		break;
+
+	case Point:
+		psoDesc.InputLayout = { mPointInputLayout.data(), mPointInputLayout.size() };
+		psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
 		break;
 	}
 
