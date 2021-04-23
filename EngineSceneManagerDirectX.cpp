@@ -464,3 +464,14 @@ bool Engine::Core::EngineSceneManagerDirectX::CreateObjectFromFile(string filena
 
 	return true;
 }
+
+bool Engine::Core::EngineSceneManagerDirectX::CreateBillBoard(float posx, float posy, float posz, float sizex, float sizey, EngineObjectDirectX ** object)
+{
+	*object = new EngineObjectDirectX;
+	(*object)->mVertexCount = 1;
+	(*object)->mBatched = true;
+
+	(*object)->mPointVertices.push_back({ XMFLOAT3(posx, posy, posz), XMFLOAT2(sizex, sizey) });
+
+	return true;
+}

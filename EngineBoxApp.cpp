@@ -26,7 +26,7 @@ int EngineBoxApp::Run(HINSTANCE hInstance)
 	}
 
 	EngineShaderDirectX *shader;
-	if (!manager.CreateShader(L"color.hlsl", &shader))
+	if (!manager.CreateShader(L"billboard.hlsl", &shader, true))
 	{
 		return -1;
 	}
@@ -42,13 +42,13 @@ int EngineBoxApp::Run(HINSTANCE hInstance)
 	material->shininess = 179.2f;
 
 	EngineTextureDirectX *texture;
-	if (!manager.CreateTexture(L"WoodCrate01.dds", &texture))
+	if (!manager.CreateTexture(L"treeArray2.dds", TextureType::T2DArray, &texture))
 	{
 		return -1;
 	}
 
-	EngineObjectDirectX *boxObject;
-	if (!manager.CreateBoxObject(&boxObject, 1, 1, 1, 0, 0.5, 0))
+	EngineObjectDirectX *object;
+	if (!manager.CreateBillBoard(0, 0, 0, 1, 1, &object))
 	{
 		return -1;
 	}
@@ -57,63 +57,6 @@ int EngineBoxApp::Run(HINSTANCE hInstance)
 	boxObject->SetMaterial(material);
 	boxObject->SetTexture(texture);
 
-
-	EngineTextureDirectX *texture2;
-	if (!manager.CreateTexture(L"water1.dds", &texture2))
-	{
-		return -1;
-	}
-
-	/*
-	EngineObjectDirectX *box2Object;
-	if (!manager.CreateBoxObject(&box2Object, 1, 1, 1, -0.5, 0, -0.5))
-	{
-		return -1;
-	}
-
-	box2Object->SetShader(RenderType::Transparent, shader);
-	box2Object->SetMaterial(material);
-	box2Object->SetTexture(texture2);
-	*/
-
-	EngineObjectDirectX *box3Object;
-	if (!manager.CreateBoxObject(&box3Object, 1, 1, 1, 0, 0.5, 0))
-	{
-		return -1;
-	}
-
-	EngineMaterialDirectX *material2;
-	if (!manager.CreateMaterial(&material2))
-	{
-		return -1;
-	}
-
-	material2->diffuseAlbedo = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.5f);
-	material2->fresnelR0 = XMFLOAT3(0.001f, 0.001f, 0.001f);
-	material2->shininess = 0.0f;
-
-	XMMATRIX world = XMLoadFloat4x4(&box3Object->mWorldMatrix);
-	XMVECTOR shadowPlane = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f); // xz plane
-	XMVECTOR toMainLight = XMVectorSet(-0.57735f, 0.57735f, -0.57735f, 0.0f);
-	XMMATRIX shadow = XMMatrixShadow(shadowPlane, toMainLight);
-	XMMATRIX shadowOffsetY = XMMatrixTranslation(0.0f, 0.001f, 0.0f);
-	XMStoreFloat4x4(&box3Object->mWorldMatrix, world * shadow * shadowOffsetY);
-
-	box3Object->SetShader(RenderType::Stencil, shader);
-	box3Object->SetMaterial(material2);
-	box3Object->SetTexture(texture);
-
-	/*
-	EngineObjectDirectX *fileObject;
-	if (!manager.CreateObjectFromFile("skull.txt", &fileObject))
-	{
-		return -1;
-	}
-	fileObject->SetShader(RenderType::Opaque, shader);
-	fileObject->SetMaterial(material);
-	fileObject->SetTexture(texture);
-	*/
-	
 	manager.mUpdateFunc = bind(&EngineBoxApp::Update, this, _1);
 	manager.mMouseDownFunc = bind(&EngineBoxApp::OnMouseDown, this, _1, _2, _3);
 	manager.mMouseUpFunc = bind(&EngineBoxApp::OnMouseUp, this, _1, _2, _3);

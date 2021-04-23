@@ -50,9 +50,10 @@ namespace Engine
 		bool CreatePyramidObject(EngineObjectDirectX **object);
 		bool CreateCylinderObject(float topRadius, float bottomRadius, float height, EngineObjectDirectX **object);
 		bool CreateObjectFromFile(string filename, EngineObjectDirectX ** object);
-		bool CreateShader(wstring srcFile, EngineShaderDirectX **shader);
+		bool CreateBillBoard(float posx, float posy, float posz, float sizex, float sizey, EngineObjectDirectX ** object);
+		bool CreateShader(wstring srcFile, EngineShaderDirectX **shader, bool hasGS = false);
 		bool CreateMaterial(EngineMaterialDirectX **material);
-		bool CreateTexture(wstring srcFile, EngineTextureDirectX **texture);
+		bool CreateTexture(wstring srcFile, TextureType textureType, EngineTextureDirectX **texture);
 		bool CreatePipelineStateObject(RenderType renderType, EngineShaderDirectX *shader, ID3D12PipelineState **pipelineStateObject);
 		bool UpdatePosVertexBuffer(void * data, UINT byteWidth, int *mBaseVertexLocation);
 		bool UpdatePropVertexBuffer(void * data, UINT byteWidth);

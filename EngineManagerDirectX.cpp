@@ -216,12 +216,18 @@ bool Engine::EngineManagerDirectX::CreateObjectFromFile(string filename, EngineO
 	return mSceneMgrInst.CreateObjectFromFile(filename, object);
 }
 
-bool Engine::EngineManagerDirectX::CreateShader(wstring srcFile, EngineShaderDirectX ** shader)
+bool Engine::EngineManagerDirectX::CreateBillBoard(float posx, float posy, float posz, float sizex, float sizey, EngineObjectDirectX ** object)
+{
+	return mSceneMgrInst.CreateBillBoard(posx, posy, posz, sizex, sizey, object);
+}
+
+bool Engine::EngineManagerDirectX::CreateShader(wstring srcFile, EngineShaderDirectX ** shader, bool hasGS)
 {
 	if (mCoreInst)
 	{
 		*shader = new EngineShaderDirectX;
-		if (mCoreInst->CreateShader(srcFile, &(*shader)->mVSByteCode, &(*shader)->mPSByteCode))
+		if (mCoreInst->CreateShader(srcFile, &(*shader)->mVSByteCode, &(*shader)->mPSByteCode, 
+			hasGS ? &(*shader)->mGSByteCode : nullptr))
 		{
 			return true;
 		}
@@ -237,13 +243,13 @@ bool Engine::EngineManagerDirectX::CreateMaterial(EngineMaterialDirectX ** mater
 	return true;
 }
 
-bool Engine::EngineManagerDirectX::CreateTexture(wstring srcFile, EngineTextureDirectX ** texture)
+bool Engine::EngineManagerDirectX::CreateTexture(wstring srcFile, TextureType textureType, EngineTextureDirectX ** texture)
 {
 	if (mCoreInst)
 	{
 		*texture = new EngineTextureDirectX;
 		(*texture)->mID = mCurSceneTextureIndex++;
-		if (mCoreInst->CreateTexture(srcFile, (*texture)->mID, (*texture)->mRescource, (*texture)->mUploadHeap))
+		if (mCoreInst->CreateTexture(srcFile, (*texture)->mID, textureType, (*texture)->mRescource, (*texture)->mUploadHeap))
 		{
 			return true;
 		}

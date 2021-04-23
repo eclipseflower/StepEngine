@@ -15,6 +15,7 @@ namespace Engine
 		public:
 			ComPtr<ID3DBlob> mVSByteCode = nullptr;
 			ComPtr<ID3DBlob> mPSByteCode = nullptr;
+			ComPtr<ID3DBlob> mGSByteCode = nullptr;
 
 			//ID3DX11Effect *mEffect = nullptr;
 			//ID3D11InputLayout *mInputLayout = nullptr;

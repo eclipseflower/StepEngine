@@ -7,6 +7,7 @@ using std::bind;
 using namespace std::placeholders;
 using Engine::EngineManagerDirectX;
 using Engine::RenderType;
+using Engine::TextureType;
 
 extern EngineManagerDirectX manager;
 

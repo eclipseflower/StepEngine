@@ -22,7 +22,9 @@ namespace Engine
 			int mIndexCount;
 			vector<EngineVertexPosDirectX> mPosVertices;
 			vector<EngineVertexPropDirectX> mPropVertices;
+			vector<EngineVertexPointDirectX> mPointVertices;
 			vector<UINT> mIndices;
+			vector<UINT> mPointIndices;
 			vector<D3D12_VERTEX_BUFFER_VIEW> mVertexBufferViews;
 			D3D12_INDEX_BUFFER_VIEW mIndexBufferView;
 

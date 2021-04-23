@@ -19,6 +19,8 @@ namespace Engine
 			bool CreatePyramidObject(EngineObjectDirectX **object);
 			bool CreateCylinderObject(float topRadius, float bottomRadius, float height, EngineObjectDirectX **object);
 			bool CreateObjectFromFile(string filename, EngineObjectDirectX **object);
+			bool CreateBillBoard(float posx, float posy, float posz, float sizex, float sizey, EngineObjectDirectX ** object);
+
 
 			vector<EngineObjectDirectX *> mSceneObjects;
 			UINT mCurSceneObjectIndex = 0;
