@@ -42,9 +42,11 @@ namespace Engine
 			bool CreateShader(wstring srcFile, ID3DBlob **vs, ID3DBlob **ps, ID3DBlob **gs = nullptr);
 			bool CreateTexture(wstring srcFile, UINT texId, TextureType textureType, ComPtr<ID3D12Resource> &res, ComPtr<ID3D12Resource> &uploadHeap);
 			bool CreatePipelineStateObject(RenderType renderType, ID3DBlob *vs, ID3DBlob *ps, ID3DBlob * gs, ID3D12PipelineState **pipelineStateObject);
+			bool UpdatePointVertexBuffer(void * data, UINT byteWidth, int *mBaseVertexLocation);
 			bool UpdatePosVertexBuffer(void * data, UINT byteWidth, int *mBaseVertexLocation);
 			bool UpdatePropVertexBuffer(void * data, UINT byteWidth);
 			bool UpdateIndexBuffer(void * data, UINT byteWidth, UINT *mStartIndexLocation);
+			bool UpdatePointIndexBuffer(void * data, UINT byteWidth, UINT *mStartIndexLocation);
 
 			void FlushCommandQueue();
 			void BeginDraw(EngineCameraDirectX * camera);
@@ -107,13 +109,17 @@ namespace Engine
 			UINT mPropVertexBufferOffset = 0;
 
 			ComPtr<ID3D12Resource> mPointVertexBufferGPU = nullptr;
+			void *mPointVertexBufferData = nullptr;
+			UINT mPointVertexBufferOffset = 0;
 
 			UINT mIndexBufferSize = 262144;
 			UINT mIndexBufferOffset = 0;
 			ComPtr<ID3D12Resource> mIndexBufferGPU = nullptr;
 			void *mIndexBufferData = nullptr;
 
+			UINT mPointIndexBufferOffset = 0;
 			ComPtr<ID3D12Resource> mPointIndexBufferGPU = nullptr;
+			void *mPointIndexBufferData = nullptr;
 
 			vector<D3D12_VERTEX_BUFFER_VIEW> mVertexBufferViews;
 			D3D12_INDEX_BUFFER_VIEW mIndexBufferView;

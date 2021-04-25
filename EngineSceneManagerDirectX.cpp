@@ -473,5 +473,35 @@ bool Engine::Core::EngineSceneManagerDirectX::CreateBillBoard(float posx, float 
 
 	(*object)->mPointVertices.push_back({ XMFLOAT3(posx, posy, posz), XMFLOAT2(sizex, sizey) });
 
+	bool res = gManagerDirectX->UpdatePointVertexBuffer((*object)->mPointVertices.data(),
+		sizeof(EngineVertexPointDirectX) * (*object)->mVertexCount, &(*object)->mBasePointVertexLocation);
+
+	if (!res)
+	{
+		return false;
+	}
+
+	(*object)->mIndexCount = 1;
+	UINT indices[] = { 0 };
+
+	for (int i = 0; i < (*object)->mIndexCount; ++i)
+	{
+		(*object)->mPointIndices.push_back(indices[i]);
+	}
+
+	res = gManagerDirectX->UpdatePointIndexBuffer((*object)->mPointIndices.data(), sizeof(UINT) * (*object)->mIndexCount,
+		&(*object)->mStartPointIndexLocation);
+
+	if (!res)
+	{
+		return false;
+	}
+
+	XMMATRIX i = XMMatrixIdentity();
+	XMStoreFloat4x4(&(*object)->mWorldMatrix, i);
+
+	(*object)->mID = mCurSceneObjectIndex++;
+	mSceneObjects.push_back(*object);
+
 	return true;
 }

@@ -32,6 +32,8 @@ namespace Engine
 			bool mBatched = false;
 			UINT mStartIndexLocation = 0;
 			int mBaseVertexLocation = 0;
+			UINT mStartPointIndexLocation = 0;
+			int mBasePointVertexLocation = 0;
 			
 			ComPtr<ID3D12Resource> mPosVertexBufferGPU = nullptr;
 			ComPtr<ID3D12Resource> mPosVertexBufferUploader = nullptr;

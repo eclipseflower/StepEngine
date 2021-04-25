@@ -262,7 +262,19 @@ bool Engine::EngineManagerDirectX::CreatePipelineStateObject(RenderType renderTy
 {
 	if (mCoreInst)
 	{
-		if (mCoreInst->CreatePipelineStateObject(renderType, shader->mVSByteCode.Get(), shader->mPSByteCode.Get(), pipelineStateObject))
+		if (mCoreInst->CreatePipelineStateObject(renderType, shader->mVSByteCode.Get(), shader->mPSByteCode.Get(), shader->mGSByteCode.Get(), pipelineStateObject))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+bool Engine::EngineManagerDirectX::UpdatePointVertexBuffer(void * data, UINT byteWidth, int * mBaseVertexLocation)
+{
+	if (mCoreInst)
+	{
+		if (mCoreInst->UpdatePointVertexBuffer(data, byteWidth, mBaseVertexLocation))
 		{
 			return true;
 		}
@@ -299,6 +311,18 @@ bool Engine::EngineManagerDirectX::UpdateIndexBuffer(void * data, UINT byteWidth
 	if (mCoreInst)
 	{
 		if (mCoreInst->UpdateIndexBuffer(data, byteWidth, mStartIndexLocation))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+bool Engine::EngineManagerDirectX::UpdatePointIndexBuffer(void * data, UINT byteWidth, UINT * mStartIndexLocation)
+{
+	if (mCoreInst)
+	{
+		if (mCoreInst->UpdatePointIndexBuffer(data, byteWidth, mStartIndexLocation))
 		{
 			return true;
 		}

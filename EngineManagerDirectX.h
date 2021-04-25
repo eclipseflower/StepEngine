@@ -55,9 +55,11 @@ namespace Engine
 		bool CreateMaterial(EngineMaterialDirectX **material);
 		bool CreateTexture(wstring srcFile, TextureType textureType, EngineTextureDirectX **texture);
 		bool CreatePipelineStateObject(RenderType renderType, EngineShaderDirectX *shader, ID3D12PipelineState **pipelineStateObject);
+		bool UpdatePointVertexBuffer(void * data, UINT byteWidth, int *mBaseVertexLocation);
 		bool UpdatePosVertexBuffer(void * data, UINT byteWidth, int *mBaseVertexLocation);
 		bool UpdatePropVertexBuffer(void * data, UINT byteWidth);
 		bool UpdateIndexBuffer(void * data, UINT byteWidth, UINT *mStartIndexLocation);
+		bool UpdatePointIndexBuffer(void * data, UINT byteWidth, UINT *mStartIndexLocation);
 
 		EngineWindowDirectX *mWindowInst;
 		EngineCoreDirectX *mCoreInst;

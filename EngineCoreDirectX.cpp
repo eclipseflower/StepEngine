@@ -582,6 +582,15 @@ bool Engine::Core::EngineCoreDirectX::CreatePipelineStateObject(RenderType rende
 	return true;
 }
 
+bool Engine::Core::EngineCoreDirectX::UpdatePointVertexBuffer(void * data, UINT byteWidth, int * mBaseVertexLocation)
+{
+	ThrowIfFailed(mPointVertexBufferGPU->Map(0, nullptr, &mPointVertexBufferData));
+	memcpy((BYTE *)mPointVertexBufferData + mPointVertexBufferOffset, data, byteWidth);
+	*mBaseVertexLocation = mPointVertexBufferOffset / sizeof(EngineVertexPointDirectX);
+	mPointVertexBufferOffset += byteWidth;
+	return true;
+}
+
 bool Engine::Core::EngineCoreDirectX::UpdatePosVertexBuffer(void * data, UINT byteWidth, int *mBaseVertexLocation)
 {
 	ThrowIfFailed(mPosVertexBufferGPU->Map(0, nullptr, &mPosVertexBufferData));
@@ -608,6 +617,16 @@ bool Engine::Core::EngineCoreDirectX::UpdateIndexBuffer(void * data, UINT byteWi
 	mIndexBufferGPU->Unmap(0, nullptr);
 	*mStartIndexLocation = mIndexBufferOffset / sizeof(UINT);
 	mIndexBufferOffset += byteWidth;
+	return true;
+}
+
+bool Engine::Core::EngineCoreDirectX::UpdatePointIndexBuffer(void * data, UINT byteWidth, UINT * mStartIndexLocation)
+{
+	ThrowIfFailed(mPointIndexBufferGPU->Map(0, nullptr, &mPointIndexBufferData));
+	memcpy((BYTE *)mPointIndexBufferData + mPointIndexBufferOffset, data, byteWidth);
+	mPointIndexBufferGPU->Unmap(0, nullptr);
+	*mStartIndexLocation = mPointIndexBufferOffset / sizeof(UINT);
+	mPointIndexBufferOffset += byteWidth;
 	return true;
 }
 

@@ -53,9 +53,9 @@ int EngineBoxApp::Run(HINSTANCE hInstance)
 		return -1;
 	}
 
-	boxObject->SetShader(RenderType::Opaque, shader);
-	boxObject->SetMaterial(material);
-	boxObject->SetTexture(texture);
+	object->SetShader(RenderType::Point, shader);
+	object->SetMaterial(material);
+	object->SetTexture(texture);
 
 	manager.mUpdateFunc = bind(&EngineBoxApp::Update, this, _1);
 	manager.mMouseDownFunc = bind(&EngineBoxApp::OnMouseDown, this, _1, _2, _3);
