@@ -468,6 +468,7 @@ bool Engine::Core::EngineSceneManagerDirectX::CreateObjectFromFile(string filena
 bool Engine::Core::EngineSceneManagerDirectX::CreateBillBoard(float posx, float posy, float posz, float sizex, float sizey, EngineObjectDirectX ** object)
 {
 	*object = new EngineObjectDirectX;
+	(*object)->mPrimitiveTopology = D3D11_PRIMITIVE_TOPOLOGY_POINTLIST;
 	(*object)->mVertexCount = 1;
 	(*object)->mBatched = true;
 

@@ -683,8 +683,6 @@ void Engine::Core::EngineCoreDirectX::BeginDraw(EngineCameraDirectX * camera)
 	mCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 	mCommandList->SetGraphicsRootSignature(mRootSignature.Get());
 
-	mCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
 	// copy pass const buffer to GPU
 	ThrowIfFailed(res.mPassConstBuffer->Map(0, nullptr, reinterpret_cast<void **>(&res.mConstBufferData)));
 	UINT passCbSize = CalcConstantBufferByteSize(sizeof(PassConstants));
@@ -770,9 +768,19 @@ void Engine::Core::EngineCoreDirectX::DrawObject(EngineObjectDirectX * object, E
 
 	mCommandList->SetPipelineState(object->mPipelineState.Get());
 
-	mCommandList->IASetVertexBuffers(0, 2, object->mBatched ? mVertexBufferViews.data() : object->VertexBufferViews());
+	mCommandList->IASetPrimitiveTopology(object->mPrimitiveTopology);
 
-	mCommandList->IASetIndexBuffer(object->mBatched ? &mIndexBufferView : object->IndexBufferView());
+	if (object->mPrimitiveTopology == D3D11_PRIMITIVE_TOPOLOGY_POINTLIST)
+	{
+		mCommandList->IASetVertexBuffers(0, 1, &mPointVertexBufferView);
+		mCommandList->IASetIndexBuffer(&mPointIndexBufferView);
+	}
+	else
+	{
+		mCommandList->IASetVertexBuffers(0, 2, object->mBatched ? mVertexBufferViews.data() : object->VertexBufferViews());
+		mCommandList->IASetIndexBuffer(object->mBatched ? &mIndexBufferView : object->IndexBufferView());
+	}
+
 
 	mCommandList->DrawIndexedInstanced(object->mIndexCount, 1, object->mStartIndexLocation, 
 		object->mBaseVertexLocation, 0);

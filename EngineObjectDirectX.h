@@ -43,6 +43,8 @@ namespace Engine
 			ComPtr<ID3D12Resource> mIndexBufferUploader = nullptr;
 			ComPtr<ID3D12PipelineState> mPipelineState = nullptr;
 
+			D3D_PRIMITIVE_TOPOLOGY mPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
 			XMFLOAT4X4 mWorldMatrix;
 
 			RenderType mRenderType;
