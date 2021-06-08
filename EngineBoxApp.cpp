@@ -53,7 +53,7 @@ int EngineBoxApp::Run(HINSTANCE hInstance)
 		return -1;
 	}
 
-	object->SetShader(RenderType::Point, shader);
+	object->SetShader(RenderType::BillBoard, shader);
 	object->SetMaterial(material);
 	object->SetTexture(texture);
 

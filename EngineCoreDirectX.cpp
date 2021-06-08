@@ -126,11 +126,12 @@ bool Engine::Core::EngineCoreDirectX::Init()
 	UINT passCbCount = mCoreResourceCount * mPassConstBufferCount;
 	UINT matCbCount = mCoreResourceCount * mMaterialConstBufferCount;
 	UINT shaderResCount = mShaderResourceCount;
+	UINT computeResCount = mComputeResourceCount;
 
 	mCbvSrvHeapIncSize = mDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	D3D12_DESCRIPTOR_HEAP_DESC cbvSrvHeapDesc;
 	cbvSrvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-	cbvSrvHeapDesc.NumDescriptors = objCbCount + passCbCount + matCbCount + shaderResCount;
+	cbvSrvHeapDesc.NumDescriptors = objCbCount + passCbCount + matCbCount + shaderResCount + computeResCount;
 	cbvSrvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	cbvSrvHeapDesc.NodeMask = 0;
 	ThrowIfFailed(mDevice->CreateDescriptorHeap(&cbvSrvHeapDesc, IID_PPV_ARGS(&mCbvSrvHeap)));
@@ -572,13 +573,58 @@ bool Engine::Core::EngineCoreDirectX::CreatePipelineStateObject(RenderType rende
 		psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 		break;
 
-	case Point:
+	case BillBoard:
 		psoDesc.InputLayout = { mPointInputLayout.data(), mPointInputLayout.size() };
 		psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
 		break;
 	}
 
 	ThrowIfFailed(mDevice->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(pipelineStateObject)));
+	return true;
+}
+
+bool Engine::Core::EngineCoreDirectX::CreateSobelPostProgressingEffect()
+{
+	UINT windowWidth = gManagerDirectX->GetWindowWidth();
+	UINT windowHeight = gManagerDirectX->GetWindowHeight();
+
+	D3D12_RESOURCE_DESC computeDesc;
+	computeDesc.Alignment = 0;
+	computeDesc.DepthOrArraySize = 1;
+	computeDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+	computeDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
+	computeDesc.Format = mBackBufferFormat;
+	computeDesc.Height = windowHeight;
+	computeDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+	computeDesc.MipLevels = 1;
+	computeDesc.SampleDesc.Count = 1;
+	computeDesc.SampleDesc.Quality = 0;
+	computeDesc.Width = windowWidth;
+
+	ThrowIfFailed(mDevice->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT), 
+		D3D12_HEAP_FLAG_NONE, &computeDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, 
+		IID_PPV_ARGS(&mCoreCompute.mComputeBuffer)));
+
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc;
+	srvDesc.Format = mBackBufferFormat;
+	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDesc.Texture2D.MipLevels = 1;
+	srvDesc.Texture2D.MostDetailedMip = 0;
+	srvDesc.Texture2D.PlaneSlice = 0;
+	srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
+	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+
+	CD3DX12_CPU_DESCRIPTOR_HANDLE handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
+		mCbvSrvHeap->GetCPUDescriptorHandleForHeapStart());
+	UINT objCbCount = mCoreResourceCount * mObjectConstBufferCount;
+	UINT passCbCount = mCoreResourceCount * mPassConstBufferCount;
+	UINT matCbCount = mCoreResourceCount * mMaterialConstBufferCount;
+	UINT shaderResCount = mShaderResourceCount;
+	UINT srvHeapIndex = objCbCount + passCbCount + matCbCount + shaderResCount;
+
+	handle.Offset(srvHeapIndex, mCbvSrvHeapIncSize);
+	mDevice->CreateShaderResourceView(mCoreCompute.mComputeBuffer.Get(), &srvDesc, handle);
+
 	return true;
 }
 

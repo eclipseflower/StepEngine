@@ -31,6 +31,11 @@ namespace Engine
 			UINT mCurrentFence = 0;
 		};
 
+		struct EngineCoreCompute
+		{
+			ComPtr<ID3D12Resource> mComputeBuffer = nullptr;
+		};
+
 		class EngineCoreDirectX
 		{
 		public:
@@ -42,6 +47,7 @@ namespace Engine
 			bool CreateShader(wstring srcFile, ID3DBlob **vs, ID3DBlob **ps, ID3DBlob **gs = nullptr);
 			bool CreateTexture(wstring srcFile, UINT texId, TextureType textureType, ComPtr<ID3D12Resource> &res, ComPtr<ID3D12Resource> &uploadHeap);
 			bool CreatePipelineStateObject(RenderType renderType, ID3DBlob *vs, ID3DBlob *ps, ID3DBlob * gs, ID3D12PipelineState **pipelineStateObject);
+			bool CreateSobelPostProgressingEffect();
 			bool UpdatePointVertexBuffer(void * data, UINT byteWidth, int *mBaseVertexLocation);
 			bool UpdatePosVertexBuffer(void * data, UINT byteWidth, int *mBaseVertexLocation);
 			bool UpdatePropVertexBuffer(void * data, UINT byteWidth);
@@ -92,6 +98,7 @@ namespace Engine
 			UINT mCurCoreResourceIndex = 0;
 
 			UINT mShaderResourceCount = 16;
+			UINT mComputeResourceCount = 2; /* one for srv, one for uav */
 
 			vector<D3D12_STATIC_SAMPLER_DESC> mStaticSamplers;
 			ComPtr<ID3D12RootSignature> mRootSignature = nullptr;
@@ -132,6 +139,8 @@ namespace Engine
 
 			D3D12_FILL_MODE mFillMode = D3D12_FILL_MODE_SOLID;
 			D3D12_CULL_MODE mCullMode = D3D12_CULL_MODE_NONE;
+
+			EngineCoreCompute mCoreCompute;
 		};
 	}
 }

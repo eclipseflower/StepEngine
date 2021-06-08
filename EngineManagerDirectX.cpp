@@ -270,6 +270,18 @@ bool Engine::EngineManagerDirectX::CreatePipelineStateObject(RenderType renderTy
 	return false;
 }
 
+bool Engine::EngineManagerDirectX::CreateSobelPostProgressingEffect()
+{
+	if (mCoreInst)
+	{
+		if (mCoreInst->CreateSobelPostProgressingEffect())
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 bool Engine::EngineManagerDirectX::UpdatePointVertexBuffer(void * data, UINT byteWidth, int * mBaseVertexLocation)
 {
 	if (mCoreInst)
