@@ -34,6 +34,12 @@ namespace Engine
 		struct EngineCoreCompute
 		{
 			ComPtr<ID3D12Resource> mComputeBuffer = nullptr;
+			CD3DX12_CPU_DESCRIPTOR_HANDLE mCpuSrv;
+			CD3DX12_CPU_DESCRIPTOR_HANDLE mCpuUav;
+			CD3DX12_GPU_DESCRIPTOR_HANDLE mGpuSrv;
+			CD3DX12_GPU_DESCRIPTOR_HANDLE mGpuUav;
+			ComPtr<ID3D12RootSignature> mComputeSignature = nullptr;
+			ComPtr<ID3D12PipelineState> mComputePipelineState = nullptr;
 		};
 
 		class EngineCoreDirectX
@@ -48,6 +54,7 @@ namespace Engine
 			bool CreateTexture(wstring srcFile, UINT texId, TextureType textureType, ComPtr<ID3D12Resource> &res, ComPtr<ID3D12Resource> &uploadHeap);
 			bool CreatePipelineStateObject(RenderType renderType, ID3DBlob *vs, ID3DBlob *ps, ID3DBlob * gs, ID3D12PipelineState **pipelineStateObject);
 			bool CreateSobelPostProgressingEffect();
+			bool CreateSobelPostProgressingResourceAndView();
 			bool UpdatePointVertexBuffer(void * data, UINT byteWidth, int *mBaseVertexLocation);
 			bool UpdatePosVertexBuffer(void * data, UINT byteWidth, int *mBaseVertexLocation);
 			bool UpdatePropVertexBuffer(void * data, UINT byteWidth);

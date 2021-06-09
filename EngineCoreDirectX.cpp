@@ -585,6 +585,61 @@ bool Engine::Core::EngineCoreDirectX::CreatePipelineStateObject(RenderType rende
 
 bool Engine::Core::EngineCoreDirectX::CreateSobelPostProgressingEffect()
 {
+	CreateSobelPostProgressingResourceAndView();
+
+	CD3DX12_DESCRIPTOR_RANGE cbvSrvTable[3];
+	cbvSrvTable[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);
+	cbvSrvTable[1].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1);
+	cbvSrvTable[2].Init(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 2, 0);
+
+	CD3DX12_ROOT_PARAMETER rootParams[3];
+	rootParams[0].InitAsDescriptorTable(1, &cbvSrvTable[0]);
+	rootParams[1].InitAsDescriptorTable(1, &cbvSrvTable[1]);
+	rootParams[2].InitAsDescriptorTable(1, &cbvSrvTable[2]);
+
+	CD3DX12_ROOT_SIGNATURE_DESC sigDesc(_countof(rootParams), rootParams, mStaticSamplers.size(),
+		mStaticSamplers.data(), D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+	ComPtr<ID3DBlob> signature = nullptr;
+	ComPtr<ID3DBlob> error = nullptr;
+	HRESULT hr = D3D12SerializeRootSignature(&sigDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, &error);
+	if (error != nullptr)
+	{
+		EngineLog::LogErrorMessageBox((char *)error->GetBufferPointer());
+	}
+	ThrowIfFailed(hr);
+	ThrowIfFailed(mDevice->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(),
+		IID_PPV_ARGS(&mCoreCompute.mComputeSignature)));
+
+	UINT compileFlags = 0;
+#if defined(DEBUG) || defined(_DEBUG)  
+	compileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+#endif
+	ID3DBlob *error = nullptr;
+	ID3DBlob *cs = nullptr;
+	HRESULT hr;
+	wstring srcFile = L"Sobel.hlsl";
+	hr = D3DCompileFromFile(srcFile.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, "CS", "cs_5_0",
+		compileFlags, 0, &cs, &error);
+	if (error != nullptr)
+	{
+		EngineLog::LogErrorMessageBox((char *)error->GetBufferPointer());
+	}
+	ThrowIfFailed(hr);
+
+	D3D12_COMPUTE_PIPELINE_STATE_DESC psoDesc;
+	psoDesc.CachedPSO.CachedBlobSizeInBytes = 0;
+	psoDesc.CachedPSO.pCachedBlob = nullptr;
+	psoDesc.CS = { cs->GetBufferPointer(), cs->GetBufferSize() };
+	psoDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
+	psoDesc.NodeMask = 0;
+	psoDesc.pRootSignature = mCoreCompute.mComputeSignature.Get();
+	ThrowIfFailed(mDevice->CreateComputePipelineState(&psoDesc, IID_PPV_ARGS(&mCoreCompute.mComputePipelineState)));
+
+	return true;
+}
+
+bool Engine::Core::EngineCoreDirectX::CreateSobelPostProgressingResourceAndView()
+{
 	UINT windowWidth = gManagerDirectX->GetWindowWidth();
 	UINT windowHeight = gManagerDirectX->GetWindowHeight();
 
@@ -601,8 +656,8 @@ bool Engine::Core::EngineCoreDirectX::CreateSobelPostProgressingEffect()
 	computeDesc.SampleDesc.Quality = 0;
 	computeDesc.Width = windowWidth;
 
-	ThrowIfFailed(mDevice->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT), 
-		D3D12_HEAP_FLAG_NONE, &computeDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, 
+	ThrowIfFailed(mDevice->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+		D3D12_HEAP_FLAG_NONE, &computeDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr,
 		IID_PPV_ARGS(&mCoreCompute.mComputeBuffer)));
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc;
@@ -614,7 +669,7 @@ bool Engine::Core::EngineCoreDirectX::CreateSobelPostProgressingEffect()
 	srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 
-	CD3DX12_CPU_DESCRIPTOR_HANDLE handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
+	CD3DX12_CPU_DESCRIPTOR_HANDLE cpuHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
 		mCbvSrvHeap->GetCPUDescriptorHandleForHeapStart());
 	UINT objCbCount = mCoreResourceCount * mObjectConstBufferCount;
 	UINT passCbCount = mCoreResourceCount * mPassConstBufferCount;
@@ -622,8 +677,27 @@ bool Engine::Core::EngineCoreDirectX::CreateSobelPostProgressingEffect()
 	UINT shaderResCount = mShaderResourceCount;
 	UINT srvHeapIndex = objCbCount + passCbCount + matCbCount + shaderResCount;
 
-	handle.Offset(srvHeapIndex, mCbvSrvHeapIncSize);
-	mDevice->CreateShaderResourceView(mCoreCompute.mComputeBuffer.Get(), &srvDesc, handle);
+	cpuHandle.Offset(srvHeapIndex, mCbvSrvHeapIncSize);
+	mDevice->CreateShaderResourceView(mCoreCompute.mComputeBuffer.Get(), &srvDesc, cpuHandle);
+	mCoreCompute.mCpuSrv = cpuHandle;
+
+	D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc;
+	uavDesc.Format = mBackBufferFormat;
+	uavDesc.Texture2D.MipSlice = 0;
+	uavDesc.Texture2D.PlaneSlice = 0;
+	uavDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
+
+	cpuHandle.Offset(1, mCbvSrvHeapIncSize);
+	mDevice->CreateUnorderedAccessView(mCoreCompute.mComputeBuffer.Get(), nullptr, &uavDesc, cpuHandle);
+	mCoreCompute.mCpuUav = cpuHandle;
+
+	CD3DX12_GPU_DESCRIPTOR_HANDLE gpuHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(
+		mCbvSrvHeap->GetGPUDescriptorHandleForHeapStart());
+	gpuHandle.Offset(srvHeapIndex, mCbvSrvHeapIncSize);
+	mCoreCompute.mGpuSrv = gpuHandle;
+
+	gpuHandle.Offset(1, mCbvSrvHeapIncSize);
+	mCoreCompute.mGpuUav = gpuHandle;
 
 	return true;
 }
