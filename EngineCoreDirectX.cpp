@@ -88,7 +88,7 @@ bool Engine::Core::EngineCoreDirectX::Init()
 
 	D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc;
 	rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-	rtvHeapDesc.NumDescriptors = mBackBufferCount;
+	rtvHeapDesc.NumDescriptors = mBackBufferCount + mRenderTargetResourceCount;
 	rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 	rtvHeapDesc.NodeMask = 0;
 	ThrowIfFailed(mDevice->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&mRtvHeap)));
@@ -127,11 +127,13 @@ bool Engine::Core::EngineCoreDirectX::Init()
 	UINT matCbCount = mCoreResourceCount * mMaterialConstBufferCount;
 	UINT shaderResCount = mShaderResourceCount;
 	UINT computeResCount = mComputeResourceCount;
+	UINT rtResCount = mRenderTargetResourceCount;
 
 	mCbvSrvHeapIncSize = mDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	D3D12_DESCRIPTOR_HEAP_DESC cbvSrvHeapDesc;
 	cbvSrvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-	cbvSrvHeapDesc.NumDescriptors = objCbCount + passCbCount + matCbCount + shaderResCount + computeResCount;
+	cbvSrvHeapDesc.NumDescriptors = objCbCount + passCbCount + matCbCount + shaderResCount + computeResCount 
+		+ rtResCount;
 	cbvSrvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	cbvSrvHeapDesc.NodeMask = 0;
 	ThrowIfFailed(mDevice->CreateDescriptorHeap(&cbvSrvHeapDesc, IID_PPV_ARGS(&mCbvSrvHeap)));
@@ -626,14 +628,27 @@ bool Engine::Core::EngineCoreDirectX::CreateSobelPostProgressingEffect()
 	}
 	ThrowIfFailed(hr);
 
-	D3D12_COMPUTE_PIPELINE_STATE_DESC psoDesc;
-	psoDesc.CachedPSO.CachedBlobSizeInBytes = 0;
-	psoDesc.CachedPSO.pCachedBlob = nullptr;
-	psoDesc.CS = { cs->GetBufferPointer(), cs->GetBufferSize() };
-	psoDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
-	psoDesc.NodeMask = 0;
-	psoDesc.pRootSignature = mCoreCompute.mComputeSignature.Get();
-	ThrowIfFailed(mDevice->CreateComputePipelineState(&psoDesc, IID_PPV_ARGS(&mCoreCompute.mComputePipelineState)));
+	D3D12_COMPUTE_PIPELINE_STATE_DESC computePsoDesc;
+	computePsoDesc.CachedPSO.CachedBlobSizeInBytes = 0;
+	computePsoDesc.CachedPSO.pCachedBlob = nullptr;
+	computePsoDesc.CS = { cs->GetBufferPointer(), cs->GetBufferSize() };
+	computePsoDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
+	computePsoDesc.NodeMask = 0;
+	computePsoDesc.pRootSignature = mCoreCompute.mComputeSignature.Get();
+	ThrowIfFailed(mDevice->CreateComputePipelineState(&computePsoDesc, IID_PPV_ARGS(&mCoreCompute.mComputePipelineState)));
+
+	// render target
+	ThrowIfFailed(mDevice->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(),
+		IID_PPV_ARGS(&mCoreRenderTarget.mGraphicSignature)));
+
+	ID3DBlob *vs = nullptr;
+	ID3DBlob *ps = nullptr;
+	if(CreateShader(L"Composite.hlsl", &vs, &ps))
+	{
+		return false;
+	}
+
+	D3D12_COMPUTE_PIPELINE_STATE_DESC graphicPsoDesc;
 
 	return true;
 }
@@ -643,21 +658,21 @@ bool Engine::Core::EngineCoreDirectX::CreateSobelPostProgressingResourceAndView(
 	UINT windowWidth = gManagerDirectX->GetWindowWidth();
 	UINT windowHeight = gManagerDirectX->GetWindowHeight();
 
-	D3D12_RESOURCE_DESC computeDesc;
-	computeDesc.Alignment = 0;
-	computeDesc.DepthOrArraySize = 1;
-	computeDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-	computeDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
-	computeDesc.Format = mBackBufferFormat;
-	computeDesc.Height = windowHeight;
-	computeDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-	computeDesc.MipLevels = 1;
-	computeDesc.SampleDesc.Count = 1;
-	computeDesc.SampleDesc.Quality = 0;
-	computeDesc.Width = windowWidth;
+	D3D12_RESOURCE_DESC resDesc;
+	resDesc.Alignment = 0;
+	resDesc.DepthOrArraySize = 1;
+	resDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+	resDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
+	resDesc.Format = mBackBufferFormat;
+	resDesc.Height = windowHeight;
+	resDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+	resDesc.MipLevels = 1;
+	resDesc.SampleDesc.Count = 1;
+	resDesc.SampleDesc.Quality = 0;
+	resDesc.Width = windowWidth;
 
 	ThrowIfFailed(mDevice->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
-		D3D12_HEAP_FLAG_NONE, &computeDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr,
+		D3D12_HEAP_FLAG_NONE, &resDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr,
 		IID_PPV_ARGS(&mCoreCompute.mComputeBuffer)));
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc;
@@ -669,7 +684,7 @@ bool Engine::Core::EngineCoreDirectX::CreateSobelPostProgressingResourceAndView(
 	srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 
-	CD3DX12_CPU_DESCRIPTOR_HANDLE cpuHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
+	CD3DX12_CPU_DESCRIPTOR_HANDLE cpuSrvHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
 		mCbvSrvHeap->GetCPUDescriptorHandleForHeapStart());
 	UINT objCbCount = mCoreResourceCount * mObjectConstBufferCount;
 	UINT passCbCount = mCoreResourceCount * mPassConstBufferCount;
@@ -677,9 +692,9 @@ bool Engine::Core::EngineCoreDirectX::CreateSobelPostProgressingResourceAndView(
 	UINT shaderResCount = mShaderResourceCount;
 	UINT srvHeapIndex = objCbCount + passCbCount + matCbCount + shaderResCount;
 
-	cpuHandle.Offset(srvHeapIndex, mCbvSrvHeapIncSize);
-	mDevice->CreateShaderResourceView(mCoreCompute.mComputeBuffer.Get(), &srvDesc, cpuHandle);
-	mCoreCompute.mCpuSrv = cpuHandle;
+	cpuSrvHandle.Offset(srvHeapIndex, mCbvSrvHeapIncSize);
+	mDevice->CreateShaderResourceView(mCoreCompute.mComputeBuffer.Get(), &srvDesc, cpuSrvHandle);
+	mCoreCompute.mCpuSrv = cpuSrvHandle;
 
 	D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc;
 	uavDesc.Format = mBackBufferFormat;
@@ -687,9 +702,9 @@ bool Engine::Core::EngineCoreDirectX::CreateSobelPostProgressingResourceAndView(
 	uavDesc.Texture2D.PlaneSlice = 0;
 	uavDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
 
-	cpuHandle.Offset(1, mCbvSrvHeapIncSize);
-	mDevice->CreateUnorderedAccessView(mCoreCompute.mComputeBuffer.Get(), nullptr, &uavDesc, cpuHandle);
-	mCoreCompute.mCpuUav = cpuHandle;
+	cpuSrvHandle.Offset(1, mCbvSrvHeapIncSize);
+	mDevice->CreateUnorderedAccessView(mCoreCompute.mComputeBuffer.Get(), nullptr, &uavDesc, cpuSrvHandle);
+	mCoreCompute.mCpuUav = cpuSrvHandle;
 
 	CD3DX12_GPU_DESCRIPTOR_HANDLE gpuHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(
 		mCbvSrvHeap->GetGPUDescriptorHandleForHeapStart());
@@ -699,6 +714,30 @@ bool Engine::Core::EngineCoreDirectX::CreateSobelPostProgressingResourceAndView(
 	gpuHandle.Offset(1, mCbvSrvHeapIncSize);
 	mCoreCompute.mGpuUav = gpuHandle;
 
+	// render target
+	resDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
+	ThrowIfFailed(mDevice->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+		D3D12_HEAP_FLAG_NONE, &resDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr,
+		IID_PPV_ARGS(&mCoreRenderTarget.mRenderTargetBuffer)));
+
+	cpuSrvHandle.Offset(1, mCbvSrvHeapIncSize);
+	mDevice->CreateShaderResourceView(mCoreRenderTarget.mRenderTargetBuffer.Get(), &srvDesc, cpuSrvHandle);
+	mCoreRenderTarget.mCpuSrv = cpuSrvHandle;
+
+	gpuHandle.Offset(1, mCbvSrvHeapIncSize);
+	mCoreRenderTarget.mGpuSrv = gpuHandle;
+
+	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc;
+	rtvDesc.Format = mBackBufferFormat;
+	rtvDesc.Texture2D.MipSlice = 0;
+	rtvDesc.Texture2D.PlaneSlice = 0;
+	rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
+
+	CD3DX12_CPU_DESCRIPTOR_HANDLE cpuRtvHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
+		mRtvHeap->GetCPUDescriptorHandleForHeapStart());
+	cpuRtvHandle.Offset(mBackBufferCount, mRtvHeapIncSize);
+	mDevice->CreateRenderTargetView(mCoreRenderTarget.mRenderTargetBuffer.Get(), &rtvDesc, cpuRtvHandle);
+	mCoreRenderTarget.mCpuRtv = cpuRtvHandle;
 	return true;
 }
 
@@ -881,10 +920,10 @@ void Engine::Core::EngineCoreDirectX::DrawObject(EngineObjectDirectX * object, E
 	UINT passCbCount = mCoreResourceCount * mPassConstBufferCount;
 	UINT matCbCount = mCoreResourceCount * mMaterialConstBufferCount;
 	UINT srvHeapIndex = objCbCount + passCbCount + matCbCount + object->mTexture->mID;
-	CD3DX12_GPU_DESCRIPTOR_HANDLE srvHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(
+	CD3DX12_GPU_DESCRIPTOR_HANDLE cpuSrvHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(
 		mCbvSrvHeap->GetGPUDescriptorHandleForHeapStart());
-	srvHandle.Offset(srvHeapIndex, mCbvSrvHeapIncSize);
-	mCommandList->SetGraphicsRootDescriptorTable(3, srvHandle);
+	cpuSrvHandle.Offset(srvHeapIndex, mCbvSrvHeapIncSize);
+	mCommandList->SetGraphicsRootDescriptorTable(3, cpuSrvHandle);
 
 	mCommandList->SetPipelineState(object->mPipelineState.Get());
 

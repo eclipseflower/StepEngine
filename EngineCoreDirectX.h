@@ -42,6 +42,15 @@ namespace Engine
 			ComPtr<ID3D12PipelineState> mComputePipelineState = nullptr;
 		};
 
+		struct EngineCoreRenderTarget
+		{
+			ComPtr<ID3D12Resource> mRenderTargetBuffer = nullptr;
+			CD3DX12_CPU_DESCRIPTOR_HANDLE mCpuSrv;
+			CD3DX12_GPU_DESCRIPTOR_HANDLE mGpuSrv;
+			CD3DX12_CPU_DESCRIPTOR_HANDLE mCpuRtv;
+			ComPtr<ID3D12RootSignature> mGraphicSignature = nullptr;
+		};
+
 		class EngineCoreDirectX
 		{
 		public:
@@ -106,6 +115,7 @@ namespace Engine
 
 			UINT mShaderResourceCount = 16;
 			UINT mComputeResourceCount = 2; /* one for srv, one for uav */
+			UINT mRenderTargetResourceCount = 1;
 
 			vector<D3D12_STATIC_SAMPLER_DESC> mStaticSamplers;
 			ComPtr<ID3D12RootSignature> mRootSignature = nullptr;
@@ -148,6 +158,7 @@ namespace Engine
 			D3D12_CULL_MODE mCullMode = D3D12_CULL_MODE_NONE;
 
 			EngineCoreCompute mCoreCompute;
+			EngineCoreRenderTarget mCoreRenderTarget;
 		};
 	}
 }
