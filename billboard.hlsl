@@ -42,7 +42,7 @@ struct GeoOut
 	float4 PosH    : SV_POSITION;
     float3 PosW    : POSITION;
 	float3 NormalW : NORMAL;
-	float3 TexC    : TEXCOORD;
+	float2 TexC    : TEXCOORD;
     uint   PrimID  : SV_PrimitiveID;
 };
 

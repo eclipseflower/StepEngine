@@ -33,6 +33,7 @@ namespace Engine
 
 		struct EngineCoreCompute
 		{
+			bool mEnable = false;
 			ComPtr<ID3D12Resource> mComputeBuffer = nullptr;
 			CD3DX12_CPU_DESCRIPTOR_HANDLE mCpuSrv;
 			CD3DX12_CPU_DESCRIPTOR_HANDLE mCpuUav;
@@ -44,11 +45,13 @@ namespace Engine
 
 		struct EngineCoreRenderTarget
 		{
+			bool mEnable = false;
 			ComPtr<ID3D12Resource> mRenderTargetBuffer = nullptr;
 			CD3DX12_CPU_DESCRIPTOR_HANDLE mCpuSrv;
 			CD3DX12_GPU_DESCRIPTOR_HANDLE mGpuSrv;
 			CD3DX12_CPU_DESCRIPTOR_HANDLE mCpuRtv;
 			ComPtr<ID3D12RootSignature> mGraphicSignature = nullptr;
+			ComPtr<ID3D12PipelineState> mGraphicPipelineState = nullptr;
 		};
 
 		class EngineCoreDirectX
@@ -74,6 +77,7 @@ namespace Engine
 			void BeginDraw(EngineCameraDirectX * camera);
 			void DrawObject(EngineObjectDirectX * object, EngineCameraDirectX * camera);
 			void EndDraw();
+			void PostDraw();
 
 		public:
 			bool mEnableMsaa = false;

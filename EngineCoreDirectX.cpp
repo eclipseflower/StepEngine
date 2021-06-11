@@ -587,6 +587,8 @@ bool Engine::Core::EngineCoreDirectX::CreatePipelineStateObject(RenderType rende
 
 bool Engine::Core::EngineCoreDirectX::CreateSobelPostProgressingEffect()
 {
+	mCoreCompute.mEnable = true;
+	mCoreRenderTarget.mEnable = true;
 	CreateSobelPostProgressingResourceAndView();
 
 	CD3DX12_DESCRIPTOR_RANGE cbvSrvTable[3];
@@ -635,7 +637,8 @@ bool Engine::Core::EngineCoreDirectX::CreateSobelPostProgressingEffect()
 	computePsoDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 	computePsoDesc.NodeMask = 0;
 	computePsoDesc.pRootSignature = mCoreCompute.mComputeSignature.Get();
-	ThrowIfFailed(mDevice->CreateComputePipelineState(&computePsoDesc, IID_PPV_ARGS(&mCoreCompute.mComputePipelineState)));
+	ThrowIfFailed(mDevice->CreateComputePipelineState(&computePsoDesc, 
+		IID_PPV_ARGS(&mCoreCompute.mComputePipelineState)));
 
 	// render target
 	ThrowIfFailed(mDevice->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(),
@@ -648,7 +651,32 @@ bool Engine::Core::EngineCoreDirectX::CreateSobelPostProgressingEffect()
 		return false;
 	}
 
-	D3D12_COMPUTE_PIPELINE_STATE_DESC graphicPsoDesc;
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicPsoDesc;
+	ZeroMemory(&graphicPsoDesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
+	graphicPsoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
+	CD3DX12_DEPTH_STENCIL_DESC dsDesc = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
+	dsDesc.DepthEnable = false;
+	dsDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
+	dsDesc.DepthFunc = D3D12_COMPARISON_FUNC_ALWAYS;
+	graphicPsoDesc.DepthStencilState = dsDesc;
+	graphicPsoDesc.DSVFormat = mDepthStencilBufferFormat;
+	graphicPsoDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
+	graphicPsoDesc.IBStripCutValue = D3D12_INDEX_BUFFER_STRIP_CUT_VALUE_DISABLED;
+	graphicPsoDesc.NodeMask = 0;
+	graphicPsoDesc.NumRenderTargets = 1;
+	graphicPsoDesc.pRootSignature = mRootSignature.Get();
+	CD3DX12_RASTERIZER_DESC rastDesc = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+	rastDesc.FillMode = mFillMode;
+	rastDesc.CullMode = mCullMode;
+	graphicPsoDesc.RasterizerState = rastDesc;
+	graphicPsoDesc.RTVFormats[0] = mBackBufferFormat;
+	graphicPsoDesc.SampleDesc.Count = mEnableMsaa ? mMsaaCount : 1;
+	graphicPsoDesc.SampleDesc.Quality = mEnableMsaa ? mMsaaQuality - 1 : 0;
+	graphicPsoDesc.SampleMask = UINT_MAX;
+	graphicPsoDesc.PS = { ps->GetBufferPointer(), ps->GetBufferSize() };
+	graphicPsoDesc.VS = { vs->GetBufferPointer(), vs->GetBufferSize() };
+	ThrowIfFailed(mDevice->CreateGraphicsPipelineState(&graphicPsoDesc,
+		IID_PPV_ARGS(&mCoreRenderTarget.mGraphicPipelineState)));
 
 	return true;
 }
@@ -817,24 +845,38 @@ void Engine::Core::EngineCoreDirectX::BeginDraw(EngineCameraDirectX * camera)
 	ThrowIfFailed(res.mCommandAlloc->Reset());
 	ThrowIfFailed(mCommandList->Reset(res.mCommandAlloc.Get(), nullptr));
 
+	CD3DX12_CPU_DESCRIPTOR_HANDLE dsv = CD3DX12_CPU_DESCRIPTOR_HANDLE(
+		mDsvHeap->GetCPUDescriptorHandleForHeapStart());
+	mCommandList->ClearDepthStencilView(dsv, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0,
+		nullptr);
+
 	// D3D12_RESOURCE_STATE_COMMON = D3D12_RESOURCE_STATE_PRESENT = 0
 	/*
 		The resource is used as a render target.
 		A subresource must be in this state when it is rendered to or when it is cleared with
 		ID3D12GraphicsCommandList::ClearRenderTargetView.
 	*/
-	mCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(mBackBuffer[mCurBackBuffer].Get(),
-		D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
+	if (mCoreRenderTarget.mEnable)
+	{
+		mCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(
+			mCoreRenderTarget.mRenderTargetBuffer.Get(), D3D12_RESOURCE_STATE_GENERIC_READ, 
+			D3D12_RESOURCE_STATE_RENDER_TARGET));
+		CD3DX12_CPU_DESCRIPTOR_HANDLE rtv = mCoreRenderTarget.mCpuRtv;
+		mCommandList->ClearRenderTargetView(rtv, LightSteelBlue, 0, nullptr);
+		mCommandList->OMSetRenderTargets(1, &rtv, true, &dsv);
+	}
+	else
+	{
+		mCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(mBackBuffer[mCurBackBuffer].Get(),
+			D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
+		CD3DX12_CPU_DESCRIPTOR_HANDLE rtv = CD3DX12_CPU_DESCRIPTOR_HANDLE(
+			mRtvHeap->GetCPUDescriptorHandleForHeapStart(), mCurBackBuffer, mRtvHeapIncSize);
+		mCommandList->ClearRenderTargetView(rtv, LightSteelBlue, 0, nullptr);
+		mCommandList->OMSetRenderTargets(1, &rtv, true, &dsv);
+	}
+
 	mCommandList->RSSetScissorRects(1, &mScissorRect);
 	mCommandList->RSSetViewports(1, &mViewport);
-	CD3DX12_CPU_DESCRIPTOR_HANDLE dsv = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-		mDsvHeap->GetCPUDescriptorHandleForHeapStart());
-	mCommandList->ClearDepthStencilView(dsv, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0,
-		nullptr);
-	CD3DX12_CPU_DESCRIPTOR_HANDLE rtv = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-		mRtvHeap->GetCPUDescriptorHandleForHeapStart(), mCurBackBuffer, mRtvHeapIncSize);
-	mCommandList->ClearRenderTargetView(rtv, LightSteelBlue, 0, nullptr);
-	mCommandList->OMSetRenderTargets(1, &rtv, true, &dsv);
 
 	// only set descriptor heap once
 	// https://stackoverflow.com/questions/55440621/how-should-setdescriptorheaps-be-used
@@ -957,8 +999,19 @@ void Engine::Core::EngineCoreDirectX::EndDraw()
 		If IDXGISwapChain::Present (or IDXGISwapChain1::Present1) is called on a resource that
 		is not currently in this state, a debug layer warning is emitted.
 	*/
-	mCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(mBackBuffer[mCurBackBuffer].Get(),
-		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
+	if (mCoreRenderTarget.mEnable)
+	{
+		mCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(
+			mCoreRenderTarget.mRenderTargetBuffer.Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, 
+			D3D12_RESOURCE_STATE_GENERIC_READ));
+		PostDraw();
+	}
+	else
+	{
+		mCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(mBackBuffer[mCurBackBuffer].Get(),
+			D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
+	}
+
 	ThrowIfFailed(mCommandList->Close());
 
 	ID3D12CommandList *cmdList[] = { mCommandList.Get() };
@@ -972,4 +1025,47 @@ void Engine::Core::EngineCoreDirectX::EndDraw()
 	EngineCoreResource res = mCoreResource[mCurCoreResourceIndex];
 	res.mCurrentFence = mCurrentFence;
 	mCurCoreResourceIndex = (mCurCoreResourceIndex + 1) % mCoreResourceCount;
+}
+
+void Engine::Core::EngineCoreDirectX::PostDraw()
+{
+	mCommandList->SetComputeRootSignature(mCoreCompute.mComputeSignature.Get());
+	mCommandList->SetComputeRootDescriptorTable(0, mCoreRenderTarget.mGpuSrv);
+	mCommandList->SetComputeRootDescriptorTable(2, mCoreCompute.mGpuUav);
+	mCommandList->SetPipelineState(mCoreCompute.mComputePipelineState.Get());
+
+	mCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(mCoreCompute.mComputeBuffer.Get(),
+		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_UNORDERED_ACCESS));
+
+	UINT windowWidth = gManagerDirectX->GetWindowWidth();
+	UINT windowHeight = gManagerDirectX->GetWindowHeight();
+
+	UINT numGroupsX = (UINT)ceilf(windowWidth / 16.0f);
+	UINT numGroupsY = (UINT)ceilf(windowHeight / 16.0f);
+	mCommandList->Dispatch(numGroupsX, numGroupsY, 1);
+
+	mCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(mCoreCompute.mComputeBuffer.Get(),
+		D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_GENERIC_READ));
+
+
+	mCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(mBackBuffer[mCurBackBuffer].Get(),
+		D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
+	CD3DX12_CPU_DESCRIPTOR_HANDLE rtv = CD3DX12_CPU_DESCRIPTOR_HANDLE(
+		mRtvHeap->GetCPUDescriptorHandleForHeapStart(), mCurBackBuffer, mRtvHeapIncSize);
+	CD3DX12_CPU_DESCRIPTOR_HANDLE dsv = CD3DX12_CPU_DESCRIPTOR_HANDLE(
+		mDsvHeap->GetCPUDescriptorHandleForHeapStart());
+	mCommandList->OMSetRenderTargets(1, &rtv, true, &dsv);
+
+	mCommandList->SetGraphicsRootSignature(mCoreRenderTarget.mGraphicSignature.Get());
+	mCommandList->SetGraphicsRootDescriptorTable(0, mCoreRenderTarget.mGpuSrv);
+	mCommandList->SetGraphicsRootDescriptorTable(1, mCoreCompute.mGpuSrv);
+	mCommandList->SetPipelineState(mCoreRenderTarget.mGraphicPipelineState.Get());
+
+	mCommandList->IASetVertexBuffers(0, 1, nullptr);
+	mCommandList->IASetIndexBuffer(nullptr);
+	mCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	mCommandList->DrawInstanced(6, 1, 0, 0);
+
+	mCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(mBackBuffer[mCurBackBuffer].Get(),
+		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
 }
