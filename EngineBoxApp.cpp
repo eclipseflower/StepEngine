@@ -26,7 +26,7 @@ int EngineBoxApp::Run(HINSTANCE hInstance)
 	}
 
 	EngineShaderDirectX *shader;
-	if (!manager.CreateShader(L"billboard.hlsl", &shader, true))
+	if (!manager.CreateShader(L"color.hlsl", &shader, false))
 	{
 		return -1;
 	}
@@ -42,18 +42,18 @@ int EngineBoxApp::Run(HINSTANCE hInstance)
 	material->shininess = 179.2f;
 
 	EngineTextureDirectX *texture;
-	if (!manager.CreateTexture(L"treeArray2.dds", TextureType::T2DArray, &texture))
+	if (!manager.CreateTexture(L"bricks.dds", TextureType::T2D, &texture))
 	{
 		return -1;
 	}
 
 	EngineObjectDirectX *object;
-	if (!manager.CreateBillBoard(0, 0, 0, 1, 1, &object))
+	if (!manager.CreateBoxObject(&object, 2, 2, 2, 0, 0, 0))
 	{
 		return -1;
 	}
 
-	object->SetShader(RenderType::BillBoard, shader);
+	object->SetShader(RenderType::Opaque, shader);
 	object->SetMaterial(material);
 	object->SetTexture(texture);
 

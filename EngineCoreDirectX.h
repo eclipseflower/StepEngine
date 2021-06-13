@@ -62,7 +62,7 @@ namespace Engine
 			bool Init();
 			bool ResizeBuffer();
 			bool CreateDefaultBuffer(void *data, UINT byteWidth, ID3D12Resource **bufferGPU, ID3D12Resource **uploadBuffer);
-			bool CreateShader(wstring srcFile, ID3DBlob **vs, ID3DBlob **ps, ID3DBlob **gs = nullptr);
+			bool CreateShader(wstring srcFile, ID3DBlob **vs, ID3DBlob **ps, ID3DBlob **gs, bool hasGS);
 			bool CreateTexture(wstring srcFile, UINT texId, TextureType textureType, ComPtr<ID3D12Resource> &res, ComPtr<ID3D12Resource> &uploadHeap);
 			bool CreatePipelineStateObject(RenderType renderType, ID3DBlob *vs, ID3DBlob *ps, ID3DBlob * gs, ID3D12PipelineState **pipelineStateObject);
 			bool CreateSobelPostProgressingEffect();

@@ -372,6 +372,10 @@ bool Engine::Core::EngineCoreDirectX::ResizeBuffer()
 	mScissorRect.top = 0;
 	mScissorRect.bottom = windowHeight;
 
+	if (mCoreRenderTarget.mEnable)
+	{
+		CreateSobelPostProgressingResourceAndView();
+	}
 	return true;
 }
 
@@ -421,7 +425,7 @@ bool Engine::Core::EngineCoreDirectX::CreateDefaultBuffer(void *data, UINT byteW
 	return true;
 }
 
-bool Engine::Core::EngineCoreDirectX::CreateShader(wstring srcFile, ID3DBlob **vs, ID3DBlob **ps, ID3DBlob **gs)
+bool Engine::Core::EngineCoreDirectX::CreateShader(wstring srcFile, ID3DBlob **vs, ID3DBlob **ps, ID3DBlob **gs, bool hasGS)
 {
 	UINT compileFlags = 0;
 #if defined(DEBUG) || defined(_DEBUG)  
@@ -446,7 +450,7 @@ bool Engine::Core::EngineCoreDirectX::CreateShader(wstring srcFile, ID3DBlob **v
 	}
 	ThrowIfFailed(hr);
 
-	if (gs != nullptr)
+	if (hasGS)
 	{
 		error = nullptr;
 		hr = D3DCompileFromFile(srcFile.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, "GS", "gs_5_0",
@@ -571,6 +575,8 @@ bool Engine::Core::EngineCoreDirectX::CreatePipelineStateObject(RenderType rende
 		blendDesc.SrcBlendAlpha = D3D12_BLEND_ONE;
 
 		psoDesc.BlendState.RenderTarget[0] = blendDesc;
+
+	case Opaque:
 		psoDesc.InputLayout = { mInputLayout.data(), mInputLayout.size() };
 		psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 		break;
@@ -618,11 +624,9 @@ bool Engine::Core::EngineCoreDirectX::CreateSobelPostProgressingEffect()
 #if defined(DEBUG) || defined(_DEBUG)  
 	compileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
 #endif
-	ID3DBlob *error = nullptr;
 	ID3DBlob *cs = nullptr;
-	HRESULT hr;
 	wstring srcFile = L"Sobel.hlsl";
-	hr = D3DCompileFromFile(srcFile.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, "CS", "cs_5_0",
+	hr = D3DCompileFromFile(srcFile.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, "SobelCS", "cs_5_0",
 		compileFlags, 0, &cs, &error);
 	if (error != nullptr)
 	{
@@ -646,7 +650,8 @@ bool Engine::Core::EngineCoreDirectX::CreateSobelPostProgressingEffect()
 
 	ID3DBlob *vs = nullptr;
 	ID3DBlob *ps = nullptr;
-	if(CreateShader(L"Composite.hlsl", &vs, &ps))
+	ID3DBlob *gs = nullptr;
+	if(!CreateShader(L"Composite.hlsl", &vs, &ps, &gs, false))
 	{
 		return false;
 	}
@@ -664,7 +669,7 @@ bool Engine::Core::EngineCoreDirectX::CreateSobelPostProgressingEffect()
 	graphicPsoDesc.IBStripCutValue = D3D12_INDEX_BUFFER_STRIP_CUT_VALUE_DISABLED;
 	graphicPsoDesc.NodeMask = 0;
 	graphicPsoDesc.NumRenderTargets = 1;
-	graphicPsoDesc.pRootSignature = mRootSignature.Get();
+	graphicPsoDesc.pRootSignature = mCoreRenderTarget.mGraphicSignature.Get();
 	CD3DX12_RASTERIZER_DESC rastDesc = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
 	rastDesc.FillMode = mFillMode;
 	rastDesc.CullMode = mCullMode;
@@ -675,6 +680,8 @@ bool Engine::Core::EngineCoreDirectX::CreateSobelPostProgressingEffect()
 	graphicPsoDesc.SampleMask = UINT_MAX;
 	graphicPsoDesc.PS = { ps->GetBufferPointer(), ps->GetBufferSize() };
 	graphicPsoDesc.VS = { vs->GetBufferPointer(), vs->GetBufferSize() };
+	graphicPsoDesc.InputLayout = { mInputLayout.data(), mInputLayout.size() };
+	graphicPsoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 	ThrowIfFailed(mDevice->CreateGraphicsPipelineState(&graphicPsoDesc,
 		IID_PPV_ARGS(&mCoreRenderTarget.mGraphicPipelineState)));
 
