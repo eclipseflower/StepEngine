@@ -8,6 +8,8 @@ namespace Step
     {
         return g_bRequestingExit;
     }
+
+    void RequestEngineExit();
 }
 
 #endif // _CORE_GLOBALS_H_

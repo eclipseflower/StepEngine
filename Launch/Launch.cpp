@@ -1,4 +1,5 @@
-#include "CoreGlobals.h"
+#include "Core/CoreGlobals.h"
+#include "EngineLoop.h"
 
 namespace Step
 {
@@ -42,5 +43,7 @@ namespace Step
 		}
 
         EngineExit();
+
+        return error;
     }
 }
