@@ -1,8 +1,16 @@
 #include "MallocAnsi.h"
-#include <malloc.h>
+#include "Core/Templates/AlignmentTemplates.h"
+#include <cstdlib>
+#include <cstring>
+#include <algorithm>
 
 namespace Step
 {
+    static size_t AnsiGetAllocationSize(void* pOriginal)
+    {
+        return *(reinterpret_cast<size_t*>(reinterpret_cast<uint8_t*>(pOriginal) - sizeof(void *) - sizeof(size_t)));
+    }
+
     void* AnsiMalloc(size_t count, uint32_t alignment)
     {
         void* ptr = malloc(count + alignment + sizeof(void *) + sizeof(size_t));
@@ -24,7 +32,7 @@ namespace Step
         {
             pResult = AnsiMalloc(count, alignment);
             size_t oldSize = AnsiGetAllocationSize(pOriginal);
-            memcpy(pResult, pOriginal, min(count, oldSize));
+            memcpy(pResult, pOriginal, std::min(count, oldSize));
             AnsiFree(pOriginal);
         }
         else if(pOriginal == nullptr)
@@ -49,13 +57,13 @@ namespace Step
 
     void* MallocAnsi::Malloc(size_t count, uint32_t alignment)
     {
-        alignment = max(count >= 16 ? SIXTEEN_ALIGNMENT : EIGHT_ALIGNMENT, alignment);
+        alignment = std::max(count >= 16 ? SIXTEEN_ALIGNMENT : EIGHT_ALIGNMENT, alignment);
         return AnsiMalloc(count, alignment);
     }
 
     void* MallocAnsi::Realloc(void* pOriginal, size_t count, uint32_t alignment)
     {
-        alignment = max(count >= 16 ? SIXTEEN_ALIGNMENT : EIGHT_ALIGNMENT, alignment);
+        alignment = std::max(count >= 16 ? SIXTEEN_ALIGNMENT : EIGHT_ALIGNMENT, alignment);
         return AnsiRealloc(pOriginal, count, alignment);
     }
 

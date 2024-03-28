@@ -1,0 +1,10 @@
+^E:\LEARNING\STEPENGINE\STEPENGINE\BUILD\CMAKEFILES\3E67BED7655CE8EF820A821BA0E7FFD1\GENERATE.STAMP.RULE
+setlocal
+D:\CMake\bin\cmake.exe -SE:/Learning/StepEngine/StepEngine -BE:/Learning/StepEngine/StepEngine/Build --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file E:/Learning/StepEngine/StepEngine/Build/StepEngine.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

@@ -1,0 +1,87 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="E:\Learning\StepEngine\StepEngine\Build\CMakeFiles\3.24.2\CompilerIdCXX\CMakeCXXCompilerId.cpp">
+      <Filter>StepEngine\Build\CMakeFiles\3.24.2\CompilerIdCXX</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Learning\StepEngine\StepEngine\Core\CoreGlobals.cpp">
+      <Filter>StepEngine\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Learning\StepEngine\StepEngine\Core\HAL\MallocAnsi.cpp">
+      <Filter>StepEngine\Core\HAL</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Learning\StepEngine\StepEngine\Core\Windows\WindowsPlatform.cpp">
+      <Filter>StepEngine\Core\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Learning\StepEngine\StepEngine\Launch\Launch.cpp">
+      <Filter>StepEngine\Launch</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Learning\StepEngine\StepEngine\Launch\Windows\LaunchWindows.cpp">
+      <Filter>StepEngine\Launch\Windows</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="E:\Learning\StepEngine\StepEngine\Core\CoreGlobals.h">
+      <Filter>StepEngine\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Learning\StepEngine\StepEngine\Core\HAL\MallocAnsi.h">
+      <Filter>StepEngine\Core\HAL</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Learning\StepEngine\StepEngine\Core\HAL\MemoryBase.h">
+      <Filter>StepEngine\Core\HAL</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Learning\StepEngine\StepEngine\Core\Templates\AlignmentTemplates.h">
+      <Filter>StepEngine\Core\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Learning\StepEngine\StepEngine\Core\Windows\WindowsPlatform.h">
+      <Filter>StepEngine\Core\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Learning\StepEngine\StepEngine\Engine\StepEngine.h">
+      <Filter>StepEngine\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Learning\StepEngine\StepEngine\Launch\EngineLoop.h">
+      <Filter>StepEngine\Launch</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="E:\Learning\StepEngine\StepEngine\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="StepEngine">
+      <UniqueIdentifier>{7DDCC204-A036-33FB-8B91-0CC27D2E3DDF}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="StepEngine\Build">
+      <UniqueIdentifier>{E30D9855-B9FC-369B-A0BC-0688BC4BC023}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="StepEngine\Build\CMakeFiles">
+      <UniqueIdentifier>{AAFF2ED3-3CBE-3E1B-8287-7899981FC9E6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="StepEngine\Build\CMakeFiles\3.24.2">
+      <UniqueIdentifier>{021855CF-EDFE-34B1-B08D-CF3E2A9F576E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="StepEngine\Build\CMakeFiles\3.24.2\CompilerIdCXX">
+      <UniqueIdentifier>{C1586112-994B-3C21-ABB9-AF3DE7BD62E2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="StepEngine\Core">
+      <UniqueIdentifier>{1FDF34FC-6862-35DA-AA86-46D08DBE1052}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="StepEngine\Core\HAL">
+      <UniqueIdentifier>{BB2BDB34-2AA7-3B73-9D1E-A4FE2A1310CE}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="StepEngine\Core\Templates">
+      <UniqueIdentifier>{A97BD1D2-D30D-329D-B83F-E794B4A033AF}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="StepEngine\Core\Windows">
+      <UniqueIdentifier>{2030AD14-48A5-3BD2-B12E-D40EDEEDFB5C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="StepEngine\Engine">
+      <UniqueIdentifier>{273C5AD6-70DC-3F6E-A030-B437786DD7F1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="StepEngine\Launch">
+      <UniqueIdentifier>{56437276-ABE9-3EE2-9B5F-4291E2BD6752}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="StepEngine\Launch\Windows">
+      <UniqueIdentifier>{5A1C91C9-811D-31A1-B772-21D0391BA27F}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
