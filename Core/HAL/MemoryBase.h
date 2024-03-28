@@ -2,8 +2,9 @@
 
 namespace Step
 {
-    static constexpr uint8_t DEFAULT_ALIGNMENT = 0;
-    static constexpr uint8_t MIN_ALIGNMENT = 8;
+    static constexpr uint32_t DEFAULT_ALIGNMENT = 0;
+    static constexpr uint32_t EIGHT_ALIGNMENT = 8;
+    static constexpr uint32_t SIXTEEN_ALIGNMENT = 16;
 
     class MemoryMalloc
     {
