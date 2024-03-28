@@ -19,7 +19,32 @@ namespace Step
 
     void* AnsiRealloc(void* pOriginal, size_t count, uint32_t alignment)
     {
+        void* pResult = nullptr;
+        if(pOriginal && count > 0)
+        {
+            pResult = AnsiMalloc(count, alignment);
+            size_t oldSize = AnsiGetAllocationSize(pOriginal);
+            memcpy(pResult, pOriginal, min(count, oldSize));
+            AnsiFree(pOriginal);
+        }
+        else if(pOriginal == nullptr)
+        {
+            pResult = AnsiMalloc(count, alignment);
+        }
+        else
+        {
+            AnsiFree(pOriginal);
+        }
 
+        return pResult;
+    }
+
+    void AnsiFree(void* ptr)
+    {
+        if(ptr)
+        {
+            free(*(reinterpret_cast<void **>(reinterpret_cast<uint8_t*>(ptr) - sizeof(void *))));
+        }
     }
 
     void* MallocAnsi::Malloc(size_t count, uint32_t alignment)
@@ -36,6 +61,6 @@ namespace Step
 
     void MallocAnsi::Free(void* pOriginal)
     {
-        free(pOriginal);
+        AnsiFree(pOriginal);
     }
 }

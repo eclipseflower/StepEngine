@@ -4,6 +4,7 @@ namespace Step
 {
     void* AnsiMalloc(size_t count, uint32_t alignment);
     void* AnsiRealloc(void* pOriginal, size_t count, uint32_t alignment);
+    void AnsiFree(void* ptr);
 
     class MallocAnsi final : public MemoryMalloc
     {
