@@ -57,13 +57,13 @@ namespace Step
 
     void* MallocAnsi::Malloc(size_t count, uint32_t alignment)
     {
-        alignment = std::max(count >= 16 ? SIXTEEN_ALIGNMENT : EIGHT_ALIGNMENT, alignment);
+        alignment = std::max(count >= 16 ? ALIGNMENT_16 : ALIGNMENT_8, alignment);
         return AnsiMalloc(count, alignment);
     }
 
     void* MallocAnsi::Realloc(void* pOriginal, size_t count, uint32_t alignment)
     {
-        alignment = std::max(count >= 16 ? SIXTEEN_ALIGNMENT : EIGHT_ALIGNMENT, alignment);
+        alignment = std::max(count >= 16 ? ALIGNMENT_16 : ALIGNMENT_8, alignment);
         return AnsiRealloc(pOriginal, count, alignment);
     }
 
