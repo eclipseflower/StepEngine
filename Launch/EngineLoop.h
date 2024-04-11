@@ -10,7 +10,7 @@ namespace Step
     public:
         virtual ~EngineLoop() {}
         int PreInit();
-        virtual int Init() { return 0; }
+        virtual int Init();
         virtual void Tick() {}
         void Exit() {}
     };

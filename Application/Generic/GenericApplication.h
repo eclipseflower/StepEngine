@@ -5,6 +5,8 @@ namespace Step
 {
     class GenericApplication
     {
+    public:
+        virtual void InitializeWindow();
     };
 }
 

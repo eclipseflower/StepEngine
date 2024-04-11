@@ -12,11 +12,14 @@ namespace Step
         static GenericApplication* CreateApplication();
         static WindowsApplication* CreateWindowsApplication(const HINSTANCE hInstance);
 
+        virtual void InitializeWindow() override;
+
     protected:
         static LRESULT CALLBACK AppWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
         WindowsApplication(const HINSTANCE hInstance);
         bool RegisterApplicationClass(const HINSTANCE hInstance);
+        int ProcessMessage(HWND hWnd, uint32_t msg, WPARAM wParam, LPARAM lParam);
     };
 }
 

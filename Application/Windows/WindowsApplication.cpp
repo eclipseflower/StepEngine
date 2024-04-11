@@ -1,4 +1,6 @@
 #include "WindowsApplication.h"
+#include "WindowsWindow.h"
+#include "Core/CoreGlobals.h"
 
 namespace Step
 {
@@ -15,9 +17,14 @@ namespace Step
         return g_pWindowsApplication;
     }
 
-    LRESULT CALLBACK WindowsApplication::AppWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+    void WindowsApplication::InitializeWindow()
     {
 
+    }
+
+    LRESULT CALLBACK WindowsApplication::AppWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+    {
+        return g_pWindowsApplication->ProcessMessage(hWnd, msg, wParam, lParam);
     }
 
     WindowsApplication::WindowsApplication(const HINSTANCE hInstance)
@@ -38,10 +45,9 @@ namespace Step
         wcex.hInstance = hInstance;
         wcex.hIcon = LoadIcon(hInstance, IDI_APPLICATION);
         wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
-        wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+        wcex.hbrBackground = (HBRUSH)COLOR_WINDOW;
         wcex.lpszMenuName = nullptr;
-        wcex.lpszClassName = L"StepEngine";
-        wcex.hIconSm = LoadIcon(wcex.hInstance, IDI_APPLICATION);
+        wcex.lpszClassName = APP_WINDOW_CLASS;
 
         if (!RegisterClassEx(&wcex))
         {
@@ -49,5 +55,21 @@ namespace Step
         }
 
         return true;
+    }
+
+    int WindowsApplication::ProcessMessage(HWND hWnd, uint32_t msg, WPARAM wParam, LPARAM lParam)
+    {
+        switch (msg)
+        {
+        case WM_DESTROY:
+            PostQuitMessage(0);
+            RequestEngineExit();
+            return 0;
+
+        default:
+            break;
+        }
+
+        return DefWindowProc(hWnd, msg, wParam, lParam);
     }
 }
