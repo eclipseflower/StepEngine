@@ -7,7 +7,7 @@ namespace Step
 {
     struct GenericWindowDefinition
     {
-        const wchar_t* pTitle;
+        const char* pTitle;
         uint32_t windowWidth;
         uint32_t windowHeight;
     };

@@ -11,7 +11,7 @@ namespace Step
         virtual ~EngineLoop() {}
         int PreInit();
         virtual int Init();
-        virtual void Tick() {}
+        virtual void Tick();
         void Exit() {}
     };
 

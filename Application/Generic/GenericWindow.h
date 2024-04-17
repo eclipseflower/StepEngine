@@ -5,7 +5,8 @@ namespace Step
 {
     class GenericWindow
     {
-
+    public:
+        virtual void Show() {}
     };
 }
 

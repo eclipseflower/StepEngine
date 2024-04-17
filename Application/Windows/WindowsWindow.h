@@ -1,18 +1,19 @@
 #ifndef WINDOWS_WINDOW_H
 #define WINDOWS_WINDOW_H
 
-#include "Generic/GenericWindow.h"
-#include "Generic/GenericWindowDefinition.h"
+#include "Application/Generic/GenericWindow.h"
+#include "Application/Generic/GenericWindowDefinition.h"
 #include <Windows.h>
 
 namespace Step
 {
-    static constexpr wchar_t APP_WINDOW_CLASS[] = L"StepEngine";
+    static constexpr char APP_WINDOW_CLASS[] = "StepEngine";
 
     class WindowsWindow : public GenericWindow
     {
     public:
         void Initialize(GenericWindowDefinition *pDefinition, HINSTANCE hInstance);
+        virtual void Show() override;
 
     private:
         HWND m_hWnd;

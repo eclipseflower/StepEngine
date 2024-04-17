@@ -1,5 +1,5 @@
 #include "EngineLoop.h"
-#include "WindowsApplication.h"
+#include "Application/Windows/WindowsApplication.h"
 
 namespace Step
 {
@@ -14,7 +14,14 @@ namespace Step
     int EngineLoop::Init()
     {
         GenericWindow* pWindow = g_pPlatformApplication->MakeWindow();
-        g_pPlatformApplication->InitializeWindow(pWindow);
+        GenericWindowDefinition definition = { "StepEngine", 960, 540 };
+        g_pPlatformApplication->InitializeWindow(pWindow, &definition);
+        pWindow->Show();
         return 0;
+    }
+
+    void EngineLoop::Tick()
+    {
+        WindowsApplication::PumpMessages();
     }
 }

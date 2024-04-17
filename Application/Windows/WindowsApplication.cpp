@@ -17,15 +17,24 @@ namespace Step
         return g_pWindowsApplication;
     }
 
+    void WindowsApplication::PumpMessages()
+    {
+        MSG msg;
+        if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+        }
+    }
+
     GenericWindow* WindowsApplication::MakeWindow()
     {
         return new WindowsWindow();
     }
 
-    void WindowsApplication::InitializeWindow(GenericWindow* pWindow)
+    void WindowsApplication::InitializeWindow(GenericWindow* pWindow, GenericWindowDefinition* pDefinition)
     {
         WindowsWindow* pWindowsWindow = static_cast<WindowsWindow*>(pWindow);
-        pWindowsWindow->Initialize();
+        pWindowsWindow->Initialize(pDefinition, m_hInstance);
     }
 
     LRESULT CALLBACK WindowsApplication::AppWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -34,6 +43,7 @@ namespace Step
     }
 
     WindowsApplication::WindowsApplication(const HINSTANCE hInstance)
+    : m_hInstance(hInstance)
     {
         RegisterApplicationClass(hInstance);
     }

@@ -18,4 +18,9 @@ namespace Step
             hInstance,
             NULL);
     }
+
+    void WindowsWindow::Show()
+    {
+        ShowWindow(m_hWnd, SW_SHOW);
+    }
 }
