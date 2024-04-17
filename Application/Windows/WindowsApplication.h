@@ -3,6 +3,7 @@
 
 #include "WindowsPlatform.h"
 #include "Generic/GenericApplication.h"
+#include <cstdint>
 
 namespace Step
 {
@@ -12,7 +13,8 @@ namespace Step
         static GenericApplication* CreateApplication();
         static WindowsApplication* CreateWindowsApplication(const HINSTANCE hInstance);
 
-        virtual void InitializeWindow() override;
+        virtual GenericWindow* MakeWindow() override;
+        virtual void InitializeWindow(GenericWindow* pWindow) override;
 
     protected:
         static LRESULT CALLBACK AppWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);

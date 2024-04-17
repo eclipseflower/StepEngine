@@ -17,9 +17,15 @@ namespace Step
         return g_pWindowsApplication;
     }
 
-    void WindowsApplication::InitializeWindow()
+    GenericWindow* WindowsApplication::MakeWindow()
     {
+        return new WindowsWindow();
+    }
 
+    void WindowsApplication::InitializeWindow(GenericWindow* pWindow)
+    {
+        WindowsWindow* pWindowsWindow = static_cast<WindowsWindow*>(pWindow);
+        pWindowsWindow->Initialize();
     }
 
     LRESULT CALLBACK WindowsApplication::AppWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
