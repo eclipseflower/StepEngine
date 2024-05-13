@@ -7,7 +7,7 @@ namespace Step
 
     int EngineLoop::PreInit()
     {
-        g_pPlatformApplication = WindowsApplication::CreateApplication();
+        g_pPlatformApplication = PlatformApplication::CreateApplication();
         return 0;
     }
 
@@ -22,6 +22,6 @@ namespace Step
 
     void EngineLoop::Tick()
     {
-        WindowsApplication::PumpMessages();
+        PlatformApplication::PumpMessages();
     }
 }

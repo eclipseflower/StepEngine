@@ -27,6 +27,8 @@ namespace Step
     private:
         HINSTANCE m_hInstance;
     };
+
+    using PlatformApplication = WindowsApplication;
 }
 
 #endif // WINDOWS_APPLICATION_H
