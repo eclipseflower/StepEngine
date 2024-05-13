@@ -4,7 +4,7 @@
 namespace Step
 {
     extern bool g_bRequestingExit;
-    __forceinline bool IsEngineExitRequested()
+    inline bool IsEngineExitRequested()
     {
         return g_bRequestingExit;
     }
