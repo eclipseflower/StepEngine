@@ -34,32 +34,75 @@ namespace Step
         inline Vector() {}
         inline Vector(T inX, T inY, T inZ) : x(inX), y(inY), z(inZ) {}
 
+        inline T& operator[](int index);
+        inline const T& operator[](int index) const;
+
         inline Vector<T> operator+ (const Vector<T>& v) const;
         inline Vector<T> operator- (const Vector<T>& v) const;
         inline Vector<T> operator* (const Vector<T>& v) const;
         inline Vector<T> operator/ (const Vector<T>& v) const;
+        inline Vector<T> operator- () const;
+
+        template<typename ARGTYPE>
+        inline Vector<T> operator* (ARGTYPE scale) const requires std::is_arithmetic_v<ARGTYPE>
+        {
+            return Vector<T>(x * scale, y * scale, z * scale);
+        }
+
+        template<typename ARGTYPE>
+        inline Vector<T> operator/ (ARGTYPE scale) const requires std::is_arithmetic_v<ARGTYPE>
+        {
+            const T rScale = 1 / static_cast<T>(scale);
+            return Vector<T>(x * rScale, y * rScale, z * rScale);
+        }
+
+        inline Vector<T>& operator+= (const Vector<T>& v);
+        inline Vector<T>& operator-= (const Vector<T>& v);
 
         inline bool operator== (const Vector<T>& v) const;
         inline bool operator!= (const Vector<T>& v) const;
 
         template<typename ARGTYPE>
-        inline Vector<T> operator* (ARGTYPE scale) const requires std::is_arithmetic_v<T>
+        inline Vector<T>& operator*= (ARGTYPE scale) requires std::is_arithmetic_v<ARGTYPE>
         {
-            return Vector<T>(x * static_cast<T>(scale), y * static_cast<T>(scale), z * static_cast<T>(scale));
+            x *= scale;
+            y *= scale;
+            z *= scale;
+            return *this;
         }
 
         template<typename ARGTYPE>
-        inline Vector<T> operator/ (ARGTYPE scale) const requires std::is_arithmetic_v<T>
+        inline Vector<T>& operator/= (ARGTYPE scale) requires std::is_arithmetic_v<ARGTYPE>
         {
             const T rScale = 1 / static_cast<T>(scale);
-            return Vector<T>(x / rScale, y / rScale, z / rScale);
+            x *= rScale;
+            y *= rScale;
+            z *= rScale;
+            return *this;
         }
 
         inline bool Equals(const Vector<T>& v, const T tolerance = VECTOR_EPSILON) const;
+        inline void Set(T inX, T inY, T inZ);
+        inline T Length() const;
+        inline T SquaredLength() const;
+        inline bool IsNormalized(const T tolerance = VECTOR_EPSILON) const;
+        inline Vector<T> Normalize(const T tolerance = VECTOR_EPSILON, const Vector<T>& defaultV = zero) const;
 
         inline static Vector<T> Cross(const Vector<T>& lhs, const Vector<T>& rhs);
         inline static T Dot(const Vector<T>& lhs, const Vector<T>& rhs);
     };
+
+    template<typename T>
+    inline T& Vector<T>::operator[](int index)
+    {
+        return xyz[index];
+    }
+
+    template<typename T>
+    inline const T& Vector<T>::operator[](int index) const
+    {
+        return xyz[index];
+    }
 
     template<typename T>
     inline Vector<T> Vector<T>::operator+(const Vector<T>& v) const
@@ -86,6 +129,30 @@ namespace Step
     }
 
     template<typename T>
+    inline Vector<T> Vector<T>::operator-() const
+    {
+        return Vector<T>(-x, -y, -z);
+    }
+
+    template<typename T>
+    inline Vector<T>& Vector<T>::operator+=(const Vector<T>& v)
+    {
+        x += v.x;
+        y += v.y;
+        z += v.z;
+        return *this;
+    }
+
+    template<typename T>
+    inline Vector<T>& Vector<T>::operator-=(const Vector<T>& v)
+    {
+        x -= v.x;
+        y -= v.y;
+        z -= v.z;
+        return *this;
+    }
+
+    template<typename T>
     inline bool Vector<T>::operator==(const Vector<T>& v) const
     {
         return x == v.x && y == v.y && z == v.z;
@@ -101,6 +168,44 @@ namespace Step
     inline bool Vector<T>::Equals(const Vector<T>& v, const T tolerance) const
     {
         return std::abs(x - v.x) <= tolerance && std::abs(y - v.y) <= tolerance && std::abs(z - v.z) <= tolerance;
+    }
+
+    template<typename T>
+    inline void Vector<T>::Set(T inX, T inY, T inZ)
+    {
+        x = inX;
+        y = inY;
+        z = inZ;
+    }
+
+    template<typename T>
+    inline T Vector<T>::Length() const
+    {
+        return std::sqrt(x * x + y * y + z * z);
+    }
+
+    template<typename T>
+    inline T Vector<T>::SquaredLength() const
+    {
+        return x * x + y * y + z * z;
+    }
+
+    template<typename T>
+    inline bool Vector<T>::IsNormalized(const T tolerance) const
+    {
+        return std::abs(SquaredLength() - 1) <= tolerance;
+    }
+
+    template<typename T>
+    inline Vector<T> Vector<T>::Normalize(const T tolerance, const Vector<T>& defaultV) const
+    {
+        const T squareLen = SquaredLength();
+        if (squareLen <= tolerance)
+        {
+            return defaultV;
+        }
+        const T invLen = 1 / std::sqrt(squareLen);
+        return Vector<T>(x * invLen, y * invLen, z * invLen);
     }
 
     template<typename T>
