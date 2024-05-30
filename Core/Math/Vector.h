@@ -2,6 +2,7 @@
 #define _VECTOR_H_
 
 #include "MathForward.h"
+#include <type_traits>
 
 #define VECTOR_EPSILON (1.e-4f)
 
@@ -183,7 +184,7 @@ namespace Step
     template<typename T>
     inline T Vector<T>::Length() const
     {
-        return std::sqrt(x * x + y * y + z * z);
+        return sqrt(x * x + y * y + z * z);
     }
 
     template<typename T>
@@ -206,7 +207,7 @@ namespace Step
         {
             return defaultV;
         }
-        const T invLen = 1 / std::sqrt(squareLen);
+        const T invLen = 1 / sqrt(squareLen);
         return Vector<T>(x * invLen, y * invLen, z * invLen);
     }
 
