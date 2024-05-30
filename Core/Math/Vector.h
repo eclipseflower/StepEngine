@@ -1,6 +1,8 @@
 #ifndef _VECTOR_H_
 #define _VECTOR_H_
 
+#include "MathForward.h"
+
 #define VECTOR_EPSILON (1.e-4f)
 
 namespace Step
@@ -87,8 +89,6 @@ namespace Step
         inline T SquaredLength() const;
         inline bool IsNormalized(const T tolerance = VECTOR_EPSILON) const;
         inline Vector<T> Normalize(const T tolerance = VECTOR_EPSILON, const Vector<T>& defaultV = zero) const;
-        inline Vector<T> Reflect(const Vector<T>& normal) const;
-        inline Vector<T> RotateAroundAxis(const T angleRad, const Vector<T>& axis) const;
 
         inline static Vector<T> Cross(const Vector<T>& lhs, const Vector<T>& rhs);
         inline static T Dot(const Vector<T>& lhs, const Vector<T>& rhs);
@@ -208,39 +208,6 @@ namespace Step
         }
         const T invLen = 1 / std::sqrt(squareLen);
         return Vector<T>(x * invLen, y * invLen, z * invLen);
-    }
-
-    template<typename T>
-    inline Vector<T> Vector<T>::Reflect(const Vector<T>& normal) const
-    {
-        return *this - normal * (2.f * Dot(*this, normal));
-    }
-
-    template<typename T>
-    inline Vector<T> Vector<T>::RotateAroundAxis(const T angleRad, const Vector<T>& axis) const
-    {
-        T s = sin(angleRad);
-        T c = cos(angleRad);
-
-        const T xx	= axis.x * axis.x;
-        const T yy	= axis.y * axis.y;
-        const T zz	= axis.z * axis.z;
-
-        const T xy	= axis.x * axis.y;
-        const T yz	= axis.y * axis.z;
-        const T zx	= axis.z * axis.x;
-
-        const T xs	= axis.x * s;
-        const T ys	= axis.y * s;
-        const T zs	= axis.z * s;
-
-        const T omc	= 1.f - c;
-
-        return Vector<T>(
-            (omc * xx + c) * x + (omc * xy - zs) * y + (omc * zx + ys) * z,
-            (omc * xy + zs) * x + (omc * yy + c) * y + (omc * yz - xs) * z,
-            (omc * zx - ys) * x + (omc * yz + xs) * y + (omc * zz + c) * z
-        );
     }
 
     template<typename T>
