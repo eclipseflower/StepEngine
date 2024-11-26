@@ -1,9 +1,12 @@
-project(StepEngine)
-
 cmake_minimum_required(VERSION 3.5)
 
-set(CMAKE_CXX_STANDARD 20)
+project(StepEngine)
 
-file(GLOB SRCS *.c *.cpp *.cc *.h *.hpp)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+file(GLOB_RECURSE SRCS *.c *.cpp *.cc *.h *.hpp)
+
+include_directories(${PROJECT_SOURCE_DIR})
 
 add_executable(StepEngine ${SRCS})
