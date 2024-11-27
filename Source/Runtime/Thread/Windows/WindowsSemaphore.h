@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Windows.h>
 #include "Runtime/Core/ClassDefine.h"
 
 namespace StepEngine
@@ -10,7 +11,11 @@ namespace StepEngine
     public:
         WindowsSemaphore(int initCount, int maxCount);
         ~WindowsSemaphore();
-        bool WaitForSignal(int timeoutMs = -1);
-        void Signal(int count = 1);
+        bool IsValid() const { return m_semaphore != NULL; }
+        bool TryAquire(int timeoutMs = 0);
+        void Aquire();
+        void Release(int count = 1);
+    private:
+        HANDLE m_semaphore;
     };
 }

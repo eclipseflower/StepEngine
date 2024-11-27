@@ -16,14 +16,14 @@ namespace StepEngine
         CloseHandle(m_Mutex);
         m_Mutex = NULL;
     }
-    bool WindowsMutex::TryLock()
+    bool WindowsMutex::TryLock(int timeoutMs)
     {
         if(!IsValid())
         {
             return false;
         }
 
-        DWORD result = WaitForSingleObject(m_Mutex, 0);
+        DWORD result = WaitForSingleObject(m_Mutex, timeoutMs);
         return result == WAIT_OBJECT_0;
     }
     void WindowsMutex::Lock()

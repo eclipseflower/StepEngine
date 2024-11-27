@@ -12,7 +12,7 @@ namespace StepEngine
         WindowsMutex();
         ~WindowsMutex();
         bool IsValid() const { return m_Mutex != NULL; }
-        bool TryLock();
+        bool TryLock(int timeoutMs = 0);
         void Lock();
         void Unlock();
     private:
