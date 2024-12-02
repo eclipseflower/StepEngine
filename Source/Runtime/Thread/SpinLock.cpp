@@ -1,4 +1,5 @@
 #include <atomic>
+#include "Runtime/Thread/Processor.h"
 #include "Runtime/Thread/Thread.h"
 #include "SpinLock.h"
 
