@@ -6,4 +6,9 @@ namespace StepEngine
     {
         SwitchToThread();
     }
+
+    unsigned int WindowsThread::GetThreadId()
+    {
+        return GetCurrentThreadId();
+    }
 }
