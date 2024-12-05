@@ -18,4 +18,6 @@ namespace StepEngine
     private:
         HANDLE m_Mutex;
     };
+
+    using PlatformMutex = WindowsMutex;
 }

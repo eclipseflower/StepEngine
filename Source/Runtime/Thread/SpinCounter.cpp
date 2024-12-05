@@ -1,5 +1,5 @@
-#include "Runtime/Thread/Processor.h"
-#include "Runtime/Thread/Thread.h"
+#include "Runtime/Thread/PlatformProcessor.h"
+#include "Runtime/Thread/PlatformThread.h"
 #include "SpinCounter.h"
 
 namespace StepEngine

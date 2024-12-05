@@ -17,4 +17,6 @@ namespace StepEngine
     private:
         CRITICAL_SECTION m_criticalSection;
     };
+
+    using PlatformCriticalSection = WindowsCriticalSection;
 }

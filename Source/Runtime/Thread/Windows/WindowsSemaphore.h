@@ -18,4 +18,6 @@ namespace StepEngine
     private:
         HANDLE m_semaphore;
     };
+
+    using PlatformSemaphore = WindowsSemaphore;
 }

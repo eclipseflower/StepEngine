@@ -1,4 +1,4 @@
-#include "Runtime/Thread/Thread.h"
+#include "Runtime/Thread/PlatformThread.h"
 #include "SpinCounter.h"
 #include "ReentrantLock.h"
 
