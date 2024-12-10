@@ -12,8 +12,8 @@ namespace StepEngine
         WindowsSemaphore(int initCount, int maxCount);
         ~WindowsSemaphore();
         bool IsValid() const { return m_semaphore != NULL; }
-        bool TryAquire(int timeoutMs = 0);
-        void Aquire();
+        bool TryAcquire(int timeoutMs = 0);
+        void Acquire();
         void Release(int count = 1);
     private:
         HANDLE m_semaphore;

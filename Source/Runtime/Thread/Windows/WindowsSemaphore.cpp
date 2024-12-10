@@ -16,7 +16,7 @@ namespace StepEngine
         CloseHandle(m_semaphore);
         m_semaphore = NULL;
     }
-    bool WindowsSemaphore::TryAquire(int timeoutMs)
+    bool WindowsSemaphore::TryAcquire(int timeoutMs)
     {
         if(!IsValid())
         {
@@ -26,7 +26,7 @@ namespace StepEngine
         DWORD ret = WaitForSingleObject(m_semaphore, timeoutMs);
         return ret == WAIT_OBJECT_0;
     }
-    void WindowsSemaphore::Aquire()
+    void WindowsSemaphore::Acquire()
     {
         if(!IsValid())
         {
