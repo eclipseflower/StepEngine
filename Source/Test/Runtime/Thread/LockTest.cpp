@@ -144,25 +144,27 @@ TEST(LockTest, SpinLock) {
 StepEngine::ReentrantLock gReentrantLock;
 void ReentrantLockFunc(int maxVal) {
     gReentrantLock.Lock();
-    if(gCounter == maxVal)
+    if(gCounter < maxVal)
     {
-        return;
+        gCounter++;
     }
-
-    gCounter++;
-    Sleep(10);
-    ReentrantLockFunc(maxVal);
     std::cout << "gCounter is " << gCounter << std::endl;
+    Sleep(10);
+    if(gCounter < maxVal)
+    {
+        ReentrantLockFunc(maxVal);
+    }
     gReentrantLock.Unlock();
 }
 
 TEST(LockTest, ReentrantLock) {
-    std::thread myThreads[5];
-    for(int i = 0; i < 5; i++)
+    int threadCount = 5;
+    std::thread myThreads[threadCount];
+    for(int i = 0; i < threadCount; i++)
     {
-        myThreads[i] = std::thread(ReentrantLockFunc, 100);
+        myThreads[i] = std::thread(ReentrantLockFunc, 100 * threadCount);
     }
-    for(int i = 0; i < 5; i++)
+    for(int i = 0; i < threadCount; i++)
     {
         myThreads[i].join();
     }
