@@ -22,5 +22,6 @@ namespace StepEngine
         Matrix4x4& SetTranslation(const Vector3& translation);
         Matrix4x4& SetScale(const Vector3& scale);
         Matrix4x4& SetRotation(const Vector3& rotation);
+        Matrix4x4& SetTRS(const Vector3& translation, const Vector3& rotation, const Vector3& scale);
     };
 }
