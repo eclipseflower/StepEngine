@@ -176,4 +176,11 @@ namespace StepEngine
 
         return *this;
     }
+    Vector3 Matrix4x4::MultiplyVector3(const Vector3& v) const
+    {
+        float x = Get(0, 0) * v.x + Get(0, 1) * v.y + Get(0, 2) * v.z;
+        float y = Get(1, 0) * v.x + Get(1, 1) * v.y + Get(1, 2) * v.z;
+        float z = Get(2, 0) * v.x + Get(2, 1) * v.y + Get(2, 2) * v.z;
+        return Vector3(x, y, z);
+    }
 }
