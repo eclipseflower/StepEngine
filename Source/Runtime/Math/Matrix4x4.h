@@ -23,5 +23,6 @@ namespace StepEngine
         Matrix4x4& SetScale(const Vector3& scale);
         Matrix4x4& SetRotation(const Vector3& rotation);
         Matrix4x4& SetTRS(const Vector3& translation, const Vector3& rotation, const Vector3& scale);
+        Matrix4x4& RotateAroundAxis(const float angle, const Vector3& axis);
     };
 }

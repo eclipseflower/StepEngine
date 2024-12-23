@@ -136,4 +136,44 @@ namespace StepEngine
 
         return *this;
     }
+    Matrix4x4& Matrix4x4::RotateAroundAxis(const float angle, const Vector3& axis)
+    {
+        float s = sin(angle);
+        float c = cos(angle);
+        float omc = 1.0f - c;
+        
+        float xx = axis.x * axis.x;
+        float yy = axis.y * axis.y;
+        float zz = axis.z * axis.z;
+
+        float xy = axis.x * axis.y;
+        float yz = axis.y * axis.z;
+        float xz = axis.x * axis.z;
+
+        float xs = axis.x * s;
+        float ys = axis.y * s;
+        float zs = axis.z * s;
+
+        Get(0, 0) = xx * omc + c;
+        Get(1, 0) = xy * omc + zs;
+        Get(2, 0) = xz * omc - ys;
+        Get(3, 0) = 0.0f;
+
+        Get(0, 1) = xy * omc - zs;
+        Get(1, 1) = yy * omc + c;
+        Get(2, 1) = yz * omc + xs;
+        Get(3, 1) = 0.0f;
+
+        Get(0, 2) = xz * omc + ys;
+        Get(1, 2) = yz * omc - xs;
+        Get(2, 2) = zz * omc + c;
+        Get(3, 2) = 0.0f;
+
+        Get(0, 3) = 0.0f;
+        Get(1, 3) = 0.0f;
+        Get(2, 3) = 0.0f;
+        Get(3, 3) = 1.0f;
+
+        return *this;
+    }
 }
