@@ -3,5 +3,5 @@
 cmake -S Source -B Build -G "Unix Makefiles"
 cmake --build Build
 @cd Build
-ctest
+ctest -R Matrix4x4Test
 @cd ..

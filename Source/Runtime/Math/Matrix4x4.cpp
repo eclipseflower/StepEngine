@@ -57,12 +57,12 @@ namespace StepEngine
         Get(2, 0) = 0.0f;
         Get(3, 0) = 0.0f;
 
-        Get(0, 1) = 1.0f;
+        Get(0, 1) = 0.0f;
         Get(1, 1) = scale.y;
         Get(2, 1) = 0.0f;
         Get(3, 1) = 0.0f;
 
-        Get(0, 2) = 1.0f;
+        Get(0, 2) = 0.0f;
         Get(1, 2) = 0.0f;
         Get(2, 2) = scale.z;
         Get(3, 2) = 0.0f;
@@ -176,11 +176,18 @@ namespace StepEngine
 
         return *this;
     }
-    Vector3 Matrix4x4::MultiplyVector3(const Vector3& v) const
+    Vector3 Matrix4x4::MultiplyVector(const Vector3& v) const
     {
         float x = Get(0, 0) * v.x + Get(0, 1) * v.y + Get(0, 2) * v.z;
         float y = Get(1, 0) * v.x + Get(1, 1) * v.y + Get(1, 2) * v.z;
         float z = Get(2, 0) * v.x + Get(2, 1) * v.y + Get(2, 2) * v.z;
+        return Vector3(x, y, z);
+    }
+    Vector3 Matrix4x4::MultiplyPoint(const Vector3& v) const
+    {
+        float x = Get(0, 0) * v.x + Get(0, 1) * v.y + Get(0, 2) * v.z + Get(0, 3);
+        float y = Get(1, 0) * v.x + Get(1, 1) * v.y + Get(1, 2) * v.z + Get(1, 3);
+        float z = Get(2, 0) * v.x + Get(2, 1) * v.y + Get(2, 2) * v.z + Get(2, 3);
         return Vector3(x, y, z);
     }
 }
