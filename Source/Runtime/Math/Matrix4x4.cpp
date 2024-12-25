@@ -1,5 +1,6 @@
-#include "Matrix4x4.h"
+#include "Runtime/Math/MathCommon.h"
 #include "Runtime/Math/Vector3.h"
+#include "Matrix4x4.h"
 
 namespace StepEngine
 {
@@ -76,12 +77,16 @@ namespace StepEngine
     }
     Matrix4x4& Matrix4x4::SetRotation(const Vector3& rotation)
     {
-        float cx = cos(rotation.x);
-        float sx = sin(rotation.x);
-        float cy = cos(rotation.y);
-        float sy = sin(rotation.y);
-        float cz = cos(rotation.z);
-        float sz = sin(rotation.z);
+        float x = DegToRad(rotation.x);
+        float y = DegToRad(rotation.y);
+        float z = DegToRad(rotation.z);
+
+        float cx = cos(x);
+        float sx = sin(x);
+        float cy = cos(y);
+        float sy = sin(y);
+        float cz = cos(z);
+        float sz = sin(z);
     
         Get(0, 0) = cy * cz;
         Get(1, 0) = cy * sz;

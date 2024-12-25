@@ -35,7 +35,7 @@ TEST(Matrix4x4Test, Scale) {
 
 TEST(Matrix4x4Test, Rotate) {
     StepEngine::Matrix4x4 m;
-    StepEngine::Vector3 v1(1.0f, 2.0f, 3.0f);
+    StepEngine::Vector3 v1(60.0f, 90.0f, 60.0f);
     m.SetRotation(v1);
     StepEngine::Vector3 v2 = m.GetRotation();
     EXPECT_EQ(v1.x, v2.x);
