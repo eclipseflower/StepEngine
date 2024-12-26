@@ -42,9 +42,9 @@ TEST(Matrix4x4Test, Rotate) {
     EXPECT_EQ(v1.y, v2.y);
     EXPECT_EQ(v1.z, v2.z);
 
-    StepEngine::Vector3 v3(4.0f, 5.0f, 6.0f);
+    StepEngine::Vector3 v3(4.0f, 5.0f, 0.0f);
     StepEngine::Vector3 v4 = m.MultiplyVector(v3);
-    EXPECT_EQ(v3.x, v4.x);
+    EXPECT_EQ(v3.z, v4.x);
     EXPECT_EQ(v3.y, v4.y);
-    EXPECT_EQ(v3.z, v4.z);
+    EXPECT_EQ(-v3.x, v4.z);
 }

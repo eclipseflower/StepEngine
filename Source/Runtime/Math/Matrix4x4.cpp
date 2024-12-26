@@ -27,6 +27,13 @@ namespace StepEngine
         float z = GetAxisZ().Length();
         return Vector3(x, y, z);
     }
+    Vector3 Matrix4x4::GetRotation() const
+    {
+        float x = RadToDeg(atan2(Get(2, 2), Get(2, 1)));
+        float y = RadToDeg(asin(-Get(2, 0)));
+        float z = RadToDeg(atan2(Get(1, 0), Get(0, 0)));
+        return Vector3(x, y, z);
+    }
     Matrix4x4& Matrix4x4::SetTranslation(const Vector3& translation)
     {
         Get(0, 0) = 1.0f;
