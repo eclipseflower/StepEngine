@@ -29,7 +29,7 @@ namespace StepEngine
     }
     Vector3 Matrix4x4::GetRotation() const
     {
-        float x = RadToDeg(atan2(Get(2, 2), Get(2, 1)));
+        float x = RadToDeg(atan2(Get(2, 1), Get(2, 2)));
         float y = RadToDeg(asin(-Get(2, 0)));
         float z = RadToDeg(atan2(Get(1, 0), Get(0, 0)));
         return Vector3(x, y, z);
@@ -150,8 +150,9 @@ namespace StepEngine
     }
     Matrix4x4& Matrix4x4::RotateAroundAxis(const float angle, const Vector3& axis)
     {
-        float s = sin(angle);
-        float c = cos(angle);
+        float rad = DegToRad(angle);
+        float s = sin(rad);
+        float c = cos(rad);
         float omc = 1.0f - c;
         
         float xx = axis.x * axis.x;
