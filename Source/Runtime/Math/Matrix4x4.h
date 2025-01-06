@@ -8,6 +8,8 @@ namespace StepEngine
     {
         float m[16];
 
+        static const Matrix4x4 Identity;
+
         float& Get(int row, int column) { return m[column * 4 + row]; }
         const float& Get(int row, int column) const { return m[column * 4 + row]; }
         
@@ -19,6 +21,9 @@ namespace StepEngine
         Vector3 GetScale() const;
         Vector3 GetRotation() const;
 
+        Matrix4x4 GetTranspose() const;
+
+        Matrix4x4& SetIdentity();
         Matrix4x4& SetTranslation(const Vector3& translation);
         Matrix4x4& SetScale(const Vector3& scale);
         Matrix4x4& SetRotation(const Vector3& rotation);

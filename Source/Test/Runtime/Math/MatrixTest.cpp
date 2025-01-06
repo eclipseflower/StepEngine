@@ -63,3 +63,24 @@ TEST(Matrix4x4Test, RotateAroundAxis) {
     EXPECT_NEAR(v1.y, v2.y, epsilon);
     EXPECT_NEAR(-v1.x, v2.z, epsilon);
 }
+
+TEST(Matrix4x4Test, Transpose) {
+    StepEngine::Matrix4x4 m1;
+    for(int i = 0; i < 4; i++)
+    {
+        for(int j = 0; j < 4; j++)
+        {
+            m1.Get(i, j) = i * 4 + j;
+        }
+    }
+
+    StepEngine::Matrix4x4 m2 = m1.GetTranspose().GetTranspose();
+
+    for(int i = 0; i < 4; i++)
+    {
+        for(int j = 0; j < 4; j++)
+        {
+            EXPECT_EQ(m1.Get(i, j), m2.Get(i, j));
+        }
+    }
+}

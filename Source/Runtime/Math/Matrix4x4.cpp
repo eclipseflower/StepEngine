@@ -4,6 +4,8 @@
 
 namespace StepEngine
 {
+    const Matrix4x4 Matrix4x4::Identity = Matrix4x4().SetIdentity();
+
     Vector3 Matrix4x4::GetAxisX() const
     {
         return Vector3(Get(0, 0), Get(1, 0), Get(2, 0));
@@ -33,6 +35,42 @@ namespace StepEngine
         float y = RadToDeg(asin(-Get(2, 0)));
         float z = RadToDeg(atan2(Get(1, 0), Get(0, 0)));
         return Vector3(x, y, z);
+    }
+    Matrix4x4 Matrix4x4::GetTranspose() const
+    {
+        Matrix4x4 result;
+        for (int i = 0; i < 4; i++)
+        {
+            for (int j = 0; j < 4; j++)
+            {
+                result.Get(i, j) = Get(j, i);
+            }
+        }
+        return result;
+    }
+    Matrix4x4& Matrix4x4::SetIdentity()
+    {
+        Get(0, 0) = 1.0f;
+        Get(1, 0) = 0.0f;
+        Get(2, 0) = 0.0f;
+        Get(3, 0) = 0.0f;
+
+        Get(0, 1) = 0.0f;
+        Get(1, 1) = 1.0f;
+        Get(2, 1) = 0.0f;
+        Get(3, 1) = 0.0f;
+
+        Get(0, 2) = 0.0f;
+        Get(1, 2) = 0.0f;
+        Get(2, 2) = 1.0f;
+        Get(3, 2) = 0.0f;
+
+        Get(0, 3) = 0.0f;
+        Get(1, 3) = 0.0f;
+        Get(2, 3) = 0.0f;
+        Get(3, 3) = 1.0f;
+
+        return *this;
     }
     Matrix4x4& Matrix4x4::SetTranslation(const Vector3& translation)
     {
